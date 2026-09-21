@@ -581,6 +581,15 @@ img{ max-width: 100%; }
   color: var(--ink-faint);
 }
 
+/* ---------- sitting: everything but the slogan and the dial steps back ---------- */
+.dims, .masthead, .tabs{ transition: opacity .9s ease; }
+body.sitting .dims,
+body.sitting .masthead,
+body.sitting .tabs{ opacity: .26; }
+.sitting-slogan{ transition: font-size .9s ease; }
+body.sitting .sitting-slogan{ font-size: clamp(1.45rem, 1.2rem + 1.15vw, 2.05rem); }
+body.sitting .sitting{ border-bottom-color: transparent; }
+
 /* ---------- search ---------- */
 .search{ padding-block: 1.3rem .1rem; }
 .find{
@@ -690,8 +699,8 @@ img{ max-width: 100%; }
       <p class="sitting-slogan"><span class="slogan-index" id="sitting-num"></span><span id="sitting-text"></span></p>
     </div>
     <div class="timer-head">
-      <h2 id="timer-heading">Contemplation</h2>
-      <p>Hold the slogan loosely. When the mind wanders, begin again.</p>
+      <h2 class="dims" id="timer-heading">Contemplation</h2>
+      <p class="dims">Hold the slogan loosely. When the mind wanders, begin again.</p>
     </div>
     <div class="timer-body">
       <div class="dial" id="dial">
@@ -705,17 +714,17 @@ img{ max-width: 100%; }
         <p class="breath-word" id="breath-word" aria-hidden="true" hidden>in</p>
       </div>
       <div class="timer-controls">
-        <div class="durations" role="group" aria-label="Session length">
+        <div class="durations dims" role="group" aria-label="Session length">
           <button class="chip" type="button" data-min="3">3 min</button>
           <button class="chip" type="button" data-min="5" aria-pressed="true">5 min</button>
           <button class="chip" type="button" data-min="10">10 min</button>
         </div>
         <div class="timer-buttons">
           <button class="btn" id="start" type="button">Begin</button>
-          <button class="btn secondary" id="reset" type="button">Reset</button>
+          <button class="btn secondary dims" id="reset" type="button">Reset</button>
         </div>
-        <button class="ghost" id="sound-toggle" type="button" aria-pressed="true">Bell on</button>
-        <button class="ghost" id="breath-toggle" type="button" aria-pressed="false">Breath off</button>
+        <button class="ghost dims" id="sound-toggle" type="button" aria-pressed="true">Bell on</button>
+        <button class="ghost dims" id="breath-toggle" type="button" aria-pressed="false">Breath off</button>
       </div>
     </div>
   </div>
@@ -1265,6 +1274,7 @@ function paint(){
 }
 function setDuration(min){
   stop();
+  opened = false;
   duration = remaining = min * 60;
   dial.classList.add("resetting");
   paint();
@@ -1275,7 +1285,8 @@ function tick(){
   paint();
   if (remaining <= 0){
     stop();
-    ring();
+    ring(1);
+    opened = false;
     readout.textContent = fmt(duration);
     remaining = duration;
     dial.classList.add("resetting");
@@ -1316,17 +1327,41 @@ breathBtn.addEventListener("click", () => {
   syncBreath();
 });
 
+/* A phone blanks its screen after half a minute, which is no way to sit.
+   The lock is dropped whenever the page is hidden, so it is taken again
+   when the page comes back and the timer is still running. */
+let wakeLock = null;
+async function keepAwake(on){
+  try {
+    if (on && "wakeLock" in navigator && !wakeLock){
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => { wakeLock = null; });
+    } else if (!on && wakeLock){
+      const held = wakeLock; wakeLock = null; await held.release();
+    }
+  } catch { wakeLock = null; }          // refused or unsupported: sit on regardless
+}
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && ticker) keepAwake(true);
+});
+
+let opened = false;      // have the three opening strikes been sounded?
 function start(){
   endsAt = Date.now() + remaining * 1000;
   ticker = setInterval(tick, 250);
   startBtn.textContent = "Pause";
   readout.setAttribute("aria-live", "off");
-  if (soundOn) warmAudio();
+  if (soundOn){ warmAudio(); if (!opened) ring(3); }
+  opened = true;
+  document.body.classList.add("sitting");
+  keepAwake(true);
   syncBreath();
 }
 function stop(){
   if (ticker){ clearInterval(ticker); ticker = null; }
   startBtn.textContent = remaining < duration ? "Resume" : "Begin";
+  document.body.classList.remove("sitting");
+  keepAwake(false);
   syncBreath();
 }
 startBtn.addEventListener("click", () => { ticker ? stop() : start(); });
@@ -1348,28 +1383,32 @@ function warmAudio(){
     if (audioCtx.state === "suspended") audioCtx.resume();
   } catch { audioCtx = null; }
 }
-function ring(){
-  if (!soundOn) return;
-  warmAudio();
-  if (!audioCtx) return;
-  const now = audioCtx.currentTime;
+function strikeAt(when){
   const out = audioCtx.createGain();
   out.gain.value = 0.0001;
   out.connect(audioCtx.destination);
-  out.gain.setValueAtTime(0.0001, now);
-  out.gain.exponentialRampToValueAtTime(0.5, now + 0.02);
-  out.gain.exponentialRampToValueAtTime(0.0001, now + 7);
+  out.gain.setValueAtTime(0.0001, when);
+  out.gain.exponentialRampToValueAtTime(0.5, when + 0.02);
+  out.gain.exponentialRampToValueAtTime(0.0001, when + 7);
   [[220, 1], [543, 0.42], [1012, 0.18], [1580, 0.07]].forEach(([freq, level]) => {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = "sine";
     osc.frequency.value = freq;
-    gain.gain.setValueAtTime(level, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 6 - level * 2);
+    gain.gain.setValueAtTime(level, when);
+    gain.gain.exponentialRampToValueAtTime(0.0001, when + 6 - level * 2);
     osc.connect(gain).connect(out);
-    osc.start(now);
-    osc.stop(now + 7.2);
+    osc.start(when);
+    osc.stop(when + 7.2);
   });
+}
+/* three strikes open a sitting, one closes it */
+function ring(count){
+  if (!soundOn) return;
+  warmAudio();
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  for (let i = 0; i < (count || 1); i++) strikeAt(now + i * 2.4);
 }
 function syncSound(){
   soundBtn.textContent = soundOn ? "Bell on" : "Bell off";
@@ -1379,7 +1418,7 @@ soundBtn.addEventListener("click", () => {
   soundOn = !soundOn;
   store.set("lojong.sound", soundOn ? "on" : "off");
   syncSound();
-  if (soundOn) ring();
+  if (soundOn) ring(1);
 });
 
 /* ============================================================
