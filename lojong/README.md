@@ -39,7 +39,8 @@ formula rather than being overridden.
 Tibetan thangka pigments: sandstone ground, *btsod* maroon, lapis, saffron and gold;
 deep night-lapis in dark mode. The only symbol is the endless knot (*dpal be'u*),
 drawn as a woven emblem in SVG — four strands with real over-and-under crossings,
-generated in code rather than hand-authored path data. The seven points are marked
+generated in code rather than hand-authored path data. It appears small, as a mark
+in the masthead and the colophon; the day's slogan stands on bare ground. The seven points are marked
 with Tibetan numerals ༡–༧.
 
 ## Icon
