@@ -194,12 +194,22 @@ img{ max-width: 100%; }
   font-size: 1.02rem;
 }
 .source{
-  margin: 22px 0 0;
+  display: block;
+  font: inherit;
   font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
   font-size: .78rem;
   letter-spacing: .09em;
+  text-align: left;
   color: var(--ink-faint);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  padding: 0 0 2px;
+  margin: 1.4rem 0 0;
+  cursor: pointer;
+  transition: color .18s, border-color .18s;
 }
+.source:hover{ color: var(--ink-soft); border-bottom-color: var(--rule); }
 .actions{
   display: flex;
   flex-wrap: wrap;
@@ -480,6 +490,129 @@ img{ max-width: 100%; }
   line-height: 1.5;
 }
 
+/* ---------- evening note ---------- */
+.evening{
+  margin-top: 2.2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule-soft);
+}
+.evening-prompt{
+  display: block;
+  font-family: Spectral, Georgia, serif;
+  font-size: 1.1rem;
+  line-height: 1.35;
+  color: var(--ink);
+  margin: .55rem 0 .65rem;
+}
+.evening-input{
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: .7rem .8rem;
+  min-height: 4.6rem;
+  resize: vertical;
+}
+.evening-input::placeholder{ color: var(--ink-faint); }
+.evening-input:focus-visible{ border-color: var(--lapis); outline-offset: 1px; }
+.evening-status{
+  margin: .45rem 0 0;
+  min-height: 1.2em;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-size: .72rem;
+  letter-spacing: .1em;
+  color: var(--ink-faint);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.evening-status.on{ opacity: 1; }
+.earlier{ margin-top: 1.7rem; }
+.earlier-list{
+  list-style: none;
+  margin: .7rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .85rem;
+}
+.earlier-list li{
+  display: flex;
+  gap: .85rem;
+  align-items: baseline;
+  font-size: .97rem;
+  color: var(--ink-soft);
+}
+.earlier-date{
+  flex: none;
+  width: 5.4rem;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-size: .74rem;
+  letter-spacing: .06em;
+  color: var(--ink-faint);
+}
+
+/* ---------- breath pacer ---------- */
+.breath{
+  position: absolute;
+  inset: 13%;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--lapis) 15%, transparent);
+  transform: scale(.52);
+}
+@keyframes breathe{
+  0%   { transform: scale(.52); }
+  40%  { transform: scale(1); }
+  100% { transform: scale(.52); }
+}
+.dial.breathing .breath{ animation: breathe 10s ease-in-out infinite; }
+.breath-word{
+  position: absolute;
+  left: 0; right: 0; bottom: 12%;
+  margin: 0;
+  text-align: center;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-size: .72rem;
+  letter-spacing: .16em;
+  color: var(--ink-faint);
+}
+
+/* ---------- search ---------- */
+.search{ padding-block: 1.3rem .1rem; }
+.find{
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: .55rem 1.1rem;
+}
+.find::placeholder{ color: var(--ink-faint); }
+.find:focus-visible{ border-color: var(--lapis); }
+.find-count{
+  margin: .5rem 0 0;
+  min-height: 1.1em;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-size: .74rem;
+  letter-spacing: .09em;
+  color: var(--ink-faint);
+}
+.sr-only{
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* ---------- colophon ---------- */
 .colophon{
   border-top: 1px solid var(--rule);
@@ -495,6 +628,8 @@ img{ max-width: 100%; }
   .timer-controls{ min-width: 0; flex: 1 1 100%; }
   .point-head .tib{ font-size: 1.7rem; }
   .subhead{ padding-left: 0; }
+  .earlier-list li{ flex-direction: column; gap: .15rem; }
+  .earlier-date{ width: auto; }
 }
 @media (prefers-reduced-motion: reduce){
   *{ transition-duration: .01ms !important; animation-duration: .01ms !important; }
@@ -528,11 +663,23 @@ img{ max-width: 100%; }
     <p class="eyebrow" id="featured-kicker">Today</p>
     <h2 class="slogan" id="featured-heading"><span class="slogan-index" id="featured-num"></span><span id="featured-text"></span></h2>
     <p class="note" id="featured-note"></p>
-    <p class="source" id="featured-source"></p>
+    <button class="source" id="featured-source" type="button"></button>
     <div class="actions">
       <button class="btn" id="draw" type="button">Draw another</button>
       <button class="btn secondary" id="back-to-today" type="button" hidden>Today's slogan</button>
     </div>
+
+    <section class="evening" aria-labelledby="evening-heading">
+      <p class="eyebrow" id="evening-heading">In the evening</p>
+      <label class="evening-prompt" for="evening-note">Where did it meet you today?</label>
+      <textarea class="evening-input" id="evening-note" rows="3" maxlength="2000"
+                placeholder="A line is enough."></textarea>
+      <p class="evening-status" id="evening-status" aria-live="polite"></p>
+      <div class="earlier" id="earlier" hidden>
+        <p class="eyebrow">When this one last came round</p>
+        <ul class="earlier-list" id="earlier-list"></ul>
+      </div>
+    </section>
   </div>
   </section>
 
@@ -548,12 +695,14 @@ img{ max-width: 100%; }
     </div>
     <div class="timer-body">
       <div class="dial" id="dial">
+        <div class="breath" id="breath" aria-hidden="true" hidden></div>
         <svg viewBox="0 0 140 140" aria-hidden="true">
           <circle class="track" cx="70" cy="70" r="62" fill="none" stroke-width="2"></circle>
           <circle class="arc" id="arc" cx="70" cy="70" r="62" fill="none" stroke-width="2"
                   stroke-linecap="round" stroke-dasharray="389.56" stroke-dashoffset="0"></circle>
         </svg>
         <div class="readout" id="readout" role="timer" aria-live="off">5:00</div>
+        <p class="breath-word" id="breath-word" aria-hidden="true" hidden>in</p>
       </div>
       <div class="timer-controls">
         <div class="durations" role="group" aria-label="Session length">
@@ -566,6 +715,7 @@ img{ max-width: 100%; }
           <button class="btn secondary" id="reset" type="button">Reset</button>
         </div>
         <button class="ghost" id="sound-toggle" type="button" aria-pressed="true">Bell on</button>
+        <button class="ghost" id="breath-toggle" type="button" aria-pressed="false">Breath off</button>
       </div>
     </div>
   </div>
@@ -575,6 +725,13 @@ img{ max-width: 100%; }
   <nav class="rail" aria-label="The seven points">
     <div class="rail-inner" id="rail"><span class="rail-label">points</span></div>
   </nav>
+
+  <div class="wrap search">
+    <label class="sr-only" for="find">Find a slogan</label>
+    <input class="find" id="find" type="search" autocomplete="off" spellcheck="false"
+           placeholder="Find a slogan &mdash; anger, envy&hellip;">
+    <p class="find-count" id="find-count" aria-live="polite"></p>
+  </div>
 
   <div class="wrap" id="points-list"></div>
 
@@ -839,6 +996,10 @@ const sourceEl = document.getElementById("featured-source");
 const backBtn  = document.getElementById("back-to-today");
 const sittingNum  = document.getElementById("sitting-num");
 const sittingText = document.getElementById("sitting-text");
+const noteInput   = document.getElementById("evening-note");
+const noteStatus  = document.getElementById("evening-status");
+const earlierBox  = document.getElementById("earlier");
+const earlierList = document.getElementById("earlier-list");
 
 /* Slogan 1 on the first day the app is opened, the next one each day after,
    wrapping round after 59. Dates are compared as plain calendar days, so a
@@ -866,7 +1027,71 @@ const todayIndex = ((daysSince(startDay) % SLOGANS.length) + SLOGANS.length) % S
 const dateLabel = new Date().toLocaleDateString(undefined, { day: "numeric", month: "long" });
 let current = todayIndex;
 
+/* ---- the evening half of slogan 41 -------------------------------------
+   One line a day, kept locally under the slogan it belongs to, so it is
+   waiting when that slogan comes round again 59 days later. */
+const NOTES_KEY = "lojong.notes";
+let noteFor = null, noteTimer = null;
+
+function readNotes(){
+  try { return JSON.parse(store.get(NOTES_KEY) || "{}") || {}; } catch { return {}; }
+}
+function saveNoteFor(n, text){
+  const all = readNotes();
+  const list = all[n] || [];
+  const today = isoToday();
+  const at = list.findIndex(e => e.d === today);
+  const t = text.trim();
+  if (t){ at >= 0 ? list[at].t = t : list.push({ d: today, t: t }); }
+  else if (at >= 0) list.splice(at, 1);
+  if (list.length) all[n] = list; else delete all[n];
+  store.set(NOTES_KEY, JSON.stringify(all));
+}
+function flushNote(){
+  clearTimeout(noteTimer); noteTimer = null;
+  if (noteFor !== null) saveNoteFor(noteFor, noteInput.value);
+}
+function flash(word){
+  noteStatus.textContent = word;
+  noteStatus.classList.add("on");
+  clearTimeout(flash.t);
+  flash.t = setTimeout(() => noteStatus.classList.remove("on"), 2200);
+}
+function longDate(iso){
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
+function loadNote(n){
+  noteFor = n;
+  const list = readNotes()[n] || [];
+  const today = isoToday();
+  const mine = list.find(e => e.d === today);
+  noteInput.value = mine ? mine.t : "";
+  noteStatus.classList.remove("on");
+  const past = list.filter(e => e.d !== today).sort((a, b) => b.d.localeCompare(a.d)).slice(0, 8);
+  earlierList.replaceChildren();
+  past.forEach(e => {
+    const li = document.createElement("li");
+    const when = document.createElement("span");
+    when.className = "earlier-date";
+    when.textContent = longDate(e.d);
+    const what = document.createElement("span");
+    what.textContent = e.t;
+    li.append(when, what);
+    earlierList.appendChild(li);
+  });
+  earlierBox.hidden = past.length === 0;
+}
+noteInput.addEventListener("input", () => {
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => { flushNote(); flash("kept"); }, 700);
+});
+noteInput.addEventListener("blur", () => { if (noteTimer) { flushNote(); flash("kept"); } });
+window.addEventListener("pagehide", flushNote);
+document.addEventListener("visibilitychange", () => { if (document.hidden) flushNote(); });
+
 function show(index, mode){
+  flushNote();
   current = index;
   const s = SLOGANS[index];
   numEl.textContent = s.n;
@@ -882,7 +1107,18 @@ function show(index, mode){
   document.querySelectorAll(".row").forEach(row => {
     row.setAttribute("aria-current", Number(row.dataset.index) === index ? "true" : "false");
   });
+  loadNote(String(s.n));
 }
+
+/* the point line leads to the slogan's place among its neighbours */
+sourceEl.addEventListener("click", () => {
+  const sec = document.getElementById("point-" + (SLOGANS[current].pointIndex + 1));
+  clearFilter();
+  goTo("points");
+  requestAnimationFrame(() => {
+    sec.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+  });
+});
 
 document.getElementById("draw").addEventListener("click", () => {
   let next = current;
@@ -899,6 +1135,8 @@ function prefersReducedMotion(){
    ============================================================ */
 const pointsEl = document.getElementById("points-list");
 const railEl = document.getElementById("rail");
+const railNav = document.querySelector(".rail");
+const pointBlocks = [];
 let flatIndex = 0;
 
 POINTS.forEach((pt, pi) => {
@@ -913,15 +1151,18 @@ POINTS.forEach((pt, pi) => {
     '<div class="titles"><span class="kicker">Point ' + pt.roman + '</span><h2>' + pt.title + '</h2></div>';
   sec.appendChild(head);
 
+  const blockGroups = [];
   pt.groups.forEach(group => {
+    let labelEl = null;
     if (group.label){
-      const h = document.createElement("p");
-      h.className = "subhead";
-      h.textContent = group.label;
-      sec.appendChild(h);
+      labelEl = document.createElement("p");
+      labelEl.className = "subhead";
+      labelEl.textContent = group.label;
+      sec.appendChild(labelEl);
     }
     const ul = document.createElement("ul");
     ul.className = "list";
+    const items = [];
     group.slogans.forEach(s => {
       const idx = flatIndex++;
       const li = document.createElement("li");
@@ -941,9 +1182,12 @@ POINTS.forEach((pt, pi) => {
       });
       li.appendChild(btn);
       ul.appendChild(li);
+      items.push({ li, hay: (s[0] + " " + s[1] + " " + s[2]).toLowerCase() });
     });
     sec.appendChild(ul);
+    blockGroups.push({ labelEl, ul, items });
   });
+  pointBlocks.push({ sec, groups: blockGroups });
   pointsEl.appendChild(sec);
 
   const a = document.createElement("a");
@@ -957,6 +1201,40 @@ POINTS.forEach((pt, pi) => {
   railEl.appendChild(a);
 });
 
+/* ---- find a slogan when a situation is already there -------------------- */
+const findInput = document.getElementById("find");
+const findCount = document.getElementById("find-count");
+
+function applyFilter(raw){
+  const q = raw.trim().toLowerCase();
+  let shown = 0;
+  pointBlocks.forEach(block => {
+    let inSection = 0;
+    block.groups.forEach(g => {
+      let inGroup = 0;
+      g.items.forEach(it => {
+        const hit = !q || it.hay.includes(q);
+        it.li.hidden = !hit;
+        if (hit) inGroup++;
+      });
+      g.ul.hidden = inGroup === 0;
+      if (g.labelEl) g.labelEl.hidden = inGroup === 0;
+      inSection += inGroup;
+    });
+    block.sec.hidden = inSection === 0;
+    shown += inSection;
+  });
+  railNav.hidden = q.length > 0;          // its links would point at hidden sections
+  findCount.textContent = q ? (shown === 0 ? "nothing found" : shown + " of " + SLOGANS.length) : "";
+}
+function clearFilter(){
+  if (!findInput.value) return;
+  findInput.value = "";
+  applyFilter("");
+}
+findInput.addEventListener("input", () => applyFilter(findInput.value));
+findInput.addEventListener("search", () => applyFilter(findInput.value));
+
 show(todayIndex, "today");
 
 /* ============================================================
@@ -968,6 +1246,9 @@ const dial = document.getElementById("dial");
 const readout = document.getElementById("readout");
 const startBtn = document.getElementById("start");
 const soundBtn = document.getElementById("sound-toggle");
+const breathBtn = document.getElementById("breath-toggle");
+const breathEl = document.getElementById("breath");
+const breathWord = document.getElementById("breath-word");
 
 let duration = 300, remaining = 300, ticker = null, endsAt = 0;
 let soundOn = store.get("lojong.sound") !== "off";
@@ -1001,16 +1282,52 @@ function tick(){
     requestAnimationFrame(() => { paint(); dial.classList.remove("resetting"); });
   }
 }
+/* ---- slogan 7: these two should ride the breath ------------------------
+   Four seconds in, six out. The words keep pacing even where motion is
+   switched off, which is the part that matters. */
+let breathOn = store.get("lojong.breath") === "on";
+let breathTimer = null, breathPhase = 0;
+
+function paceBreath(){
+  stopPacing();
+  breathPhase = 0;
+  const step = () => {
+    breathWord.textContent = breathPhase === 0 ? "in" : "out";
+    breathTimer = setTimeout(() => { breathPhase = 1 - breathPhase; step(); },
+                             breathPhase === 0 ? 4000 : 6000);
+  };
+  step();
+}
+function stopPacing(){
+  if (breathTimer){ clearTimeout(breathTimer); breathTimer = null; }
+}
+function syncBreath(){
+  breathBtn.textContent = breathOn ? "Breath on" : "Breath off";
+  breathBtn.setAttribute("aria-pressed", String(breathOn));
+  const running = breathOn && ticker !== null;
+  breathEl.hidden = !running;
+  breathWord.hidden = !running;
+  dial.classList.toggle("breathing", running);
+  running ? paceBreath() : stopPacing();
+}
+breathBtn.addEventListener("click", () => {
+  breathOn = !breathOn;
+  store.set("lojong.breath", breathOn ? "on" : "off");
+  syncBreath();
+});
+
 function start(){
   endsAt = Date.now() + remaining * 1000;
   ticker = setInterval(tick, 250);
   startBtn.textContent = "Pause";
   readout.setAttribute("aria-live", "off");
   if (soundOn) warmAudio();
+  syncBreath();
 }
 function stop(){
   if (ticker){ clearInterval(ticker); ticker = null; }
   startBtn.textContent = remaining < duration ? "Resume" : "Begin";
+  syncBreath();
 }
 startBtn.addEventListener("click", () => { ticker ? stop() : start(); });
 document.getElementById("reset").addEventListener("click", () => setDuration(duration / 60));
@@ -1021,6 +1338,7 @@ document.querySelectorAll(".chip").forEach(chip => {
   });
 });
 paint();
+syncBreath();
 
 /* a struck bowl: a low fundamental with two inharmonic partials, decaying */
 let audioCtx = null;
