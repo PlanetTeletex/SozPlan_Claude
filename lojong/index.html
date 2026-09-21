@@ -300,30 +300,70 @@ img{ max-width: 100%; }
   letter-spacing: .01em;
   color: var(--ink);
 }
-.timer-controls{ display: flex; flex-direction: column; align-items: center; gap: .85rem; }
-.durations{ display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
-.toggles{ display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-.chip{
+.ring{
+  --r:   clamp(125px, 35vw, 158px);   /* radius the marks sit on */
+  --orb: clamp(2.9rem, 9vw, 3.3rem);  /* diameter of one mark */
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: calc(2 * var(--r) + var(--orb));
+  height: calc(2 * var(--r) + var(--orb));
+  max-width: 100%;
+  margin-inline: auto;
+}
+.orb{
+  position: absolute;
+  top: 50%; left: 50%;
+  width: var(--orb);
+  height: var(--orb);
+  margin: calc(var(--orb) / -2) 0 0 calc(var(--orb) / -2);
+  display: grid;
+  place-items: center;
   font: inherit;
   font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
   font-weight: 500;
-  font-size: .82rem;
-  letter-spacing: .06em;
-  padding: 5px 14px 4px;
-  border: 1px solid var(--rule);
-  background: transparent;
+  font-size: .92rem;
+  letter-spacing: .02em;
   color: var(--ink-soft);
-  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
   cursor: pointer;
-  transition: color .18s, border-color .18s, background-color .18s;
+  /* out along its own angle, then turned upright again */
+  transform: rotate(var(--a)) translateY(calc(-1 * var(--r))) rotate(calc(-1 * var(--a)));
+  transition: color .18s, border-color .18s, background-color .18s, opacity .9s ease;
 }
-.chip:hover{ color: var(--ink); border-color: var(--ink-faint); }
-.chip[aria-pressed="true"]{
+.orb svg{
+  width: 46%; height: 46%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.orb:hover{ color: var(--ink); border-color: var(--ink-faint); }
+.orb[aria-pressed="true"]{
   color: var(--lapis);
   border-color: var(--lapis);
-  background: color-mix(in srgb, var(--lapis) 9%, transparent);
+  background: color-mix(in srgb, var(--lapis) 8%, var(--surface));
 }
-.timer-buttons{ display: flex; justify-content: center; gap: 10px; align-items: center; }
+.orb.primary{
+  width: calc(var(--orb) * 1.18);
+  height: calc(var(--orb) * 1.18);
+  margin: calc(var(--orb) * -0.59) 0 0 calc(var(--orb) * -0.59);
+  color: var(--btn-fg);
+  background: var(--maroon);
+  border-color: var(--maroon);
+}
+.orb.primary:hover{ color: var(--btn-fg); opacity: .88; }
+.ring-state{
+  margin: .2rem 0 0;
+  text-align: center;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-size: .74rem;
+  letter-spacing: .1em;
+  color: var(--ink-faint);
+}
 
 /* ---------- section tabs ---------- */
 .tabs{
@@ -637,7 +677,6 @@ body.sitting .sitting{ border-bottom-color: transparent; }
 .colophon .knot-small{ width: 22px; height: 22px; color: var(--gold); opacity: .8; display: block; margin-bottom: 14px; }
 
 @media (max-width: 420px){
-  .timer-controls{ width: 100%; }
   .point-head .tib{ font-size: 1.7rem; }
   .subhead{ padding-left: 0; }
   .earlier-list li{ flex-direction: column; gap: .15rem; }
@@ -706,31 +745,35 @@ body.sitting .sitting{ border-bottom-color: transparent; }
       <p class="dims">Hold the slogan loosely. When the mind wanders, begin again.</p>
     </div>
     <div class="timer-body">
-      <div class="dial" id="dial">
-        <div class="breath" id="breath" aria-hidden="true" hidden></div>
-        <svg viewBox="0 0 140 140" aria-hidden="true">
-          <circle class="track" cx="70" cy="70" r="62" fill="none" stroke-width="2"></circle>
-          <circle class="arc" id="arc" cx="70" cy="70" r="62" fill="none" stroke-width="2"
-                  stroke-linecap="round" stroke-dasharray="389.56" stroke-dashoffset="0"></circle>
-        </svg>
-        <div class="readout" id="readout" role="timer" aria-live="off">5:00</div>
-        <p class="breath-word" id="breath-word" aria-hidden="true" hidden>in</p>
+      <div class="ring">
+        <div class="dial" id="dial">
+          <div class="breath" id="breath" aria-hidden="true" hidden></div>
+          <svg viewBox="0 0 140 140" aria-hidden="true">
+            <circle class="track" cx="70" cy="70" r="62" fill="none" stroke-width="2"></circle>
+            <circle class="arc" id="arc" cx="70" cy="70" r="62" fill="none" stroke-width="2"
+                    stroke-linecap="round" stroke-dasharray="389.56" stroke-dashoffset="0"></circle>
+          </svg>
+          <div class="readout" id="readout" role="timer" aria-live="off">5:00</div>
+          <p class="breath-word" id="breath-word" aria-hidden="true" hidden>in</p>
+        </div>
+
+        <button class="orb dims" type="button" data-min="3" style="--a: 282.9deg"
+                aria-pressed="false" aria-label="Three minutes" title="3 min">3</button>
+        <button class="orb dims" type="button" data-min="5" style="--a: 334.3deg"
+                aria-pressed="true" aria-label="Five minutes" title="5 min">5</button>
+        <button class="orb dims" type="button" data-min="10" style="--a: 25.7deg"
+                aria-pressed="false" aria-label="Ten minutes" title="10 min">10</button>
+        <button class="orb dims" id="sound-toggle" type="button" style="--a: 77.1deg"
+                aria-pressed="true" aria-label="Bell" title="Bell"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.4h18"/><path d="M4.8 10.4a7.2 6.4 0 0 0 14.4 0"/></svg></button>
+        <button class="orb dims" id="breath-toggle" type="button" style="--a: 128.6deg"
+                aria-pressed="false" aria-label="Breath pacer" title="Breath pacer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c2.5-5.4 5-5.4 7.5 0s5 5.4 7.5 0"/></svg></button>
+        <button class="orb primary" id="start" type="button" style="--a: 180deg" aria-label="Begin" title="Begin">
+          <span class="ico-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.2 6.1 18 12l-8.8 5.9Z" fill="currentColor" stroke="none"/></svg></span><span class="ico-pause" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.7 6.4v11.2M14.3 6.4v11.2"/></svg></span>
+        </button>
+        <button class="orb dims" id="reset" type="button" style="--a: 231.4deg"
+                aria-label="Reset" title="Reset"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 11.2A7.6 7.6 0 1 1 17.4 6"/><path d="M19.9 3.6v4.6h-4.6"/></svg></button>
       </div>
-      <div class="timer-controls">
-        <div class="durations dims" role="group" aria-label="Session length">
-          <button class="chip" type="button" data-min="3">3 min</button>
-          <button class="chip" type="button" data-min="5" aria-pressed="true">5 min</button>
-          <button class="chip" type="button" data-min="10">10 min</button>
-        </div>
-        <div class="timer-buttons">
-          <button class="btn" id="start" type="button">Begin</button>
-          <button class="btn secondary dims" id="reset" type="button">Reset</button>
-        </div>
-        <div class="toggles dims">
-          <button class="ghost" id="sound-toggle" type="button" aria-pressed="true">Bell on</button>
-          <button class="ghost" id="breath-toggle" type="button" aria-pressed="false">Breath off</button>
-        </div>
-      </div>
+      <p class="ring-state dims" id="ring-state"></p>
     </div>
   </div>
   </section>
@@ -1259,6 +1302,15 @@ const arc = document.getElementById("arc");
 const dial = document.getElementById("dial");
 const readout = document.getElementById("readout");
 const startBtn = document.getElementById("start");
+const icoPlay = startBtn.querySelector(".ico-play");
+const icoPause = startBtn.querySelector(".ico-pause");
+function setStartFace(running){
+  icoPlay.hidden = running;
+  icoPause.hidden = !running;
+  const label = running ? "Pause" : (remaining < duration ? "Resume" : "Begin");
+  startBtn.setAttribute("aria-label", label);
+  startBtn.title = label;
+}
 const soundBtn = document.getElementById("sound-toggle");
 const breathBtn = document.getElementById("breath-toggle");
 const breathEl = document.getElementById("breath");
@@ -1266,6 +1318,7 @@ const breathWord = document.getElementById("breath-word");
 
 let duration = 300, remaining = 300, ticker = null, endsAt = 0;
 let soundOn = store.get("lojong.sound") !== "off";
+let breathOn = store.get("lojong.breath") === "on";
 arc.setAttribute("stroke-dasharray", CIRC);
 syncSound();
 
@@ -1301,7 +1354,6 @@ function tick(){
 /* ---- slogan 7: these two should ride the breath ------------------------
    Four seconds in, six out. The words keep pacing even where motion is
    switched off, which is the part that matters. */
-let breathOn = store.get("lojong.breath") === "on";
 let breathTimer = null, breathPhase = 0;
 
 function paceBreath(){
@@ -1318,8 +1370,11 @@ function stopPacing(){
   if (breathTimer){ clearTimeout(breathTimer); breathTimer = null; }
 }
 function syncBreath(){
-  breathBtn.textContent = breathOn ? "Breath on" : "Breath off";
   breathBtn.setAttribute("aria-pressed", String(breathOn));
+  const label = breathOn ? "Breath pacer on" : "Breath pacer off";
+  breathBtn.setAttribute("aria-label", label);
+  breathBtn.title = label;
+  syncRingState();
   const running = breathOn && ticker !== null;
   breathEl.hidden = !running;
   breathWord.hidden = !running;
@@ -1354,7 +1409,7 @@ let opened = false;      // have the three opening strikes been sounded?
 function start(){
   endsAt = Date.now() + remaining * 1000;
   ticker = setInterval(tick, 250);
-  startBtn.textContent = "Pause";
+  setStartFace(true);
   readout.setAttribute("aria-live", "off");
   if (soundOn){ warmAudio(); if (!opened) ring(3); }
   opened = true;
@@ -1364,16 +1419,16 @@ function start(){
 }
 function stop(){
   if (ticker){ clearInterval(ticker); ticker = null; }
-  startBtn.textContent = remaining < duration ? "Resume" : "Begin";
+  setStartFace(false);
   document.body.classList.remove("sitting");
   keepAwake(false);
   syncBreath();
 }
 startBtn.addEventListener("click", () => { ticker ? stop() : start(); });
 document.getElementById("reset").addEventListener("click", () => setDuration(duration / 60));
-document.querySelectorAll(".chip").forEach(chip => {
+document.querySelectorAll("[data-min]").forEach(chip => {
   chip.addEventListener("click", () => {
-    document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c === chip)));
+    document.querySelectorAll("[data-min]").forEach(c => c.setAttribute("aria-pressed", String(c === chip)));
     setDuration(Number(chip.dataset.min));
   });
 });
@@ -1415,9 +1470,16 @@ function ring(count){
   const now = audioCtx.currentTime;
   for (let i = 0; i < (count || 1); i++) strikeAt(now + i * 2.4);
 }
+function syncRingState(){
+  const line = document.getElementById("ring-state");
+  if (line) line.textContent = (soundOn ? "bell on" : "bell off") + "  ·  " + (breathOn ? "breath on" : "breath off");
+}
 function syncSound(){
-  soundBtn.textContent = soundOn ? "Bell on" : "Bell off";
   soundBtn.setAttribute("aria-pressed", String(soundOn));
+  const label = soundOn ? "Bell on" : "Bell off";
+  soundBtn.setAttribute("aria-label", label);
+  soundBtn.title = label;
+  syncRingState();
 }
 soundBtn.addEventListener("click", () => {
   soundOn = !soundOn;
