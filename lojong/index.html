@@ -1016,5 +1016,12 @@ themeBtn.addEventListener("click", () => {
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncTheme);
 syncTheme();
 </script>
+<script>
+/* Offline support. Skipped on file:// and inside an embedding frame (e.g. a
+   published artifact), where a worker would only cache someone else's origin. */
+if ("serviceWorker" in navigator && location.protocol.startsWith("http") && window.top === window.self){
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
 </body>
 </html>

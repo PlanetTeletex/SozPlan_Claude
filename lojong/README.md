@@ -35,6 +35,23 @@ copy of the file keeps its tab icon. The PNGs (180/192/512) and `manifest.webman
 are for the home screen — they only take effect when the folder is served over HTTP
 (GitHub Pages, any static host); `index.html` on its own ignores them without error.
 
+## Running it from a phone
+
+The repository is public, so GitHub Pages serves it for free:
+**Settings → Pages → Deploy from a branch →** branch `claude/tender-noether-ej4c7j`,
+folder `/ (root)`. After about a minute the app is at
+
+    https://planetteletex.github.io/SozPlan_Claude/lojong/
+
+Open that on the phone and add it to the home screen (iOS: Share → *Add to Home
+Screen*; Android: ⋮ → *Install app*). It then starts standalone, with the knot icon.
+
+`sw.js` caches the page, the icons and the Google Fonts on first visit, so the app
+opens without a network afterwards. The document itself is fetched network-first:
+a push to the branch reaches an installed copy the next time it is opened online.
+Bump `VERSION` in `sw.js` to retire an old cache. The worker is deliberately not
+registered on `file://` or inside an embedding frame.
+
 ## Text
 
 The slogans appear in their familiar English wording. The one- or two-sentence note
