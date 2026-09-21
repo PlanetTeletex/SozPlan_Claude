@@ -33,6 +33,7 @@
   --rule:         #cdc1a8;
   --rule-soft:    #dbd1bc;
   --btn-fg:       #f6f1e6;
+  --tabh:         46px;
   --knot-halo:    #e9e1d0;
   --knot-ink:     #a9801f;
   --knot-alpha:   .16;
@@ -159,9 +160,7 @@ img{ max-width: 100%; }
 .today{
   position: relative;
   isolation: isolate;
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-  padding-block: 40px 30px;
+  padding-block: 38px 30px;
   overflow: hidden;
 }
 .watermark{
@@ -245,8 +244,20 @@ img{ max-width: 100%; }
 
 /* ---------- timer ---------- */
 .timer{
-  border-bottom: 1px solid var(--rule);
-  padding-block: 26px 30px;
+  padding-block: 34px 40px;
+}
+.sitting{
+  margin: 0 0 30px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.sitting-slogan{
+  font-family: Spectral, Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(1.2rem, 4.4vw, 1.5rem);
+  line-height: 1.3;
+  text-wrap: balance;
+  margin: 8px 0 0;
 }
 .timer-head{
   display: flex;
@@ -273,7 +284,7 @@ img{ max-width: 100%; }
   margin-top: 22px;
   flex-wrap: wrap;
 }
-.dial{ position: relative; flex: none; width: 132px; height: 132px; }
+.dial{ position: relative; flex: none; width: clamp(132px, 38vw, 168px); aspect-ratio: 1; }
 .dial svg{ width: 100%; height: 100%; transform: rotate(-90deg); }
 .dial .track{ stroke: var(--rule-soft); }
 .dial .arc{
@@ -292,7 +303,7 @@ img{ max-width: 100%; }
   letter-spacing: .01em;
   color: var(--ink);
 }
-.timer-controls{ display: flex; flex-direction: column; gap: 14px; min-width: 12rem; }
+.timer-controls{ display: flex; flex-direction: column; align-items: flex-start; gap: 14px; min-width: 12rem; }
 .durations{ display: flex; gap: 8px; }
 .chip{
   font: inherit;
@@ -316,10 +327,48 @@ img{ max-width: 100%; }
 }
 .timer-buttons{ display: flex; gap: 10px; align-items: center; }
 
+/* ---------- section tabs ---------- */
+.tabs{
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: color-mix(in srgb, var(--paper) 93%, transparent);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.tabs-inner{
+  max-width: 44rem;
+  margin: 0 auto;
+  padding-inline: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.tab{
+  font: inherit;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-weight: 500;
+  font-size: clamp(.68rem, 2.9vw, .82rem);
+  letter-spacing: .06em;
+  color: var(--ink-faint);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 13px 2px 11px;
+  cursor: pointer;
+  min-width: 0;            /* a grid item must be allowed to shrink */
+  overflow-wrap: break-word;
+  transition: color .18s, border-color .18s;
+}
+.tab:hover{ color: var(--ink-soft); }
+.tab[aria-selected="true"]{ color: var(--maroon); border-bottom-color: var(--gold); }
+.view:focus{ outline: none; }
+
 /* ---------- point navigation ---------- */
 .rail{
   position: sticky;
-  top: env(safe-area-inset-top, 0px);
+  top: calc(env(safe-area-inset-top, 0px) + var(--tabh));
   z-index: 5;
   background: color-mix(in srgb, var(--paper) 92%, transparent);
   backdrop-filter: blur(8px);
@@ -361,7 +410,7 @@ img{ max-width: 100%; }
 .rail a:hover{ color: var(--maroon); background: var(--surface-sunk); }
 
 /* ---------- the seven points ---------- */
-.point{ padding-block: 42px 8px; scroll-margin-top: 64px; }
+.point{ padding-block: 42px 8px; scroll-margin-top: calc(var(--tabh) + 22px); }
 .point-head{ display: flex; gap: 16px; align-items: flex-start; }
 .tib{
   flex: none;
@@ -480,8 +529,17 @@ img{ max-width: 100%; }
   <button class="ghost" id="theme-toggle" type="button">Dark</button>
 </header>
 
+<nav class="tabs" aria-label="Sections">
+  <div class="tabs-inner" role="tablist">
+    <button class="tab" type="button" role="tab" id="tab-today" aria-controls="view-today" aria-selected="true">Today</button>
+    <button class="tab" type="button" role="tab" id="tab-practice" aria-controls="view-practice" aria-selected="false" tabindex="-1">Contemplation</button>
+    <button class="tab" type="button" role="tab" id="tab-points" aria-controls="view-points" aria-selected="false" tabindex="-1">Seven Points</button>
+  </div>
+</nav>
+
 <main>
-  <section class="wrap today" aria-labelledby="featured-heading">
+  <section class="view" id="view-today" role="tabpanel" aria-labelledby="tab-today" tabindex="-1">
+  <div class="wrap today">
     <svg class="watermark" viewBox="0 0 200 200" aria-hidden="true" data-knot="watermark"></svg>
     <p class="eyebrow" id="featured-kicker">Today</p>
     <h2 class="slogan" id="featured-heading"><span class="slogan-index" id="featured-num"></span><span id="featured-text"></span></h2>
@@ -492,9 +550,15 @@ img{ max-width: 100%; }
       <button class="btn secondary" id="back-to-today" type="button" hidden>Today's slogan</button>
       <button class="btn secondary" id="sit" type="button">Sit with it</button>
     </div>
+  </div>
   </section>
 
-  <section class="wrap timer" id="timer" aria-labelledby="timer-heading">
+  <section class="view" id="view-practice" role="tabpanel" aria-labelledby="tab-practice" tabindex="-1" hidden>
+  <div class="wrap timer" id="timer" aria-labelledby="timer-heading">
+    <div class="sitting">
+      <p class="eyebrow">Sitting with</p>
+      <p class="sitting-slogan"><span class="slogan-index" id="sitting-num"></span><span id="sitting-text"></span></p>
+    </div>
     <div class="timer-head">
       <h2 id="timer-heading">Contemplation</h2>
       <p>Hold the slogan loosely. When the mind wanders, begin again.</p>
@@ -521,19 +585,22 @@ img{ max-width: 100%; }
         <button class="ghost" id="sound-toggle" type="button" aria-pressed="true">Bell on</button>
       </div>
     </div>
+  </div>
   </section>
 
+  <section class="view" id="view-points" role="tabpanel" aria-labelledby="tab-points" tabindex="-1" hidden>
   <nav class="rail" aria-label="The seven points">
     <div class="rail-inner" id="rail"><span class="rail-label">points</span></div>
   </nav>
 
-  <div class="wrap" id="points"></div>
+  <div class="wrap" id="points-list"></div>
 
   <footer class="wrap colophon">
     <svg class="knot-small" viewBox="0 0 200 200" aria-hidden="true" data-knot="mark"></svg>
     <p>The seven points of mind training were set down by Chekawa Yeshe Dorje (1102&ndash;1176), drawing on the instructions Atisha brought from Suvarnadvipa to Tibet. The slogans appear here in their familiar English wording; the short commentary beneath each one is a plain practice note, not a translation of any classical commentary.</p>
-    <p>Tap any slogan to sit with it.</p>
+    <p>Tap any slogan to bring it to Today.</p>
   </footer>
+  </section>
 </main>
 
 <script>
@@ -789,6 +856,8 @@ const textEl   = document.getElementById("featured-text");
 const noteEl   = document.getElementById("featured-note");
 const sourceEl = document.getElementById("featured-source");
 const backBtn  = document.getElementById("back-to-today");
+const sittingNum  = document.getElementById("sitting-num");
+const sittingText = document.getElementById("sitting-text");
 
 const todayIndex = (() => {
   const d = new Date();
@@ -808,6 +877,8 @@ function show(index, mode){
   numEl.textContent = s.n;
   textEl.textContent = s.text;
   noteEl.textContent = s.note;
+  sittingNum.textContent = s.n;
+  sittingText.textContent = s.text;
   kickerEl.innerHTML = mode === "today"
     ? "Today <span class=\"dot\">&middot;</span> " + dateLabel
     : "Drawn <span class=\"dot\">&middot;</span> sit with this one";
@@ -825,7 +896,7 @@ document.getElementById("draw").addEventListener("click", () => {
 });
 backBtn.addEventListener("click", () => show(todayIndex, "today"));
 document.getElementById("sit").addEventListener("click", () => {
-  document.getElementById("timer").scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+  goTo("practice");
   document.getElementById("start").focus({ preventScroll: true });
 });
 function prefersReducedMotion(){
@@ -835,7 +906,7 @@ function prefersReducedMotion(){
 /* ============================================================
    Render the seven points
    ============================================================ */
-const pointsEl = document.getElementById("points");
+const pointsEl = document.getElementById("points-list");
 const railEl = document.getElementById("rail");
 let flatIndex = 0;
 
@@ -875,7 +946,7 @@ POINTS.forEach((pt, pi) => {
       btn.querySelector(".gloss").textContent = s[2];
       btn.addEventListener("click", () => {
         show(idx, "drawn");
-        window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+        goTo("today");
       });
       li.appendChild(btn);
       ul.appendChild(li);
@@ -888,6 +959,10 @@ POINTS.forEach((pt, pi) => {
   a.href = "#point-" + (pi + 1);
   a.textContent = pt.tib;
   a.setAttribute("aria-label", "Point " + pt.roman + ": " + pt.title);
+  a.addEventListener("click", ev => {
+    ev.preventDefault();
+    sec.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+  });
   railEl.appendChild(a);
 });
 
@@ -997,6 +1072,47 @@ soundBtn.addEventListener("click", () => {
   syncSound();
   if (soundOn) ring();
 });
+
+/* ============================================================
+   Three views, one at a time
+   ============================================================ */
+const VIEWS = ["today", "practice", "points"];
+function currentView(){
+  const h = location.hash.replace("#", "");
+  return VIEWS.includes(h) ? h : null;
+}
+function render(name){
+  VIEWS.forEach(v => {
+    const on = v === name;
+    document.getElementById("view-" + v).hidden = !on;
+    const tab = document.getElementById("tab-" + v);
+    tab.setAttribute("aria-selected", String(on));
+    tab.tabIndex = on ? 0 : -1;
+  });
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+function goTo(name){
+  if (currentView() === name) render(name);   // no hashchange to wait for
+  else location.hash = name;
+}
+window.addEventListener("hashchange", () => {
+  const v = currentView();
+  if (v) render(v);                           // in-page anchors are not views
+});
+VIEWS.forEach((v, i) => {
+  const tab = document.getElementById("tab-" + v);
+  tab.addEventListener("click", () => goTo(v));
+  tab.addEventListener("keydown", ev => {
+    const step = ev.key === "ArrowRight" ? 1 : ev.key === "ArrowLeft" ? -1 : 0;
+    if (!step) return;
+    ev.preventDefault();
+    const next = VIEWS[(i + step + VIEWS.length) % VIEWS.length];
+    goTo(next);
+    document.getElementById("tab-" + next).focus();
+  });
+});
+if (!currentView()) history.replaceState(null, "", "#today");
+render(currentView() || "today");
 
 /* ============================================================
    Theme
