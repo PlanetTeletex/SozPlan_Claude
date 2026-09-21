@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lojong Slogans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Alegreya+Sans:wght@400;500;700&family=Alegreya+Sans+SC:wght@500;700&display=swap">
+<style>
+/* ---------- tokens: light (bare :root defines the complete palette) ---------- */
+:root{
+  --paper:        #e9e1d0;
+  --surface:      #f4efe3;
+  --surface-sunk: #e2d9c5;
+  --ink:          #2b2320;
+  --ink-soft:     #6d5f52;
+  --ink-faint:    #8e8271;
+  --maroon:       #7a1f2b;
+  --lapis:        #22417a;
+  --saffron:      #c4651a;
+  --gold:         #a9801f;
+  --rule:         #cdc1a8;
+  --rule-soft:    #dbd1bc;
+  --btn-fg:       #f6f1e6;
+  --knot-halo:    #e9e1d0;
+  --knot-ink:     #a9801f;
+  --knot-alpha:   .16;
+  --focus:        #22417a;
+  --shadow:       0 1px 2px rgba(43,35,32,.05), 0 8px 24px -18px rgba(43,35,32,.5);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:        #131923;
+    --surface:      #1a212e;
+    --surface-sunk: #10161f;
+    --ink:          #e8ddc7;
+    --ink-soft:     #a99d89;
+    --ink-faint:    #8b8272;
+    --maroon:       #d4838c;
+    --lapis:        #8fb0e2;
+    --saffron:      #e0a45c;
+    --gold:         #d2ac58;
+    --rule:         #2c3647;
+    --rule-soft:    #232c3b;
+    --btn-fg:       #131923;
+    --knot-halo:    #131923;
+    --knot-ink:     #d2ac58;
+    --knot-alpha:   .20;
+    --focus:        #8fb0e2;
+    --shadow:       0 1px 2px rgba(0,0,0,.3), 0 10px 30px -20px rgba(0,0,0,.9);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:        #131923;
+  --surface:      #1a212e;
+  --surface-sunk: #10161f;
+  --ink:          #e8ddc7;
+  --ink-soft:     #a99d89;
+  --ink-faint:    #8b8272;
+  --maroon:       #d4838c;
+  --lapis:        #8fb0e2;
+  --saffron:      #e0a45c;
+  --gold:         #d2ac58;
+  --rule:         #2c3647;
+  --rule-soft:    #232c3b;
+  --btn-fg:       #131923;
+  --knot-halo:    #131923;
+  --knot-ink:     #d2ac58;
+  --knot-alpha:   .20;
+  --focus:        #8fb0e2;
+  --shadow:       0 1px 2px rgba(0,0,0,.3), 0 10px 30px -20px rgba(0,0,0,.9);
+  color-scheme: dark;
+}
+
+/* ---------- reset / frame ---------- */
+:root{
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{ box-sizing: border-box; }
+body{
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Alegreya Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img{ max-width: 100%; }
+[hidden]{ display: none !important; }
+:focus-visible{ outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 2px; }
+
+.wrap{
+  max-width: 44rem;
+  margin: 0 auto;
+  padding-inline: 20px;
+}
+
+/* ---------- masthead ---------- */
+.masthead{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-block: 26px 18px;
+}
+.mark{ flex: none; width: 34px; height: 34px; color: var(--gold); }
+.masthead h1{
+  margin: 0;
+  font-family: Spectral, Georgia, serif;
+  font-weight: 400;
+  font-size: 1.45rem;
+  letter-spacing: .01em;
+  line-height: 1.1;
+}
+.masthead p{
+  margin: 1px 0 0;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-weight: 500;
+  font-size: .82rem;
+  letter-spacing: .07em;
+  text-transform: lowercase;
+  color: var(--ink-faint);
+}
+.masthead .spacer{ flex: 1 1 auto; }
+
+.ghost{
+  font: inherit;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-weight: 500;
+  font-size: .78rem;
+  letter-spacing: .09em;
+  color: var(--ink-soft);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 5px 13px 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .18s, border-color .18s, background-color .18s;
+}
+.ghost:hover{ color: var(--ink); border-color: var(--ink-faint); }
+.ghost[aria-pressed="true"]{ color: var(--lapis); border-color: var(--lapis); }
+
+/* ---------- featured slogan ---------- */
+.today{
+  position: relative;
+  isolation: isolate;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding-block: 40px 30px;
+  overflow: hidden;
+}
+.watermark{
+  position: absolute;
+  top: 50%; left: 50%;
+  translate: -50% -50%;
+  width: min(460px, 118%);
+  aspect-ratio: 1;
+  max-width: 118%;
+  z-index: -1;
+  color: var(--knot-ink);
+  opacity: var(--knot-alpha);
+  pointer-events: none;
+}
+.eyebrow{
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-weight: 500;
+  font-size: .8rem;
+  letter-spacing: .12em;
+  color: var(--saffron);
+  margin: 0 0 14px;
+}
+.eyebrow .dot{ color: var(--ink-faint); padding-inline: .45em; }
+.slogan{
+  font-family: Spectral, Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(1.75rem, 6.4vw, 2.7rem);
+  line-height: 1.22;
+  letter-spacing: -.012em;
+  text-wrap: balance;
+  margin: 0;
+  color: var(--ink);
+}
+.slogan-index{
+  font-family: Spectral, Georgia, serif;
+  font-size: .5em;
+  vertical-align: .55em;
+  color: var(--maroon);
+  margin-right: .35em;
+  font-weight: 400;
+}
+.note{
+  margin: 18px 0 0;
+  max-width: 34rem;
+  color: var(--ink-soft);
+  font-size: 1.02rem;
+}
+.source{
+  margin: 22px 0 0;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-size: .78rem;
+  letter-spacing: .09em;
+  color: var(--ink-faint);
+}
+.actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+.btn{
+  font: inherit;
+  font-family: "Alegreya Sans", sans-serif;
+  font-weight: 500;
+  font-size: .95rem;
+  padding: 8px 18px;
+  border-radius: 2px;
+  border: 1px solid var(--maroon);
+  background: var(--maroon);
+  color: var(--btn-fg);
+  cursor: pointer;
+  transition: opacity .18s, background-color .18s, color .18s;
+}
+.btn:hover{ opacity: .86; }
+.btn.secondary{
+  background: transparent;
+  color: var(--ink-soft);
+  border-color: var(--rule);
+}
+.btn.secondary:hover{ color: var(--ink); border-color: var(--ink-faint); }
+
+/* ---------- timer ---------- */
+.timer{
+  border-bottom: 1px solid var(--rule);
+  padding-block: 26px 30px;
+}
+.timer-head{
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.timer-head h2{
+  margin: 0;
+  font-family: Spectral, Georgia, serif;
+  font-weight: 400;
+  font-size: 1.1rem;
+}
+.timer-head p{
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: .95rem;
+  flex: 1 1 14rem;
+}
+.timer-body{
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 5vw, 36px);
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+.dial{ position: relative; flex: none; width: 132px; height: 132px; }
+.dial svg{ width: 100%; height: 100%; transform: rotate(-90deg); }
+.dial .track{ stroke: var(--rule-soft); }
+.dial .arc{
+  stroke: var(--gold);
+  transition: stroke-dashoffset .95s linear;
+}
+.dial.resetting .arc{ transition: none; }
+.readout{
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  font-family: Spectral, Georgia, serif;
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
+  color: var(--ink);
+}
+.timer-controls{ display: flex; flex-direction: column; gap: 14px; min-width: 12rem; }
+.durations{ display: flex; gap: 8px; }
+.chip{
+  font: inherit;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-weight: 500;
+  font-size: .82rem;
+  letter-spacing: .06em;
+  padding: 5px 14px 4px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-soft);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color .18s, border-color .18s, background-color .18s;
+}
+.chip:hover{ color: var(--ink); border-color: var(--ink-faint); }
+.chip[aria-pressed="true"]{
+  color: var(--lapis);
+  border-color: var(--lapis);
+  background: color-mix(in srgb, var(--lapis) 9%, transparent);
+}
+.timer-buttons{ display: flex; gap: 10px; align-items: center; }
+
+/* ---------- point navigation ---------- */
+.rail{
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.rail-inner{
+  max-width: 44rem;
+  margin: 0 auto;
+  padding-inline: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block: 7px;
+}
+.rail-inner::-webkit-scrollbar{ display: none; }
+.rail-label{
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-size: .74rem;
+  letter-spacing: .1em;
+  color: var(--ink-faint);
+  margin-right: 8px;
+  white-space: nowrap;
+}
+.rail a{
+  flex: none;
+  display: grid;
+  place-content: center;
+  width: 34px;
+  height: 32px;
+  font-size: 1.22rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-radius: 3px;
+  transition: color .18s, background-color .18s;
+}
+.rail a:hover{ color: var(--maroon); background: var(--surface-sunk); }
+
+/* ---------- the seven points ---------- */
+.point{ padding-block: 42px 8px; scroll-margin-top: 64px; }
+.point-head{ display: flex; gap: 16px; align-items: flex-start; }
+.tib{
+  flex: none;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--gold);
+  width: 1.4em;
+  text-align: center;
+  padding-top: 2px;
+}
+.point-head .titles{ flex: 1 1 auto; }
+.point-head .kicker{
+  display: block;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-weight: 700;
+  font-size: .78rem;
+  letter-spacing: .13em;
+  color: var(--maroon);
+  margin-bottom: 3px;
+}
+.point-head h2{
+  margin: 0;
+  font-family: Spectral, Georgia, serif;
+  font-weight: 400;
+  font-size: 1.32rem;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.subhead{
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-weight: 500;
+  font-size: .78rem;
+  letter-spacing: .12em;
+  color: var(--lapis);
+  margin: 30px 0 4px;
+  padding-left: calc(1.4em + 16px);
+}
+.list{ list-style: none; margin: 18px 0 0; padding: 0; }
+.list li + li{ border-top: 1px solid var(--rule-soft); }
+.row{
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 14px 10px 15px;
+  margin-inline: -10px;
+  width: calc(100% + 20px);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color .18s;
+}
+.row:hover{ background: var(--surface); }
+.row[aria-current="true"]{ background: var(--surface); }
+.row[aria-current="true"] .num{ color: var(--saffron); }
+.num{
+  flex: none;
+  width: 1.4em;
+  text-align: center;
+  font-family: Spectral, Georgia, serif;
+  font-size: .95rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+  padding-top: .28em;
+}
+.row .text{ flex: 1 1 auto; }
+.row .line{
+  font-family: Spectral, Georgia, serif;
+  font-size: 1.17rem;
+  line-height: 1.35;
+  letter-spacing: -.005em;
+  display: block;
+}
+.row .gloss{
+  display: block;
+  margin-top: 4px;
+  color: var(--ink-soft);
+  font-size: .96rem;
+  line-height: 1.5;
+}
+
+/* ---------- colophon ---------- */
+.colophon{
+  border-top: 1px solid var(--rule);
+  margin-top: 40px;
+  padding-block: 28px 44px;
+  color: var(--ink-faint);
+  font-size: .9rem;
+}
+.colophon p{ margin: 0 0 8px; max-width: 34rem; }
+.colophon .knot-small{ width: 22px; height: 22px; color: var(--gold); opacity: .8; display: block; margin-bottom: 14px; }
+
+@media (max-width: 420px){
+  .timer-controls{ min-width: 0; flex: 1 1 100%; }
+  .point-head .tib{ font-size: 1.7rem; }
+  .subhead{ padding-left: 0; }
+}
+@media (prefers-reduced-motion: reduce){
+  *{ transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  html{ scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<header class="wrap masthead">
+  <svg class="mark" viewBox="0 0 200 200" aria-hidden="true" data-knot="mark"></svg>
+  <div>
+    <h1>Lojong</h1>
+    <p>seven points &middot; fifty-nine slogans</p>
+  </div>
+  <span class="spacer"></span>
+  <button class="ghost" id="theme-toggle" type="button">Dark</button>
+</header>
+
+<main>
+  <section class="wrap today" aria-labelledby="featured-heading">
+    <svg class="watermark" viewBox="0 0 200 200" aria-hidden="true" data-knot="watermark"></svg>
+    <p class="eyebrow" id="featured-kicker">Today</p>
+    <h2 class="slogan" id="featured-heading"><span class="slogan-index" id="featured-num"></span><span id="featured-text"></span></h2>
+    <p class="note" id="featured-note"></p>
+    <p class="source" id="featured-source"></p>
+    <div class="actions">
+      <button class="btn" id="draw" type="button">Draw another</button>
+      <button class="btn secondary" id="back-to-today" type="button" hidden>Today's slogan</button>
+      <button class="btn secondary" id="sit" type="button">Sit with it</button>
+    </div>
+  </section>
+
+  <section class="wrap timer" id="timer" aria-labelledby="timer-heading">
+    <div class="timer-head">
+      <h2 id="timer-heading">Contemplation</h2>
+      <p>Hold the slogan loosely. When the mind wanders, begin again.</p>
+    </div>
+    <div class="timer-body">
+      <div class="dial" id="dial">
+        <svg viewBox="0 0 140 140" aria-hidden="true">
+          <circle class="track" cx="70" cy="70" r="62" fill="none" stroke-width="2"></circle>
+          <circle class="arc" id="arc" cx="70" cy="70" r="62" fill="none" stroke-width="2"
+                  stroke-linecap="round" stroke-dasharray="389.56" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="readout" id="readout" role="timer" aria-live="off">5:00</div>
+      </div>
+      <div class="timer-controls">
+        <div class="durations" role="group" aria-label="Session length">
+          <button class="chip" type="button" data-min="3">3 min</button>
+          <button class="chip" type="button" data-min="5" aria-pressed="true">5 min</button>
+          <button class="chip" type="button" data-min="10">10 min</button>
+        </div>
+        <div class="timer-buttons">
+          <button class="btn" id="start" type="button">Begin</button>
+          <button class="btn secondary" id="reset" type="button">Reset</button>
+        </div>
+        <button class="ghost" id="sound-toggle" type="button" aria-pressed="true">Bell on</button>
+      </div>
+    </div>
+  </section>
+
+  <nav class="rail" aria-label="The seven points">
+    <div class="rail-inner" id="rail"><span class="rail-label">points</span></div>
+  </nav>
+
+  <div class="wrap" id="points"></div>
+
+  <footer class="wrap colophon">
+    <svg class="knot-small" viewBox="0 0 200 200" aria-hidden="true" data-knot="mark"></svg>
+    <p>The seven points of mind training were set down by Chekawa Yeshe Dorje (1102&ndash;1176), drawing on the instructions Atisha brought from Suvarnadvipa to Tibet. The slogans appear here in their familiar English wording; the short commentary beneath each one is a plain practice note, not a translation of any classical commentary.</p>
+    <p>Tap any slogan to sit with it.</p>
+  </footer>
+</main>
+
+<script>
+/* ============================================================
+   The seven points of mind training
+   ============================================================ */
+const POINTS = [
+  {
+    tib: "༡", roman: "One",
+    title: "The preliminaries, which are the basis for dharma practice",
+    groups: [{ label: null, slogans: [
+      [1, "First, train in the preliminaries.",
+       "Before anything exotic, sit with the four reminders: this life is rare, death is certain, actions carry consequences, chasing comfort never finishes. They are the ground the rest stands on."]
+    ]}]
+  },
+  {
+    tib: "༢", roman: "Two",
+    title: "The main practice, which is training in bodhichitta",
+    groups: [
+      { label: "Absolute bodhichitta", slogans: [
+        [2, "Regard all dharmas as dreams.",
+         "The argument, the deadline, the mood — vivid, and with nothing solid inside. Hold experience the way you hold a dream you are still having."],
+        [3, "Examine the nature of unborn awareness.",
+         "Look straight at the mind that is looking. No shape, no location, no owner turns up — and nothing was ever manufactured."],
+        [4, "Self-liberate even the antidote.",
+         "Don't turn emptiness into one more thing to hold. The remedy dissolves along with what it treated."],
+        [5, "Rest in the nature of alaya, the essence.",
+         "Drop the running commentary. Let the mind settle back into its own ground, before the sorting into good and bad begins."],
+        [6, "In postmeditation, be a child of illusion.",
+         "Off the cushion, move through the day knowing the show is a show. Play your part wholeheartedly and lightly."]
+      ]},
+      { label: "Relative bodhichitta", slogans: [
+        [7, "Sending and taking should be practiced alternately. These two should ride the breath.",
+         "Tonglen: breathe in what hurts, breathe out relief. Let the breath do the carrying instead of manufacturing a feeling."],
+        [8, "Three objects, three poisons, three seeds of virtue.",
+         "Attraction, aversion, indifference — notice which one arises toward whatever you meet. Each one caught in the act becomes the seed of its opposite."],
+        [9, "In all activities, train with slogans.",
+         "Keep one slogan in your pocket and let ordinary moments trigger it: the queue, the inbox, the stairs."],
+        [10, "Begin the sequence of sending and taking with yourself.",
+         "Take on your own pain first, honestly. Compassion that steps over you is usually a performance."]
+      ]}
+    ]
+  },
+  {
+    tib: "༣", roman: "Three",
+    title: "Transformation of bad circumstances into the path of enlightenment",
+    groups: [{ label: null, slogans: [
+      [11, "When the world is filled with evil, transform all mishaps into the path of bodhi.",
+       "When conditions turn against you, that is the material — not an interruption of the practice."],
+      [12, "Drive all blames into one.",
+       "Trace the suffering back to self-protection rather than to whoever you think caused it. Not self-blame; just looking where you have leverage."],
+      [13, "Be grateful to everyone.",
+       "Whoever irritates you is showing you exactly where your training is. Difficult people are the curriculum."],
+      [14, "Seeing confusion as the four kayas is unsurpassable shunyata protection.",
+       "Examine a confused thought closely: no birthplace, no dwelling, no destination. Seeing that is the protection."],
+      [15, "Four practices are the best of methods.",
+       "Gather merit, lay down old harm, feed the obstacles, ask for help. Four plain moves for a hard day."],
+      [16, "Whatever you meet unexpectedly, join with meditation.",
+       "The unplanned interruption is the practice. Meet it before deciding whether it should have happened."]
+    ]}]
+  },
+  {
+    tib: "༤", roman: "Four",
+    title: "Showing the utilization of practice in one's whole life",
+    groups: [{ label: null, slogans: [
+      [17, "Practice the five strengths, the condensed heart instructions.",
+       "Resolve, familiarity, positive seed, reproach, aspiration: intention set, habit built, goodness planted, self-deception named, direction renewed."],
+      [18, "The mahayana instruction for ejection of consciousness at death is the five strengths: how you conduct yourself is important.",
+       "The same five carry you through dying. How you meet endings, the small ones included, is the rehearsal."]
+    ]}]
+  },
+  {
+    tib: "༥", roman: "Five",
+    title: "Evaluation of mind training",
+    groups: [{ label: null, slogans: [
+      [19, "All dharma agrees at one point.",
+       "Every teaching aims at the same target: less self-clinging. If a practice is inflating you, it is being misused."],
+      [20, "Of the two witnesses, hold the principal one.",
+       "Others see your behaviour; only you see your motive. Trust that witness and stop auditioning."],
+      [21, "Always maintain only a joyful mind.",
+       "Not pretending things are fine — the buoyancy of no longer having to defend yourself."],
+      [22, "If you can practice even when distracted, you are well trained.",
+       "The measure isn't a good session. It's whether the training shows up when you are rushed, tired and provoked."]
+    ]}]
+  },
+  {
+    tib: "༦", roman: "Six",
+    title: "Disciplines of mind training",
+    groups: [{ label: null, slogans: [
+      [23, "Always abide by the three basic principles.",
+       "Keep your commitments, stay inside the bounds of decency, develop patience. Unglamorous, and the entire foundation."],
+      [24, "Change your attitude, but remain natural.",
+       "Turn the mind around inwardly without advertising it. No new persona, no special voice."],
+      [25, "Don't talk about injured limbs.",
+       "Leave other people's flaws and misfortunes alone — in speech, and in the commentary running in your head."],
+      [26, "Don't ponder others.",
+       "Mind your own faults. Auditing everyone else is the most comfortable way to avoid practicing."],
+      [27, "Work with the greatest defilements first.",
+       "Go after the strongest habit, the one you least want to look at, instead of tidying the easy edges."],
+      [28, "Abandon any hope of fruition.",
+       "Practice without keeping score. Waiting for results quietly turns the training into another acquisition."],
+      [29, "Abandon poisonous food.",
+       "A good action done to reinforce your self-image is laced. Learn the flavour."],
+      [30, "Don't be so predictable.",
+       "Don't hold grudges on a schedule or return injuries out of habit. Let your reactions stop running themselves."],
+      [31, "Don't malign others.",
+       "Don't use your sharpness to make someone smaller, however good the line is."],
+      [32, "Don't wait in ambush.",
+       "Don't save up an injury for the moment when paying it back is safe."],
+      [33, "Don't bring things to a painful point.",
+       "Don't push until someone is humiliated. Winning that way costs more than losing."],
+      [34, "Don't transfer the ox's load to the cow.",
+       "Don't offload what is yours onto someone with less room to refuse it."],
+      [35, "Don't try to be the fastest.",
+       "Don't compete for position — least of all in practice, where the prize is imaginary."],
+      [36, "Don't act with a twist.",
+       "Don't do the decent thing in order to be seen doing it, or to come out ahead later."],
+      [37, "Don't make gods into demons.",
+       "Don't let the training become the source of your arrogance. That turns the medicine sour."],
+      [38, "Don't seek others' pain as the limbs of your own happiness.",
+       "Never build your gain on someone else's loss — not quietly, not even in wishes."]
+    ]}]
+  },
+  {
+    tib: "༧", roman: "Seven",
+    title: "Guidelines of mind training",
+    groups: [{ label: null, slogans: [
+      [39, "All activities should be done with one intention.",
+       "Let a single motivation — benefit — run through eating, working, commuting, resting."],
+      [40, "Correct all wrongs with one intention.",
+       "When things go wrong, meet them with that same intention instead of inventing a fresh strategy each time."],
+      [41, "Two activities: one at the beginning, one at the end.",
+       "Set the motivation on waking; look honestly at the day before sleep. A frame that holds everything between."],
+      [42, "Whichever of the two occurs, be patient.",
+       "Fortune or ruin, praise or blame — keep walking at the same pace."],
+      [43, "Observe these two, even at the risk of your life.",
+       "Your general ethics, and your particular commitment to this training. Protect both."],
+      [44, "Train in the three difficulties.",
+       "It is hard to catch a reaction, hard to turn it, hard to keep turning it. Naming the three makes each one workable."],
+      [45, "Take on the three principal causes.",
+       "A teacher, a workable practice, and the conditions to do it. If you have these, don't squander them."],
+      [46, "Pay heed that the three never wane.",
+       "Appreciation for what taught you, enthusiasm for the training, and care in how you behave."],
+      [47, "Keep the three inseparable.",
+       "Body, speech and mind pointed the same way — not practicing with the mind while the mouth does something else."],
+      [48, "Train without bias in all areas. It is crucial to always do this pervasively and wholeheartedly.",
+       "Not only with the people who are easy. A practice with exceptions is just a preference."],
+      [49, "Always meditate on whatever provokes resentment.",
+       "Turn toward the person or the memory you would rather route around. That is where the training bites."],
+      [50, "Don't be swayed by external circumstances.",
+       "Don't let the practice depend on a quiet room and a good mood."],
+      [51, "This time, practice the main points.",
+       "Of everything you could do with this life, do the essential thing: work with your mind, benefit others."],
+      [52, "Don't misinterpret.",
+       "Patience, compassion, joy and aspiration can all be counterfeited. Check which version you are running."],
+      [53, "Don't vacillate.",
+       "Stop relitigating whether to practice. The deliberation is more tiring than the practice."],
+      [54, "Train wholeheartedly.",
+       "Half measures keep the exit open. Commit, and the energy arrives."],
+      [55, "Liberate yourself by examining and analyzing.",
+       "Keep investigating your own mind instead of accepting the flattering account of it."],
+      [56, "Don't wallow in self-pity.",
+       "Self-pity feels like honesty and works like a wall."],
+      [57, "Don't be jealous.",
+       "Someone else's good fortune is not subtracted from yours. Envy only adds a second loss."],
+      [58, "Don't be frivolous.",
+       "Don't burn your attention on distraction when something real is being asked of you."],
+      [59, "Don't expect applause.",
+       "Do it because it needs doing, then let go of waiting for the thank-you."]
+    ]}]
+  }
+];
+
+/* flatten for lookup */
+const SLOGANS = [];
+POINTS.forEach((pt, pi) => pt.groups.forEach(g => g.slogans.forEach(s => {
+  SLOGANS.push({ n: s[0], text: s[1], note: s[2], point: pt, pointIndex: pi });
+})));
+
+/* ---------- small storage helper (browser storage can throw) ---------- */
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v){ try { localStorage.setItem(k, v); } catch { /* ignore */ } }
+};
+
+/* ============================================================
+   The endless knot — four woven strands, over and under
+   ============================================================ */
+function buildKnot(svg, opts){
+  const NS = "http://www.w3.org/2000/svg";
+  const o = Object.assign({ width: 6, halo: 12, reach: 9 }, opts || {});
+  const gap = 22, span = 72;            // strand spacing, half-length of a run
+  const pos = [100 - 1.5 * gap, 100 - 0.5 * gap, 100 + 0.5 * gap, 100 + 1.5 * gap];
+  const g = document.createElementNS(NS, "g");
+
+  const stroke = (el, colorVar, w) => {
+    el.setAttribute("fill", "none");
+    el.setAttribute("stroke-width", w);
+    el.setAttribute("stroke-linecap", "round");
+    el.style.stroke = colorVar;
+    g.appendChild(el);
+    return el;
+  };
+  /* a stadium: the outline is two parallel strands joined by half-turns */
+  const stadium = (a, b, vertical) => {
+    const r = gap / 2, x = vertical ? a : 100 - span, y = vertical ? 100 - span : a;
+    const w = vertical ? gap : span * 2, h = vertical ? span * 2 : gap;
+    const mk = () => {
+      const rect = document.createElementNS(NS, "rect");
+      rect.setAttribute("x", x); rect.setAttribute("y", y);
+      rect.setAttribute("width", w); rect.setAttribute("height", h);
+      rect.setAttribute("rx", r); rect.setAttribute("ry", r);
+      return rect;
+    };
+    stroke(mk(), "var(--knot-halo)", o.width + o.halo);
+    stroke(mk(), "currentColor", o.width);
+  };
+  const segment = (x1, y1, x2, y2) => {
+    const mk = () => {
+      const l = document.createElementNS(NS, "line");
+      l.setAttribute("x1", x1); l.setAttribute("y1", y1);
+      l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+      return l;
+    };
+    stroke(mk(), "var(--knot-halo)", o.width + o.halo);
+    stroke(mk(), "currentColor", o.width);
+  };
+
+  /* vertical pairs first, then horizontal pairs ride over them ... */
+  stadium(pos[0], pos[1], true);  stadium(pos[2], pos[3], true);
+  stadium(pos[0], pos[1], false); stadium(pos[2], pos[3], false);
+  /* ... then half the crossings are re-laid so the vertical passes over */
+  const reach = o.reach;
+  for (let i = 0; i < 4; i++){
+    for (let j = 0; j < 4; j++){
+      if ((i + j) % 2 === 0) segment(pos[i], pos[j] - reach, pos[i], pos[j] + reach);
+    }
+  }
+  svg.appendChild(g);
+}
+document.querySelectorAll("[data-knot]").forEach(svg => {
+  buildKnot(svg, svg.dataset.knot === "mark"
+    ? { width: 9, halo: 14, reach: 10 }
+    : { width: 6, halo: 12, reach: 9 });
+});
+
+/* ============================================================
+   Featured slogan: one per day, stable for 24 hours
+   ============================================================ */
+const kickerEl = document.getElementById("featured-kicker");
+const numEl    = document.getElementById("featured-num");
+const textEl   = document.getElementById("featured-text");
+const noteEl   = document.getElementById("featured-note");
+const sourceEl = document.getElementById("featured-source");
+const backBtn  = document.getElementById("back-to-today");
+
+const todayIndex = (() => {
+  const d = new Date();
+  let h = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+  h = (h ^ 0x5f3a7c1d) >>> 0;
+  h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 3266489909) >>> 0;
+  return ((h ^ (h >>> 16)) >>> 0) % SLOGANS.length;
+})();
+
+const dateLabel = new Date().toLocaleDateString(undefined, { day: "numeric", month: "long" });
+let current = todayIndex;
+
+function show(index, mode){
+  current = index;
+  const s = SLOGANS[index];
+  numEl.textContent = s.n;
+  textEl.textContent = s.text;
+  noteEl.textContent = s.note;
+  kickerEl.innerHTML = mode === "today"
+    ? "Today <span class=\"dot\">&middot;</span> " + dateLabel
+    : "Drawn <span class=\"dot\">&middot;</span> sit with this one";
+  sourceEl.textContent = "Point " + s.point.roman + " — " + s.point.title;
+  backBtn.hidden = mode === "today";
+  document.querySelectorAll(".row").forEach(row => {
+    row.setAttribute("aria-current", Number(row.dataset.index) === index ? "true" : "false");
+  });
+}
+
+document.getElementById("draw").addEventListener("click", () => {
+  let next = current;
+  while (next === current) next = Math.floor(Math.random() * SLOGANS.length);
+  show(next, "drawn");
+});
+backBtn.addEventListener("click", () => show(todayIndex, "today"));
+document.getElementById("sit").addEventListener("click", () => {
+  document.getElementById("timer").scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+  document.getElementById("start").focus({ preventScroll: true });
+});
+function prefersReducedMotion(){
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/* ============================================================
+   Render the seven points
+   ============================================================ */
+const pointsEl = document.getElementById("points");
+const railEl = document.getElementById("rail");
+let flatIndex = 0;
+
+POINTS.forEach((pt, pi) => {
+  const sec = document.createElement("section");
+  sec.className = "point";
+  sec.id = "point-" + (pi + 1);
+
+  const head = document.createElement("div");
+  head.className = "point-head";
+  head.innerHTML =
+    '<div class="tib" aria-hidden="true">' + pt.tib + '</div>' +
+    '<div class="titles"><span class="kicker">Point ' + pt.roman + '</span><h2>' + pt.title + '</h2></div>';
+  sec.appendChild(head);
+
+  pt.groups.forEach(group => {
+    if (group.label){
+      const h = document.createElement("p");
+      h.className = "subhead";
+      h.textContent = group.label;
+      sec.appendChild(h);
+    }
+    const ul = document.createElement("ul");
+    ul.className = "list";
+    group.slogans.forEach(s => {
+      const idx = flatIndex++;
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "row";
+      btn.dataset.index = idx;
+      btn.setAttribute("aria-current", "false");
+      btn.innerHTML =
+        '<span class="num" aria-hidden="true">' + s[0] + '</span>' +
+        '<span class="text"><span class="line"></span><span class="gloss"></span></span>';
+      btn.querySelector(".line").textContent = s[1];
+      btn.querySelector(".gloss").textContent = s[2];
+      btn.addEventListener("click", () => {
+        show(idx, "drawn");
+        window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+      });
+      li.appendChild(btn);
+      ul.appendChild(li);
+    });
+    sec.appendChild(ul);
+  });
+  pointsEl.appendChild(sec);
+
+  const a = document.createElement("a");
+  a.href = "#point-" + (pi + 1);
+  a.textContent = pt.tib;
+  a.setAttribute("aria-label", "Point " + pt.roman + ": " + pt.title);
+  railEl.appendChild(a);
+});
+
+show(todayIndex, "today");
+
+/* ============================================================
+   Contemplation timer
+   ============================================================ */
+const CIRC = 2 * Math.PI * 62;
+const arc = document.getElementById("arc");
+const dial = document.getElementById("dial");
+const readout = document.getElementById("readout");
+const startBtn = document.getElementById("start");
+const soundBtn = document.getElementById("sound-toggle");
+
+let duration = 300, remaining = 300, ticker = null, endsAt = 0;
+let soundOn = store.get("lojong.sound") !== "off";
+arc.setAttribute("stroke-dasharray", CIRC);
+syncSound();
+
+function fmt(sec){
+  const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+  return m + ":" + String(s).padStart(2, "0");
+}
+function paint(){
+  readout.textContent = fmt(remaining);
+  arc.setAttribute("stroke-dashoffset", CIRC * (1 - remaining / duration));
+}
+function setDuration(min){
+  stop();
+  duration = remaining = min * 60;
+  dial.classList.add("resetting");
+  paint();
+  requestAnimationFrame(() => dial.classList.remove("resetting"));
+}
+function tick(){
+  remaining = Math.max(0, Math.round((endsAt - Date.now()) / 1000));
+  paint();
+  if (remaining <= 0){
+    stop();
+    ring();
+    readout.textContent = fmt(duration);
+    remaining = duration;
+    dial.classList.add("resetting");
+    requestAnimationFrame(() => { paint(); dial.classList.remove("resetting"); });
+  }
+}
+function start(){
+  endsAt = Date.now() + remaining * 1000;
+  ticker = setInterval(tick, 250);
+  startBtn.textContent = "Pause";
+  readout.setAttribute("aria-live", "off");
+  if (soundOn) warmAudio();
+}
+function stop(){
+  if (ticker){ clearInterval(ticker); ticker = null; }
+  startBtn.textContent = remaining < duration ? "Resume" : "Begin";
+}
+startBtn.addEventListener("click", () => { ticker ? stop() : start(); });
+document.getElementById("reset").addEventListener("click", () => setDuration(duration / 60));
+document.querySelectorAll(".chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c === chip)));
+    setDuration(Number(chip.dataset.min));
+  });
+});
+paint();
+
+/* a struck bowl: a low fundamental with two inharmonic partials, decaying */
+let audioCtx = null;
+function warmAudio(){
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+  } catch { audioCtx = null; }
+}
+function ring(){
+  if (!soundOn) return;
+  warmAudio();
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const out = audioCtx.createGain();
+  out.gain.value = 0.0001;
+  out.connect(audioCtx.destination);
+  out.gain.setValueAtTime(0.0001, now);
+  out.gain.exponentialRampToValueAtTime(0.5, now + 0.02);
+  out.gain.exponentialRampToValueAtTime(0.0001, now + 7);
+  [[220, 1], [543, 0.42], [1012, 0.18], [1580, 0.07]].forEach(([freq, level]) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(level, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 6 - level * 2);
+    osc.connect(gain).connect(out);
+    osc.start(now);
+    osc.stop(now + 7.2);
+  });
+}
+function syncSound(){
+  soundBtn.textContent = soundOn ? "Bell on" : "Bell off";
+  soundBtn.setAttribute("aria-pressed", String(soundOn));
+}
+soundBtn.addEventListener("click", () => {
+  soundOn = !soundOn;
+  store.set("lojong.sound", soundOn ? "on" : "off");
+  syncSound();
+  if (soundOn) ring();
+});
+
+/* ============================================================
+   Theme
+   ============================================================ */
+const themeBtn = document.getElementById("theme-toggle");
+const saved = store.get("lojong.theme");
+if (saved === "dark" || saved === "light") document.documentElement.setAttribute("data-theme", saved);
+function isDark(){
+  const stamped = document.documentElement.getAttribute("data-theme");
+  if (stamped) return stamped === "dark";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+function syncTheme(){ themeBtn.textContent = isDark() ? "Light" : "Dark"; }
+themeBtn.addEventListener("click", () => {
+  const next = isDark() ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  store.set("lojong.theme", next);
+  syncTheme();
+});
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncTheme);
+syncTheme();
+</script>
+</body>
+</html>
