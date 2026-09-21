@@ -548,7 +548,6 @@ img{ max-width: 100%; }
     <div class="actions">
       <button class="btn" id="draw" type="button">Draw another</button>
       <button class="btn secondary" id="back-to-today" type="button" hidden>Today's slogan</button>
-      <button class="btn secondary" id="sit" type="button">Sit with it</button>
     </div>
   </div>
   </section>
@@ -859,14 +858,28 @@ const backBtn  = document.getElementById("back-to-today");
 const sittingNum  = document.getElementById("sitting-num");
 const sittingText = document.getElementById("sitting-text");
 
-const todayIndex = (() => {
-  const d = new Date();
-  let h = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-  h = (h ^ 0x5f3a7c1d) >>> 0;
-  h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0;
-  h = Math.imul(h ^ (h >>> 13), 3266489909) >>> 0;
-  return ((h ^ (h >>> 16)) >>> 0) % SLOGANS.length;
+/* Slogan 1 on the first day the app is opened, the next one each day after,
+   wrapping round after 59. Dates are compared as plain calendar days, so a
+   clock change or a summer-time shift cannot skip or repeat a day. */
+const EPOCH = "2026-09-22";               // used only if storage is unavailable
+function isoToday(){
+  const n = new Date();
+  return n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0")
+                         + "-" + String(n.getDate()).padStart(2, "0");
+}
+function daysSince(iso){
+  const [y, m, d] = iso.split("-").map(Number);
+  const n = new Date();
+  return Math.floor((Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()) - Date.UTC(y, m - 1, d)) / 86400000);
+}
+const startDay = (() => {
+  const saved = store.get("lojong.start");
+  if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) return saved;
+  const today = isoToday();
+  store.set("lojong.start", today);
+  return store.get("lojong.start") === today ? today : EPOCH;   // storage refused
 })();
+const todayIndex = ((daysSince(startDay) % SLOGANS.length) + SLOGANS.length) % SLOGANS.length;
 
 const dateLabel = new Date().toLocaleDateString(undefined, { day: "numeric", month: "long" });
 let current = todayIndex;
@@ -895,10 +908,6 @@ document.getElementById("draw").addEventListener("click", () => {
   show(next, "drawn");
 });
 backBtn.addEventListener("click", () => show(todayIndex, "today"));
-document.getElementById("sit").addEventListener("click", () => {
-  goTo("practice");
-  document.getElementById("start").focus({ preventScroll: true });
-});
 function prefersReducedMotion(){
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }

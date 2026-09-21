@@ -12,8 +12,11 @@ back to system serif/sans and stays fully usable offline.
 The app has three views behind three tabs — `#today`, `#practice`, `#points` —
 so each function is reached directly instead of scrolled to.
 
-- **Slogan of the day** — one slogan chosen from the date, so it stays the same for
-  24 hours. `Draw another` pulls a random one; `Today's slogan` returns.
+- **Slogan of the day** — the 59 in order: slogan 1 on the first day the app is
+  opened, the next one each day after, wrapping round after 59. The starting day
+  is kept in `localStorage` (`lojong.start`); if storage is unavailable the app
+  counts from a fixed date instead, so the sequence still advances. `Draw another`
+  pulls a random one; `Today's slogan` returns to the day's.
 - **All 59 slogans on one page**, grouped under the seven points (point two split
   into absolute and relative bodhichitta), in the *Seven Points* view. Tap any
   slogan to bring it to *Today*.
