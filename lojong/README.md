@@ -26,6 +26,15 @@ drawn as a woven emblem in SVG — four strands with real over-and-under crossin
 generated in code rather than hand-authored path data. The seven points are marked
 with Tibetan numerals ༡–༧.
 
+## Icon
+
+`icon.svg` is the app icon: the same woven endless knot in gold on *btsod* maroon,
+generated from the geometry the page uses at runtime. `favicon.svg` is a heavier-stroke
+variant that still reads at 16 px, inlined into `index.html` as a data URI so a lone
+copy of the file keeps its tab icon. The PNGs (180/192/512) and `manifest.webmanifest`
+are for the home screen — they only take effect when the folder is served over HTTP
+(GitHub Pages, any static host); `index.html` on its own ignores them without error.
+
 ## Text
 
 The slogans appear in their familiar English wording. The one- or two-sentence note
