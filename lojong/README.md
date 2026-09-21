@@ -26,6 +26,14 @@ so each function is reached directly instead of scrolled to.
   choice is remembered in `localStorage`.
 - **Light and dark**, following the system setting, with a manual override.
 
+## Scaling
+
+Everything is measured in `rem` against one fluid root size,
+`clamp(0.95em, 0.95em + 0.3vw, 1.25em)`: type, gutters and vertical rhythm grow
+together with the screen, from about 16 px on a phone to 19 px on a wide display.
+The `em` base means a reader's own larger system text size still wins over the
+formula rather than being overridden.
+
 ## Design
 
 Tibetan thangka pigments: sandstone ground, *btsod* maroon, lapis, saffron and gold;
