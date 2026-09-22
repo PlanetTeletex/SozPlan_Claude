@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Pecha">
+  <rect width="200" height="200" rx="34" fill="#7a1f2b"/>
+  <g>
+    <rect x="22" y="62" width="156" height="76" rx="3" fill="#e9e1d0"/>
+    <rect x="30" y="70" width="140" height="60" fill="none" stroke="#7a1f2b" stroke-width="2.5"/>
+    <rect x="35" y="75" width="130" height="50" fill="none" stroke="#7a1f2b" stroke-width="1.6"/>
+    <g stroke="#2b2320" stroke-width="4.2" stroke-linecap="round">
+      <line x1="48" y1="86"  x2="152" y2="86"/>
+      <line x1="48" y1="100" x2="152" y2="100"/>
+      <line x1="48" y1="114" x2="134" y2="114"/>
+    </g>
+    <g fill="#a9801f">
+      <circle cx="41" cy="100" r="3"/>
+      <circle cx="159" cy="100" r="3"/>
+    </g>
+  </g>
+</svg>
