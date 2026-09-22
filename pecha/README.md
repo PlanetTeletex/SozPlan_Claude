@@ -81,6 +81,22 @@ so bleibt die Versgliederung erhalten, die man beim Rezitieren braucht.
 Blätter werden nach Blatt gezählt, nicht nach Seite: 1a, 1b, 2a, 2b … Bei losen
 Blättern ist die Foliozahl im linken Rand die einzige Ordnung, die der Stapel hat.
 
+## Auf den Homescreen
+
+Die Seite ist eine installierbare Web-App. Über GitHub Pages aufrufen, dann:
+
+- **iPhone/iPad (Safari):** Teilen-Menü → *Zum Home-Bildschirm*. Das Symbol kommt
+  aus `apple-touch-icon.png`; iOS rundet die Ecken selbst, deshalb ist die Datei
+  randlos und ohne Transparenz.
+- **Android (Chrome):** Menü → *App installieren* bzw. *Zum Startbildschirm*.
+  Für die runde Maske adaptiver Symbole liegt `icon-maskable-512.png` bei, in dem
+  das Blatt so weit eingerückt ist, dass es der Beschnitt nicht an den Enden kappt.
+- **Desktop (Chrome/Edge):** Installationssymbol in der Adressleiste.
+
+Einmal geöffnet, arbeitet die App offline weiter: der Service Worker hält Seite,
+Manifest und Symbole vor und holt die Seite bei Netz frisch nach, damit
+Änderungen ankommen. Die Schrift kommt beim ersten Aufruf mit ins Cache.
+
 ## Wo die Texte liegen
 
 Im `localStorage` dieses Browsers, auf diesem Gerät. Kein Konto, keine Übertragung,
