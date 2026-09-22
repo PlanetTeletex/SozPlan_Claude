@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pecha</title>
+<link rel="icon" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="apple-touch-icon-precomposed" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Pecha">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#e9e1d0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131923" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+/* ---------- tokens: light ---------- */
+:root{
+  --paper:        #e9e1d0;
+  --surface:      #f4efe3;
+  --surface-sunk: #e2d9c5;
+  --ink:          #2b2320;
+  --ink-soft:     #6d5f52;
+  --ink-faint:    #8e8271;
+  --maroon:       #7a1f2b;
+  --lapis:        #22417a;
+  --gold:         #a9801f;
+  --rule:         #cdc1a8;
+  --rule-soft:    #dbd1bc;
+  --btn-fg:       #f6f1e6;
+  --leaf:         #f7f2e6;
+  --leaf-ink:     #2b2320;
+  --leaf-rule:    #7a1f2b;
+  --focus:        #22417a;
+  --shadow: 0 1px 2px rgba(43,35,32,.06), 0 10px 28px -20px rgba(43,35,32,.55);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131923; --surface:#1a212e; --surface-sunk:#10161f;
+    --ink:#e8ddc7; --ink-soft:#a99d89; --ink-faint:#8b8272;
+    --maroon:#d4838c; --lapis:#8fa9df; --gold:#d3a53a;
+    --rule:#33405a; --rule-soft:#263043; --btn-fg:#131923;
+    --leaf:#1d2534; --leaf-ink:#e8ddc7; --leaf-rule:#d4838c;
+    --focus:#8fa9df;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.9);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131923; --surface:#1a212e; --surface-sunk:#10161f;
+  --ink:#e8ddc7; --ink-soft:#a99d89; --ink-faint:#8b8272;
+  --maroon:#d4838c; --lapis:#8fa9df; --gold:#d3a53a;
+  --rule:#33405a; --rule-soft:#263043; --btn-fg:#131923;
+  --leaf:#1d2534; --leaf-ink:#e8ddc7; --leaf-rule:#d4838c;
+  --focus:#8fa9df;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.9);
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box}
+html{font-size:clamp(0.95em, 0.95em + 0.3vw, 1.2em)}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:'Alegreya Sans',system-ui,-apple-system,sans-serif;line-height:1.5;
+  -webkit-text-size-adjust:100%}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+.wrap{max-width:54rem;margin:0 auto;padding:0 1rem}
+
+/* ---------- chrome ---------- */
+header{border-bottom:1px solid var(--rule);background:var(--surface)}
+.bar{display:flex;align-items:baseline;gap:.7rem;padding:.7rem 0 .55rem}
+.brand{font-family:Spectral,Georgia,serif;font-size:1.15rem;color:var(--maroon);margin:0;font-weight:500}
+.brand-sub{color:var(--ink-faint);font-size:.82rem}
+.bar .spacer{flex:1}
+.ghost{background:none;border:1px solid var(--rule);color:var(--ink-soft);
+  border-radius:999px;padding:.12rem .62rem;font:inherit;font-size:.78rem;cursor:pointer}
+.ghost:hover{border-color:var(--ink-faint);color:var(--ink)}
+
+nav.tabs{background:var(--surface);border-bottom:1px solid var(--rule);
+  position:sticky;top:0;z-index:20}
+.tabs-inner{max-width:54rem;margin:0 auto;padding:0 1rem;display:flex;gap:.2rem}
+.tab{appearance:none;background:none;border:0;border-bottom:2px solid transparent;
+  color:var(--ink-soft);font:inherit;font-size:.92rem;padding:.55rem .75rem;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--maroon);border-bottom-color:var(--gold)}
+main{padding:1.4rem 0 5rem}
+.view:focus{outline:none}
+
+h2{font-family:Spectral,Georgia,serif;font-weight:400;font-size:1.4rem;margin:0 0 .2rem}
+.lede{color:var(--ink-soft);margin:0 0 1.4rem;font-size:.95rem}
+
+/* ---------- controls ---------- */
+.btn{appearance:none;border:1px solid var(--maroon);background:var(--maroon);color:var(--btn-fg);
+  font:inherit;font-size:.9rem;border-radius:999px;padding:.34rem 1rem;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.secondary{background:transparent;color:var(--maroon)}
+.btn.quiet{background:transparent;color:var(--ink-soft);border-color:var(--rule)}
+.btn.quiet:hover{color:var(--ink);border-color:var(--ink-faint)}
+.row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+input[type=text],input[type=search],textarea,select{
+  font:inherit;color:var(--ink);background:var(--surface);
+  border:1px solid var(--rule);border-radius:6px;padding:.4rem .6rem;width:100%}
+textarea{line-height:1.5;resize:vertical;font-size:.95rem}
+label.f{display:block;margin:0 0 .9rem}
+label.f > span{display:block;font-size:.8rem;color:var(--ink-soft);margin:0 0 .18rem}
+
+/* ---------- library ---------- */
+.libtools{display:flex;gap:.5rem;align-items:center;margin:0 0 1rem}
+.libtools input{flex:1}
+ul.lib{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule-soft)}
+ul.lib li{border-bottom:1px solid var(--rule-soft)}
+.entry{display:block;width:100%;text-align:left;background:none;border:0;font:inherit;
+  padding:.72rem .2rem;cursor:pointer;color:inherit}
+.entry:hover{background:var(--surface)}
+.entry .t{font-family:Spectral,Georgia,serif;font-size:1.05rem;display:block}
+.entry .m{font-size:.8rem;color:var(--ink-faint);display:block;margin-top:.1rem}
+.empty{color:var(--ink-soft);font-size:.95rem;padding:1.6rem 0;text-align:center}
+
+/* ---------- settings ---------- */
+details.set{border:1px solid var(--rule);border-radius:8px;background:var(--surface);
+  padding:.5rem .8rem;margin:0 0 1.2rem}
+details.set > summary{cursor:pointer;font-size:.9rem;color:var(--ink-soft);list-style:none}
+details.set > summary::-webkit-details-marker{display:none}
+details.set > summary::before{content:"▸ ";color:var(--gold)}
+details.set[open] > summary::before{content:"▾ "}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.7rem 1.1rem;margin:.9rem 0 .3rem}
+.sl{display:block}
+.sl > span{display:flex;justify-content:space-between;gap:.6rem;
+  font-size:.8rem;color:var(--ink-soft)}
+.sl > span b{white-space:nowrap}
+.sl input[type=range]{width:100%;accent-color:var(--maroon)}
+.chk{display:flex;align-items:center;gap:.45rem;font-size:.88rem;color:var(--ink-soft);margin:.3rem 0}
+.chk input{accent-color:var(--maroon)}
+.fmtnote{font-size:.82rem;color:var(--ink-faint);margin:.5rem 0 0}
+
+/* ---------- leaf ---------- */
+.stage{overflow:hidden;margin:0 0 1rem}
+.leafwrap{position:relative}
+.leaf{position:relative;transform-origin:top left;
+  width:var(--lf-w);height:var(--lf-h);
+  background:var(--leaf);color:var(--leaf-ink);
+  font-family:Spectral,Georgia,serif;font-weight:400;
+  box-shadow:var(--shadow)}
+.leaf .rules{position:absolute;inset:0;pointer-events:none}
+.leaf .rules i{position:absolute;top:5mm;bottom:5mm;width:0;border-left:.4mm solid var(--leaf-rule)}
+/* the margin marks sit in the band between the inner rule and the text,
+   so they never print on top of the frame */
+.leaf .mark{position:absolute;top:50%;transform:translateY(-50%);
+  width:calc(var(--lf-ml) * .5);text-align:center;color:var(--leaf-rule);
+  font-size:calc(var(--lf-fs) * .42);letter-spacing:.03em;line-height:1.2}
+.leaf .mark.l{left:calc(var(--lf-ml) * .5)}
+.leaf .mark.r{right:calc(var(--lf-ml) * .5)}
+.leaf .block{position:absolute;left:var(--lf-ml);right:var(--lf-ml);top:var(--lf-mt)}
+.leaf .ln{height:var(--lf-pitch);line-height:var(--lf-pitch);font-size:var(--lf-fs);
+  white-space:nowrap;overflow:hidden}
+.leaf .ln.j{display:flex;justify-content:space-between}
+.leaf .ln.t{color:var(--leaf-rule);text-align:center;font-weight:500;
+  letter-spacing:.02em;display:block}
+.sidecap{font-size:.78rem;color:var(--ink-faint);margin:.1rem 0 1.1rem}
+
+/* measuring element — must have layout, must not be seen */
+#meas{position:absolute;left:-10000px;top:0;visibility:hidden;
+  font-family:Spectral,Georgia,serif;font-weight:400;white-space:normal;
+  overflow-wrap:break-word;hyphens:none}
+
+/* ---------- reader ---------- */
+.readbar{display:flex;align-items:center;gap:.6rem;margin:0 0 1rem}
+.readbar select{flex:1}
+.nav{display:flex;align-items:center;justify-content:center;gap:1rem;margin:.6rem 0 0}
+.nav .pos{font-size:.85rem;color:var(--ink-soft);min-width:5.5rem;text-align:center}
+.round{appearance:none;border:1px solid var(--rule);background:var(--surface);color:var(--ink);
+  width:2.3rem;height:2.3rem;border-radius:50%;font:inherit;font-size:1rem;cursor:pointer}
+.round:hover{border-color:var(--maroon);color:var(--maroon)}
+.round[disabled]{opacity:.35;cursor:default}
+
+/* ---------- help ---------- */
+.help{border-top:1px solid var(--rule-soft);margin-top:2.4rem;padding-top:1.2rem;
+  font-size:.9rem;color:var(--ink-soft);max-width:40rem}
+.help h3{font-family:Spectral,Georgia,serif;font-weight:400;font-size:1.05rem;
+  color:var(--ink);margin:1.2rem 0 .3rem}
+.help ol{padding-left:1.2rem;margin:.3rem 0}
+.help li{margin:.25rem 0}
+.help code{background:var(--surface);padding:.05rem .3rem;border-radius:3px;font-size:.85em}
+
+.toast{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%);
+  background:var(--ink);color:var(--paper);padding:.45rem 1rem;border-radius:999px;
+  font-size:.85rem;box-shadow:var(--shadow);opacity:0;pointer-events:none;
+  transition:opacity .2s}
+.toast.on{opacity:.95}
+
+/* ---------- print ---------- */
+#print-root{display:none}
+.sheet{position:relative;background:#fff;color:#000;overflow:hidden}
+.sheet .strip{position:absolute;left:0;right:0;overflow:hidden}
+.sheet .cut{position:absolute;left:0;right:0;height:0;border-top:.1mm solid #b9b9b9}
+.sheet.flip180{transform:rotate(180deg)}
+.sheet .tlabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Alegreya Sans',sans-serif;font-size:14mm;color:#7a1f2b;letter-spacing:.06em}
+.sheet .thint{position:absolute;left:8mm;bottom:4mm;font-family:'Alegreya Sans',sans-serif;
+  font-size:3mm;color:#888}
+
+@media print{
+  html,body{background:#fff;margin:0;padding:0}
+  body > *:not(#print-root){display:none !important}
+  #print-root{display:block !important}
+  .sheet{break-after:page;page-break-after:always;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet:last-child{break-after:auto;page-break-after:auto}
+  .sheet .leaf{background:transparent;color:#1a1a1a;box-shadow:none;
+    --leaf-rule:#7a1f2b}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <h1 class="brand">Pecha</h1>
+    <span class="brand-sub">Gebetsblätter setzen</span>
+    <span class="spacer"></span>
+    <button class="ghost" id="theme-toggle" type="button">Dark</button>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Bereiche">
+  <div class="tabs-inner" role="tablist">
+    <button class="tab" type="button" role="tab" id="tab-sammlung" aria-controls="view-sammlung" aria-selected="true">Sammlung</button>
+    <button class="tab" type="button" role="tab" id="tab-setzen" aria-controls="view-setzen" aria-selected="false" tabindex="-1">Setzen</button>
+    <button class="tab" type="button" role="tab" id="tab-lesen" aria-controls="view-lesen" aria-selected="false" tabindex="-1">Lesen</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ Sammlung ============ -->
+<section class="view" id="view-sammlung" role="tabpanel" aria-labelledby="tab-sammlung" tabindex="-1">
+  <div class="wrap">
+    <h2>Sammlung</h2>
+    <p class="lede" id="lib-count"></p>
+    <div class="libtools">
+      <input type="search" id="search" placeholder="Suchen…" aria-label="Sammlung durchsuchen">
+      <button class="btn" id="new-text" type="button">Neuer Text</button>
+    </div>
+    <ul class="lib" id="lib"></ul>
+    <p class="empty" id="lib-empty" hidden>Noch nichts gesetzt. <b>Neuer Text</b> legt das erste Blatt an.</p>
+
+    <div class="row" style="margin-top:1.6rem">
+      <button class="btn quiet" id="export" type="button">Sammlung sichern</button>
+      <button class="btn quiet" id="import-btn" type="button">Sammlung einlesen</button>
+      <input type="file" id="import" accept="application/json,.json" hidden>
+    </div>
+
+    <div class="help">
+      <h3>Vom Bildschirm zum Stapel</h3>
+      <ol>
+        <li>Text einfügen, Format wählen, <b>Blätter drucken</b> — A4, beidseitig.</li>
+        <li>Bogen quer durchschneiden, an den feinen Linien.</li>
+        <li>Blätter der Reihe nach stapeln: 1a oben, dann 1b auf der Rückseite, 2a, 2b …</li>
+      </ol>
+      <h3>Einmal pro Drucker: der Testbogen</h3>
+      <p>Drucker wenden das Papier entweder über die lange oder über die kurze Kante — und
+      welche, steht in keinem Handbuch verlässlich. Der <b>Testbogen</b> druckt vorn
+      <code>V1 V2 V3</code> und hinten <code>R1 R2 R3</code>. Schneide ihn, leg die Streifen
+      aufeinander: steht hinter <code>V1</code> die <code>R1</code>, ist die Einstellung
+      richtig. Sonst im Setzen-Bereich auf die andere Kante umstellen und noch einmal testen.
+      Danach stimmt jeder weitere Druck.</p>
+      <h3>Wo die Texte liegen</h3>
+      <p>Im Speicher dieses Browsers, auf diesem Gerät — nirgendwo sonst, ohne Konto,
+      ohne Netz. Das heißt auch: geleerte Browserdaten nehmen sie mit.
+      <b>Sammlung sichern</b> legt sie als Datei ab, <b>einlesen</b> holt sie zurück
+      oder auf ein anderes Gerät.</p>
+      <h3>Steuerzeichen im Text</h3>
+      <p>Eine Zeile aus <code>---</code> bricht auf die <b>nächste Seite</b> um —
+      damit ein Vers nicht über den Rand rutscht. Eine Zeile aus <code>===</code>
+      beginnt ein <b>neues Blatt</b>: die Rückseite davor bleibt leer, und das Gebet
+      danach lässt sich als eigener Stapel herausnehmen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Setzen ============ -->
+<section class="view" id="view-setzen" role="tabpanel" aria-labelledby="tab-setzen" tabindex="-1" hidden>
+  <div class="wrap">
+    <h2 id="set-h">Setzen</h2>
+    <p class="lede" id="set-status">Noch kein Text gewählt.</p>
+
+    <div id="editor" hidden>
+      <label class="f"><span>Titel</span>
+        <input type="text" id="f-title" placeholder="Die vier Unermesslichen"></label>
+      <label class="f"><span>Kürzel im Blattrand (optional)</span>
+        <input type="text" id="f-short" placeholder="z. B. IMM" maxlength="8"></label>
+      <label class="f"><span>Text</span>
+        <textarea id="f-body" rows="9" placeholder="Hier einfügen. --- beginnt eine neue Seite, === ein neues Blatt."></textarea></label>
+
+      <details class="set" id="setbox">
+        <summary>Format und Satz</summary>
+        <div class="grid">
+          <label class="f" style="margin:0"><span>Blattformat</span>
+            <select id="f-format">
+              <option value="C">C — Mittel</option>
+              <option value="A">A — Groß</option>
+              <option value="B">B — Klassisch schmal</option>
+            </select></label>
+          <label class="sl"><span>Zeilen je Seite <b id="v-lines"></b></span>
+            <input type="range" id="f-lines" min="3" max="12" step="1"></label>
+          <label class="sl"><span>Schrift <b id="v-fs"></b></span>
+            <input type="range" id="f-fs" min="3" max="14" step="0.1"></label>
+          <label class="sl"><span>Seitenrand <b id="v-ml"></b></span>
+            <input type="range" id="f-ml" min="6" max="45" step="0.5"></label>
+          <label class="sl"><span>Zeilenabstand <b id="v-lh"></b></span>
+            <input type="range" id="f-lh" min="1.2" max="3" step="0.05"></label>
+        </div>
+        <label class="chk"><input type="checkbox" id="f-keep"> Zeilenumbrüche aus der Vorlage beibehalten</label>
+        <label class="chk"><input type="checkbox" id="f-just"> Blocksatz</label>
+        <label class="chk"><input type="checkbox" id="f-title-on"> Titel auf das erste Blatt setzen</label>
+        <label class="chk"><input type="checkbox" id="f-cut"> Schnittlinien mitdrucken</label>
+        <label class="chk"><input type="checkbox" id="f-short-flip"> Drucker wendet über die <b>kurze</b> Kante</label>
+        <p class="fmtnote" id="fmtnote"></p>
+      </details>
+
+      <div class="row" style="margin:0 0 1.4rem">
+        <button class="btn" id="print-leaves" type="button">Blätter drucken</button>
+        <button class="btn quiet" id="print-test" type="button">Testbogen</button>
+        <button class="btn quiet" id="read-this" type="button">Lesen</button>
+        <span class="spacer" style="flex:1"></span>
+        <button class="btn quiet" id="delete" type="button">Löschen</button>
+      </div>
+
+      <p class="lede" id="sheetinfo"></p>
+      <div id="preview"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Lesen ============ -->
+<section class="view" id="view-lesen" role="tabpanel" aria-labelledby="tab-lesen" tabindex="-1" hidden>
+  <div class="wrap">
+    <div class="readbar">
+      <select id="read-pick" aria-label="Text wählen"></select>
+    </div>
+    <div id="read-stage"></div>
+    <div class="nav">
+      <button class="round" id="prev" type="button" aria-label="Voriges Blatt">‹</button>
+      <span class="pos" id="read-pos"></span>
+      <button class="round" id="next" type="button" aria-label="Nächstes Blatt">›</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div id="meas" aria-hidden="true"></div>
+<div id="print-root" aria-hidden="true"></div>
+<style id="page-size"></style>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ---------- storage (browser storage can throw) ---------- */
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v){ try { localStorage.setItem(k, v); } catch { /* ignore */ } }
+};
+
+/* ---------- the three formats ----------
+   Every one divides an A4 sheet into equal horizontal strips, so a leaf is
+   only ever cut straight across — never lengthwise. */
+const FORMATS = {
+  A: { name:"Groß",             w:210, h:148.5, per:2, orient:"portrait",  lines:6, fs:9.2, ml:24 },
+  B: { name:"Klassisch schmal", w:297, h:70,    per:3, orient:"landscape", lines:5, fs:5.2, ml:26 },
+  C: { name:"Mittel",           w:210, h:99,    per:3, orient:"portrait",  lines:6, fs:6.6, ml:21 }
+};
+const A4 = { portrait:{w:210,h:297}, landscape:{w:297,h:210} };
+
+const LIB_KEY = "pecha.library";
+const PREF_KEY = "pecha.prefs";
+
+function newText(fmt){
+  const f = FORMATS[fmt] || FORMATS.C;
+  return {
+    id: "t" + Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+    title: "", short: "", body: "",
+    format: fmt || "C", lines: f.lines, fs: f.fs, ml: f.ml, lh: 2,
+    keepBreaks: true, justify: false, showTitle: true,
+    created: Date.now(), updated: Date.now()
+  };
+}
+
+let lib = loadLib();
+let prefs = loadPrefs();
+let current = null;          // the text open in the editor
+let readIdx = 0;
+
+function loadLib(){
+  try {
+    const raw = JSON.parse(store.get(LIB_KEY) || "null");
+    if (raw && Array.isArray(raw.texts)) return raw.texts.map(fix);
+  } catch { /* fall through to empty */ }
+  return [];
+}
+function fix(t){                       // tolerate older / partial records
+  const base = newText(t && t.format);
+  return Object.assign(base, t || {}, { id: (t && t.id) || base.id });
+}
+function saveLib(){
+  store.set(LIB_KEY, JSON.stringify({ v:1, texts: lib }));
+}
+
+/* Typesetting a text costs a layout query per word, so the library list
+   must not redo it on every keystroke in the search field. */
+function sidesCount(t){
+  if (t.sidesN != null && t.sidesStamp === t.updated) return t.sidesN;
+  t.sidesN = compose(t).sides.length;
+  t.sidesStamp = t.updated;
+  return t.sidesN;
+}
+function loadPrefs(){
+  try { return Object.assign({ cutLines:true, flip:"long" }, JSON.parse(store.get(PREF_KEY) || "{}")); }
+  catch { return { cutLines:true, flip:"long" }; }
+}
+function savePrefs(){ store.set(PREF_KEY, JSON.stringify(prefs)); }
+
+/* ============================================================
+   Layout — where the lines break is decided here, not by the browser.
+   Each output line is rendered as its own nowrap box, so what the
+   preview shows and what the printer prints cannot drift apart.
+   ============================================================ */
+const meas = document.getElementById("meas");
+
+/* Positions at which a line may begin: after a space, after a hyphen,
+   and — inside an implausibly long word — anywhere. */
+function candidates(s){
+  const set = new Set([0]);
+  const re = /\S+/g;
+  let m;
+  while ((m = re.exec(s))){
+    set.add(m.index);
+    const w = m[0];
+    for (let i = 1; i < w.length; i++){
+      const c = w[i-1];
+      if (c === "-" || c === "–" || c === "—" || w.length > 20) set.add(m.index + i);
+    }
+  }
+  return [...set].sort((a,b) => a - b);
+}
+
+function splitPara(text, longWord){
+  meas.textContent = text;
+  const node = meas.firstChild;
+  if (!node) return [""];
+  const range = document.createRange();
+  const out = [];
+  let start = 0, lastTop = null;
+  for (const p of candidates(text, longWord || 20)){
+    if (p >= text.length) break;
+    range.setStart(node, p); range.setEnd(node, p + 1);
+    const r = range.getClientRects()[0];
+    if (!r) continue;
+    const top = Math.round(r.top * 100) / 100;
+    if (lastTop === null){ lastTop = top; continue; }
+    if (top > lastTop + 0.5){ out.push(text.slice(start, p)); start = p; lastTop = top; }
+  }
+  out.push(text.slice(start));
+  return out.map(s => s.trim());
+}
+
+/* Raw text -> paragraphs, honouring the --- leaf break */
+function parseBody(body, keepBreaks){
+  const out = [];
+  let buf = [];
+  const flush = () => {
+    if (!buf.length) return;
+    out.push({ text: buf.join(" ").replace(/\s+/g, " ").trim() });
+    buf = [];
+  };
+  for (const line of String(body || "").replace(/\r\n?/g, "\n").split("\n")){
+    if (/^\s*-{3,}\s*$/.test(line)){ flush(); out.push({ br:"side" }); continue; }
+    if (/^\s*={3,}\s*$/.test(line)){ flush(); out.push({ br:"leaf" }); continue; }
+    if (!line.trim()){ flush(); continue; }
+    if (keepBreaks){ flush(); out.push({ text: line.replace(/\s+/g, " ").trim() }); }
+    else buf.push(line.trim());
+  }
+  flush();
+  return out;
+}
+
+function geometry(t){
+  const f = FORMATS[t.format] || FORMATS.C;
+  const pitch = t.fs * t.lh;
+  return {
+    w: f.w, h: f.h, per: f.per, orient: f.orient, name: f.name,
+    ml: t.ml, fs: t.fs, lh: t.lh, pitch,
+    blockW: f.w - 2 * t.ml,
+    mt: Math.max(3, (f.h - t.lines * pitch) / 2),
+    lines: t.lines
+  };
+}
+
+/* The whole text as a list of leaf sides, each a list of lines */
+function compose(t){
+  const g = geometry(t);
+  meas.style.width = g.blockW + "mm";
+  meas.style.fontSize = g.fs + "mm";
+  meas.style.lineHeight = g.pitch + "mm";
+
+  const paras = [];
+  if (t.showTitle && t.title.trim()) paras.push({ text: t.title.trim(), cls: "t" });
+  paras.push(...parseBody(t.body, t.keepBreaks));
+
+  /* a word wider than half the column must be breakable, or its line would
+     be set wider than the leaf and clipped */
+  const longWord = Math.max(8, Math.round(g.blockW / (g.fs * 0.5) / 2));
+
+  const lines = [];
+  for (const p of paras){
+    if (p.br){ lines.push({ br: p.br }); continue; }
+    const parts = splitPara(p.text, longWord);
+    parts.forEach((s, i) => lines.push({ text:s, cls:p.cls || "", last: i === parts.length - 1 }));
+  }
+
+  const sides = [];
+  let cur = [];
+  const endSide = () => { sides.push(cur); cur = []; };
+  for (const ln of lines){
+    if (ln.br){
+      if (cur.length) endSide();
+      /* === starts a new leaf, so the verso of the one before stays blank */
+      if (ln.br === "leaf" && sides.length % 2) endSide();
+      continue;
+    }
+    if (cur.length >= g.lines) endSide();
+    cur.push(ln);
+  }
+  if (cur.length || !sides.length) endSide();
+  return { sides, g };
+}
+
+/* ---------- drawing one leaf ---------- */
+function leafEl(lines, g, folio, short, justify){
+  const el = document.createElement("div");
+  el.className = "leaf";
+  const s = el.style;
+  s.setProperty("--lf-w", g.w + "mm");
+  s.setProperty("--lf-h", g.h + "mm");
+  s.setProperty("--lf-ml", g.ml + "mm");
+  s.setProperty("--lf-mt", g.mt + "mm");
+  s.setProperty("--lf-fs", g.fs + "mm");
+  s.setProperty("--lf-pitch", g.pitch + "mm");
+
+  const rules = document.createElement("div");
+  rules.className = "rules";
+  const x1 = (g.ml * 0.38).toFixed(2) + "mm", x2 = (g.ml * 0.50).toFixed(2) + "mm";
+  [["left",x1],["left",x2],["right",x1],["right",x2]].forEach(([side, x]) => {
+    const i = document.createElement("i");
+    i.style[side] = x;
+    rules.appendChild(i);
+  });
+  el.appendChild(rules);
+
+  if (folio){
+    const l = document.createElement("div");
+    l.className = "mark l";
+    l.textContent = folio;
+    el.appendChild(l);
+  }
+  if (short){
+    const r = document.createElement("div");
+    r.className = "mark r";
+    r.textContent = short;
+    el.appendChild(r);
+  }
+
+  const block = document.createElement("div");
+  block.className = "block";
+  for (let i = 0; i < g.lines; i++){
+    const ln = lines[i];
+    const d = document.createElement("div");
+    d.className = "ln" + (ln && ln.cls ? " " + ln.cls : "");
+    if (!ln){ d.innerHTML = "&nbsp;"; block.appendChild(d); continue; }
+    const words = ln.text.split(" ").filter(Boolean);
+    if (justify && !ln.last && !ln.cls && words.length > 1){
+      d.classList.add("j");
+      words.forEach(w => { const sp = document.createElement("span"); sp.textContent = w; d.appendChild(sp); });
+    } else {
+      d.textContent = ln.text || " ";
+    }
+    block.appendChild(d);
+  }
+  el.appendChild(block);
+  return el;
+}
+
+const MM = 96 / 25.4;
+function fitLeaf(el, availPx){
+  const wPx = parseFloat(el.style.getPropertyValue("--lf-w")) * MM;
+  const hPx = parseFloat(el.style.getPropertyValue("--lf-h")) * MM;
+  const k = Math.min(1, availPx / wPx);
+  el.style.transform = "scale(" + k + ")";
+  if (el.parentElement) el.parentElement.style.height = (hPx * k) + "px";
+}
+
+function folioOf(i){ return (Math.floor(i / 2) + 1) + (i % 2 ? "b" : "a"); }
+
+/* ============================================================
+   Views
+   ============================================================ */
+const VIEWS = ["sammlung", "setzen", "lesen"];
+function currentView(){
+  const h = location.hash.replace("#", "");
+  return VIEWS.includes(h) ? h : null;
+}
+function render(name){
+  VIEWS.forEach(v => {
+    const on = v === name;
+    document.getElementById("view-" + v).hidden = !on;
+    const tab = document.getElementById("tab-" + v);
+    tab.setAttribute("aria-selected", String(on));
+    tab.tabIndex = on ? 0 : -1;
+  });
+  if (name === "sammlung") drawLib();
+  if (name === "setzen") drawEditor();
+  if (name === "lesen") drawReader();
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+function goTo(name){
+  if (currentView() === name) render(name);
+  else location.hash = name;
+}
+window.addEventListener("hashchange", () => { const v = currentView(); if (v) render(v); });
+VIEWS.forEach((v, i) => {
+  const tab = document.getElementById("tab-" + v);
+  tab.addEventListener("click", () => goTo(v));
+  tab.addEventListener("keydown", ev => {
+    const step = ev.key === "ArrowRight" ? 1 : ev.key === "ArrowLeft" ? -1 : 0;
+    if (!step) return;
+    ev.preventDefault();
+    const next = VIEWS[(i + step + VIEWS.length) % VIEWS.length];
+    goTo(next);
+    document.getElementById("tab-" + next).focus();
+  });
+});
+
+/* ---------- toast ---------- */
+let toastTimer = null;
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("on"), 2200);
+}
+
+/* ============================================================
+   Sammlung
+   ============================================================ */
+const searchEl = document.getElementById("search");
+function drawLib(){
+  const q = searchEl.value.trim().toLowerCase();
+  const list = lib
+    .filter(t => !q || (t.title + " " + t.body).toLowerCase().includes(q))
+    .sort((a,b) => b.updated - a.updated);
+  const ul = document.getElementById("lib");
+  ul.textContent = "";
+  for (const t of list){
+    const li = document.createElement("li");
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "entry";
+    const tt = document.createElement("span");
+    tt.className = "t";
+    tt.textContent = t.title.trim() || "Ohne Titel";
+    const m = document.createElement("span");
+    m.className = "m";
+    const n = sidesCount(t);
+    m.textContent = FORMATS[t.format].name + " · " + Math.ceil(n / 2)
+      + (Math.ceil(n / 2) === 1 ? " Blatt · " : " Blätter · ")
+      + new Date(t.updated).toLocaleDateString("de-DE");
+    b.append(tt, m);
+    b.addEventListener("click", () => { current = t; goTo("setzen"); });
+    li.appendChild(b);
+    ul.appendChild(li);
+  }
+  document.getElementById("lib-empty").hidden = lib.length > 0;
+  document.getElementById("lib-count").textContent =
+    lib.length === 0 ? "" :
+    lib.length + (lib.length === 1 ? " Text" : " Texte") + (q ? ", " + list.length + " davon gefunden" : "");
+}
+searchEl.addEventListener("input", drawLib);
+
+document.getElementById("new-text").addEventListener("click", () => {
+  current = newText("C");
+  goTo("setzen");
+  setTimeout(() => document.getElementById("f-title").focus(), 30);
+});
+
+document.getElementById("export").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify({ v:1, texts: lib }, null, 2)], { type:"application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "pecha-sammlung-" + new Date().toISOString().slice(0,10) + ".json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import").click());
+document.getElementById("import").addEventListener("change", ev => {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    let added = 0, updated = 0;
+    try {
+      const data = JSON.parse(String(r.result));
+      const texts = Array.isArray(data) ? data : (data && data.texts);
+      if (!Array.isArray(texts)) throw new Error("kein Sammlungsformat");
+      for (const raw of texts){
+        const t = fix(raw);
+        const at = lib.findIndex(x => x.id === t.id);
+        if (at < 0){ lib.push(t); added++; }
+        else if ((t.updated || 0) > (lib[at].updated || 0)){ lib[at] = t; updated++; }
+      }
+      saveLib();
+      drawLib();
+      toast(added + " neu, " + updated + " aktualisiert");
+    } catch (e){
+      toast("Datei nicht lesbar");
+    }
+  };
+  r.readAsText(file);
+  ev.target.value = "";
+});
+
+/* ============================================================
+   Setzen
+   ============================================================ */
+const F = {
+  title: document.getElementById("f-title"),
+  short: document.getElementById("f-short"),
+  body:  document.getElementById("f-body"),
+  format:document.getElementById("f-format"),
+  lines: document.getElementById("f-lines"),
+  fs:    document.getElementById("f-fs"),
+  ml:    document.getElementById("f-ml"),
+  lh:    document.getElementById("f-lh"),
+  keep:  document.getElementById("f-keep"),
+  just:  document.getElementById("f-just"),
+  titleOn: document.getElementById("f-title-on"),
+  cut:   document.getElementById("f-cut"),
+  shortFlip: document.getElementById("f-short-flip")
+};
+
+function fillForm(t){
+  F.title.value = t.title;
+  F.short.value = t.short;
+  F.body.value = t.body;
+  F.format.value = t.format;
+  F.lines.value = t.lines;
+  F.fs.value = t.fs;
+  F.ml.value = t.ml;
+  F.lh.value = t.lh;
+  F.keep.checked = t.keepBreaks;
+  F.just.checked = t.justify;
+  F.titleOn.checked = t.showTitle;
+  F.cut.checked = prefs.cutLines;
+  F.shortFlip.checked = prefs.flip === "short";
+}
+
+function readForm(t){
+  t.title = F.title.value;
+  t.short = F.short.value;
+  t.body = F.body.value;
+  t.format = F.format.value;
+  t.lines = +F.lines.value;
+  t.fs = +F.fs.value;
+  t.ml = +F.ml.value;
+  t.lh = +F.lh.value;
+  t.keepBreaks = F.keep.checked;
+  t.justify = F.just.checked;
+  t.showTitle = F.titleOn.checked;
+  prefs.cutLines = F.cut.checked;
+  prefs.flip = F.shortFlip.checked ? "short" : "long";
+  savePrefs();
+}
+
+let saveTimer = null;
+function touch(){
+  if (!current) return;
+  readForm(current);
+  clampToFormat(current);
+  current.updated = Date.now();
+  if (current.title.trim() || current.body.trim()){
+    if (!lib.some(x => x.id === current.id)) lib.push(current);
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveLib, 350);
+  }
+  drawPreview();
+}
+
+/* keep the block inside the leaf whatever the sliders say */
+function clampToFormat(t){
+  const f = FORMATS[t.format] || FORMATS.C;
+  t.ml = Math.min(t.ml, (f.w - 20) / 2);
+  const maxPitch = (f.h - 6) / t.lines;
+  if (t.fs * t.lh > maxPitch) t.fs = Math.max(2.5, maxPitch / t.lh);
+  F.ml.value = t.ml;
+  F.fs.value = t.fs.toFixed(1);
+}
+
+function drawEditor(){
+  const has = !!current;
+  document.getElementById("editor").hidden = !has;
+  if (!has){
+    document.getElementById("set-status").textContent =
+      "Noch kein Text gewählt — in der Sammlung einen öffnen oder einen neuen anlegen.";
+    return;
+  }
+  document.getElementById("set-status").textContent =
+    "Änderungen werden sofort gespeichert.";
+  fillForm(current);
+  drawPreview();
+}
+
+function drawPreview(){
+  if (!current) return;
+  const t = current;
+  const { sides, g } = compose(t);
+  const de = (n, d) => n.toFixed(d).replace(".", ",");
+  document.getElementById("v-lines").textContent = t.lines;
+  document.getElementById("v-fs").textContent = de(t.fs, 1) + " mm · " + Math.round(t.fs * 2.835) + " pt";
+  document.getElementById("v-ml").textContent = de(t.ml, 1) + " mm";
+  document.getElementById("v-lh").textContent = de(t.lh, 2) + "×";
+  const f = FORMATS[t.format];
+  document.getElementById("fmtnote").textContent =
+    String(f.w).replace(".", ",") + " × " + String(f.h).replace(".", ",")
+    + " mm · " + f.per + " Blätter je A4-Bogen (" +
+    (f.orient === "portrait" ? "hoch" : "quer") + ") · " + (f.per - 1) + " Schnitte";
+
+  const leaves = Math.ceil(sides.length / 2);
+  const sheets = Math.ceil(leaves / g.per);
+  t.sidesN = sides.length; t.sidesStamp = t.updated;
+  document.getElementById("sheetinfo").textContent =
+    sides.length + " Seiten · " + leaves + (leaves === 1 ? " Blatt · " : " Blätter · ")
+    + sheets + (sheets === 1 ? " Bogen" : " Bögen") + " A4, beidseitig";
+
+  const box = document.getElementById("preview");
+  box.textContent = "";
+  const avail = box.clientWidth || 600;
+  sides.forEach((lines, i) => {
+    const stage = document.createElement("div");
+    stage.className = "stage";
+    const wrap = document.createElement("div");
+    wrap.className = "leafwrap";
+    const el = leafEl(lines, g, folioOf(i), t.short.trim(), t.justify);
+    wrap.appendChild(el);
+    stage.appendChild(wrap);
+    box.appendChild(stage);
+    fitLeaf(el, avail);
+    const cap = document.createElement("p");
+    cap.className = "sidecap";
+    cap.textContent = "Blatt " + folioOf(i);
+    box.appendChild(cap);
+  });
+}
+
+[F.title, F.short, F.body].forEach(el => el.addEventListener("input", touch));
+[F.lines, F.fs, F.ml, F.lh].forEach(el => el.addEventListener("input", touch));
+[F.keep, F.just, F.titleOn, F.cut, F.shortFlip].forEach(el => el.addEventListener("change", touch));
+F.format.addEventListener("change", () => {
+  if (!current) return;
+  const f = FORMATS[F.format.value];
+  current.format = F.format.value;
+  current.lines = f.lines; current.fs = f.fs; current.ml = f.ml; current.lh = 2;
+  fillForm(current);
+  touch();
+});
+
+document.getElementById("delete").addEventListener("click", () => {
+  if (!current) return;
+  const name = current.title.trim() || "diesen Text";
+  if (!confirm("„" + name + "“ endgültig löschen?")) return;
+  lib = lib.filter(x => x.id !== current.id);
+  saveLib();
+  current = null;
+  goTo("sammlung");
+  toast("Gelöscht");
+});
+
+document.getElementById("read-this").addEventListener("click", () => { readIdx = 0; goTo("lesen"); });
+
+window.addEventListener("resize", () => {
+  if (currentView() === "setzen") drawPreview();
+  if (currentView() === "lesen") drawReader();
+});
+
+/* ============================================================
+   Print — imposition onto A4
+   ============================================================ */
+function sheetEl(g, orient){
+  const el = document.createElement("div");
+  el.className = "sheet";
+  const page = A4[orient];
+  el.style.width = page.w + "mm";
+  el.style.height = page.h + "mm";
+  return el;
+}
+
+function addStrips(sheet, g, count, make){
+  for (let k = 0; k < count; k++){
+    const strip = document.createElement("div");
+    strip.className = "strip";
+    strip.style.top = (k * g.h) + "mm";
+    strip.style.height = g.h + "mm";
+    const content = make(k);
+    if (content) strip.appendChild(content);
+    sheet.appendChild(strip);
+    if (prefs.cutLines && k > 0){
+      const cut = document.createElement("div");
+      cut.className = "cut";
+      cut.style.top = (k * g.h) + "mm";
+      sheet.appendChild(cut);
+    }
+  }
+}
+
+function setPageSize(orient){
+  const p = A4[orient];
+  document.getElementById("page-size").textContent =
+    "@page{ size: " + p.w + "mm " + p.h + "mm; margin: 0; }";
+}
+
+function buildLeafSheets(t){
+  const { sides, g } = compose(t);
+  const root = document.getElementById("print-root");
+  root.textContent = "";
+  setPageSize(g.orient);
+
+  /* sides -> leaves (recto, verso) */
+  const leaves = [];
+  for (let i = 0; i < sides.length; i += 2){
+    leaves.push({ a: sides[i], b: sides[i+1] || [], ai: i, bi: i+1 });
+  }
+  while (leaves.length % g.per) leaves.push(null);   // blank leaves keep the cuts aligned
+
+  const short = t.short.trim();
+  for (let s = 0; s < leaves.length / g.per; s++){
+    const group = leaves.slice(s * g.per, s * g.per + g.per);
+
+    const front = sheetEl(g, g.orient);
+    addStrips(front, g, g.per, k => {
+      const lf = group[k];
+      return lf ? leafEl(lf.a, g, folioOf(lf.ai), short, t.justify) : null;
+    });
+    root.appendChild(front);
+
+    const back = sheetEl(g, g.orient);
+    if (prefs.flip === "short") back.classList.add("flip180");
+    addStrips(back, g, g.per, k => {
+      const lf = group[k];
+      return lf ? leafEl(lf.b, g, folioOf(lf.bi), short, t.justify) : null;
+    });
+    root.appendChild(back);
+  }
+  return { sheets: leaves.length / g.per, leaves: leaves.filter(Boolean).length };
+}
+
+function buildTestSheet(t){
+  const g = geometry(t);
+  const root = document.getElementById("print-root");
+  root.textContent = "";
+  setPageSize(g.orient);
+  const make = (prefix) => {
+    const sheet = sheetEl(g, g.orient);
+    addStrips(sheet, g, g.per, k => {
+      const d = document.createElement("div");
+      d.className = "tlabel";
+      d.textContent = prefix + (k + 1);
+      return d;
+    });
+    const hint = document.createElement("div");
+    hint.className = "thint";
+    hint.textContent = prefix === "V"
+      ? "Testbogen — schneiden, Streifen aufeinanderlegen: hinter V1 muss R1 stehen."
+      : "Rückseite. Steht hinter V1 nicht R1, im Setzen-Bereich die Wendekante umstellen.";
+    sheet.appendChild(hint);
+    return sheet;
+  };
+  root.appendChild(make("V"));
+  const back = make("R");
+  if (prefs.flip === "short") back.classList.add("flip180");
+  root.appendChild(back);
+}
+
+/* The sheets are cleared away after printing — but only by the run that put
+   them there, so a later print cannot be emptied by an earlier one's timer. */
+let printRun = 0;
+function clearPrint(run){
+  if (run !== printRun) return;
+  document.getElementById("print-root").textContent = "";
+}
+window.addEventListener("afterprint", () => clearPrint(printRun));
+function printNow(){
+  const run = ++printRun;
+  window.print();
+  setTimeout(() => clearPrint(run), 3000);
+}
+document.getElementById("print-leaves").addEventListener("click", () => {
+  if (!current) return;
+  const r = buildLeafSheets(current);
+  toast(r.sheets + (r.sheets === 1 ? " Bogen" : " Bögen") + ", beidseitig drucken");
+  printNow();
+});
+document.getElementById("print-test").addEventListener("click", () => {
+  if (!current) return;
+  buildTestSheet(current);
+  printNow();
+});
+
+/* ============================================================
+   Lesen
+   ============================================================ */
+const pick = document.getElementById("read-pick");
+function drawReader(){
+  const sorted = [...lib].sort((a,b) => b.updated - a.updated);
+  const keep = pick.value;
+  pick.textContent = "";
+  if (!sorted.length){
+    document.getElementById("read-stage").textContent = "";
+    document.getElementById("read-pos").textContent = "";
+    const o = document.createElement("option");
+    o.textContent = "Noch nichts in der Sammlung";
+    pick.appendChild(o);
+    return;
+  }
+  for (const t of sorted){
+    const o = document.createElement("option");
+    o.value = t.id;
+    o.textContent = t.title.trim() || "Ohne Titel";
+    pick.appendChild(o);
+  }
+  const wanted = (current && sorted.some(t => t.id === current.id)) ? current.id
+               : (sorted.some(t => t.id === keep) ? keep : sorted[0].id);
+  pick.value = wanted;
+  drawSide();
+}
+function drawSide(){
+  const t = lib.find(x => x.id === pick.value);
+  const stage = document.getElementById("read-stage");
+  stage.textContent = "";
+  if (!t) return;
+  const { sides, g } = compose(t);
+  readIdx = Math.max(0, Math.min(readIdx, sides.length - 1));
+  const st = document.createElement("div");
+  st.className = "stage";
+  const wrap = document.createElement("div");
+  wrap.className = "leafwrap";
+  const el = leafEl(sides[readIdx], g, folioOf(readIdx), t.short.trim(), t.justify);
+  wrap.appendChild(el);
+  st.appendChild(wrap);
+  stage.appendChild(st);
+  fitLeaf(el, stage.clientWidth || 600);
+  document.getElementById("read-pos").textContent = "Blatt " + folioOf(readIdx)
+    + "  ·  " + (readIdx + 1) + "/" + sides.length;
+  document.getElementById("prev").disabled = readIdx === 0;
+  document.getElementById("next").disabled = readIdx >= sides.length - 1;
+}
+pick.addEventListener("change", () => { readIdx = 0; drawSide(); });
+document.getElementById("prev").addEventListener("click", () => { readIdx--; drawSide(); });
+document.getElementById("next").addEventListener("click", () => { readIdx++; drawSide(); });
+window.addEventListener("keydown", ev => {
+  if (currentView() !== "lesen") return;
+  if (ev.target && /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return;
+  if (ev.target && ev.target.getAttribute && ev.target.getAttribute("role") === "tab") return;
+  if (ev.key === "ArrowRight"){ readIdx++; drawSide(); }
+  if (ev.key === "ArrowLeft"){ readIdx--; drawSide(); }
+});
+
+/* ============================================================
+   Theme
+   ============================================================ */
+const themeBtn = document.getElementById("theme-toggle");
+const savedTheme = store.get("pecha.theme");
+if (savedTheme === "dark" || savedTheme === "light") document.documentElement.setAttribute("data-theme", savedTheme);
+function isDark(){
+  const stamped = document.documentElement.getAttribute("data-theme");
+  if (stamped) return stamped === "dark";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+function syncTheme(){ themeBtn.textContent = isDark() ? "Light" : "Dark"; }
+themeBtn.addEventListener("click", () => {
+  const next = isDark() ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  store.set("pecha.theme", next);
+  syncTheme();
+});
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncTheme);
+syncTheme();
+
+/* ============================================================
+   Start
+   ============================================================ */
+if (!currentView()) history.replaceState(null, "", "#sammlung");
+render(currentView() || "sammlung");
+
+/* The line breaks are measured in the real font — so once it arrives, measure again. */
+if (document.fonts && document.fonts.ready){
+  document.fonts.ready.then(() => {
+    if (currentView() === "setzen") drawPreview();
+    if (currentView() === "lesen") drawSide();
+    if (currentView() === "sammlung") drawLib();
+  });
+}
+
+if ("serviceWorker" in navigator){
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>
