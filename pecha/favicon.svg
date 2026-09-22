@@ -1,1 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Pecha"><rect width="200" height="200" rx="34" fill="#7a1f2b"/><rect x="22.0" y="63.0" width="156.0" height="74.0" rx="2" fill="#e9e1d0"/><g stroke="#7a1f2b" stroke-width="2.0" stroke-linecap="butt"><line x1="31.0" y1="70.0" x2="31.0" y2="130.0"/><line x1="36.0" y1="70.0" x2="36.0" y2="130.0"/><line x1="169.0" y1="70.0" x2="169.0" y2="130.0"/><line x1="164.0" y1="70.0" x2="164.0" y2="130.0"/></g><g stroke="#2b2320" stroke-width="6.0" stroke-linecap="round"><line x1="48.0" y1="82.0" x2="152.0" y2="82.0"/><line x1="48.0" y1="100.0" x2="152.0" y2="100.0"/><line x1="48.0" y1="118.0" x2="132.0" y2="118.0"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Pecha"><rect width="200" height="200" rx="34" fill="#7a1f2b"/><defs><clipPath id="vb"><path d="M 84 82 C 69 95, 52 103, 52 125 C 52 148, 74 164, 100 164 C 126 164, 148 148, 148 125 C 148 103, 131 95, 116 82 Z"/></clipPath></defs>
+  <g fill="#d3a53a">
+    <path d="M 100 32 C 108 45, 114 52, 114 59 A 14 14 0 0 1 86 59 C 86 52, 92 45, 100 32 Z"/>
+    <rect x="67" y="66" width="66" height="10" rx="5"/>
+    <path d="M 76 76 L 124 76 L 117 84 L 83 84 Z"/>
+    <path d="M 84 82 C 69 95, 52 103, 52 125 C 52 148, 74 164, 100 164 C 126 164, 148 148, 148 125 C 148 103, 131 95, 116 82 Z"/>
+    <rect x="80" y="162" width="40" height="8" rx="3"/>
+    <rect x="66" y="169" width="68" height="11" rx="5"/>
+  </g>
+  <g clip-path="url(#vb)" fill="#7a1f2b">
+    <rect x="40" y="107" width="120" height="7"/>
+    <rect x="40" y="139" width="120" height="5"/>
+  </g></svg>

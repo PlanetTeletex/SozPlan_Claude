@@ -90,7 +90,7 @@ Die Seite ist eine installierbare Web-App. Über GitHub Pages aufrufen, dann:
   randlos und ohne Transparenz.
 - **Android (Chrome):** Menü → *App installieren* bzw. *Zum Startbildschirm*.
   Für die runde Maske adaptiver Symbole liegt `icon-maskable-512.png` bei, in dem
-  das Blatt so weit eingerückt ist, dass es der Beschnitt nicht an den Enden kappt.
+  die Vase so weit eingerückt ist, dass der Beschnitt sie nicht an den Ecken kappt.
 - **Desktop (Chrome/Edge):** Installationssymbol in der Adressleiste.
 
 Einmal geöffnet, arbeitet die App offline weiter: der Service Worker hält Seite,
@@ -112,6 +112,12 @@ was neuer ist.
   schlimmer als gar keins. Die App setzt lateinische Schrift.
 - **Kein Abgleich zwischen Geräten.** Datei sichern und einlesen statt Konto.
 - **Kein Blocksatz mit Silbentrennung** — Blocksatz dehnt nur die Wortabstände.
+
+## Das Symbol
+
+Die **Schatzvase** (*bum pa*), eines der Acht Glückssymbole — das Gefäß, dessen
+Inhalt nicht ausgeht. Für eine Sammlung, die über die Jahre wächst, das passendste
+der acht; der endlose Knoten war ohnehin vergeben, den trägt `lojong`.
 
 ## Gestaltung
 
