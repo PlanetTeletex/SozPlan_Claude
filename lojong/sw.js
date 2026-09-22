@@ -1,12 +1,13 @@
 /* Lojong — offline support.
    Bump VERSION to retire the old cache; the page itself is fetched
    network-first, so edits reach an installed app as soon as it is online. */
-const VERSION = "2026-09-21b";
+const VERSION = "2026-09-22-icons";
 const CACHE = "lojong-" + VERSION;
 const CORE = [
-  "./", "./index.html", "./manifest.webmanifest",
+  "./", "./index.html", "./manifest.json",
   "./icon.svg", "./favicon.svg",
-  "./apple-touch-icon.png", "./icon-192.png", "./icon-512.png"
+  "./apple-touch-icon.png", "./icon-192.png", "./icon-512.png",
+  "./icon-maskable-192.png", "./icon-maskable-512.png"
 ];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 
