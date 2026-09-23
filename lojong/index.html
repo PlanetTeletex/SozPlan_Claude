@@ -338,6 +338,25 @@ img{ max-width: 100%; }
   color: var(--ink-faint);
   pointer-events: none;
 }
+/* stepping the sequence on or back by one */
+.step{
+  appearance: none;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: color .18s, border-color .18s;
+}
+.step:hover{ color: var(--maroon); border-color: var(--maroon); }
+
 .ring{
   --r:   clamp(125px, 35vw, 158px);   /* radius the marks sit on */
   --orb: clamp(2.9rem, 9vw, 3.3rem);  /* diameter of one mark */
@@ -730,7 +749,10 @@ body.sitting .sitting{ border-bottom-color: transparent; }
     <p class="note" id="featured-note"></p>
     <button class="source" id="featured-source" type="button"></button>
     <div class="actions">
+      <button class="step" id="step-back" type="button" aria-label="A slogan back">&lsaquo;</button>
       <button class="btn" id="draw" type="button">Draw another</button>
+      <button class="step" id="step-on" type="button" aria-label="A slogan on">&rsaquo;</button>
+      <button class="btn secondary" id="adopt" type="button" hidden>Carry on from here</button>
       <button class="btn secondary" id="back-to-today" type="button" hidden>Today's slogan</button>
     </div>
 
@@ -1066,6 +1088,9 @@ const noteInput   = document.getElementById("evening-note");
 const noteStatus  = document.getElementById("evening-status");
 const earlierBox  = document.getElementById("earlier");
 const earlierList = document.getElementById("earlier-list");
+const adoptBtn = document.getElementById("adopt");
+const stepBack = document.getElementById("step-back");
+const stepOn = document.getElementById("step-on");
 
 /* Slogan 1 on the first day the app is opened, the next one each day after,
    wrapping round after 59. Dates are compared as plain calendar days, so a
@@ -1081,14 +1106,32 @@ function daysSince(iso){
   const n = new Date();
   return Math.floor((Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()) - Date.UTC(y, m - 1, d)) / 86400000);
 }
-const startDay = (() => {
+let startDay = (() => {
   const saved = store.get("lojong.start");
   if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) return saved;
   const today = isoToday();
   store.set("lojong.start", today);
   return store.get("lojong.start") === today ? today : EPOCH;   // storage refused
 })();
-const todayIndex = ((daysSince(startDay) % SLOGANS.length) + SLOGANS.length) % SLOGANS.length;
+let todayIndex = ((daysSince(startDay) % SLOGANS.length) + SLOGANS.length) % SLOGANS.length;
+
+/* The sequence is derived from the starting day, so moving to a different
+   slogan means moving that day: a slogan n places on is a start n days
+   earlier. Storage that gets wiped — deleting a home screen entry does it —
+   takes the position with it, and this is how it is put back without
+   stepping through the lot. */
+function anchorTo(index){
+  const n = SLOGANS.length;
+  const wanted = ((index % n) + n) % n;
+  const d = new Date();
+  d.setDate(d.getDate() - wanted);
+  const iso = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0")
+                              + "-" + String(d.getDate()).padStart(2, "0");
+  store.set("lojong.start", iso);
+  startDay = iso;
+  todayIndex = wanted;
+  show(todayIndex, "today");
+}
 
 const dateLabel = new Date().toLocaleDateString(undefined, { day: "numeric", month: "long" });
 let current = todayIndex;
@@ -1169,7 +1212,11 @@ function show(index, mode){
     ? "Today <span class=\"dot\">&middot;</span> " + dateLabel
     : "Drawn <span class=\"dot\">&middot;</span> sit with this one";
   sourceEl.textContent = "Point " + s.point.roman + " — " + s.point.title;
-  backBtn.hidden = mode === "today";
+  const isToday = mode === "today";
+  backBtn.hidden = isToday;
+  adoptBtn.hidden = isToday;
+  stepBack.hidden = !isToday;
+  stepOn.hidden = !isToday;
   document.querySelectorAll(".row").forEach(row => {
     row.setAttribute("aria-current", Number(row.dataset.index) === index ? "true" : "false");
   });
@@ -1192,6 +1239,9 @@ document.getElementById("draw").addEventListener("click", () => {
   show(next, "drawn");
 });
 backBtn.addEventListener("click", () => show(todayIndex, "today"));
+adoptBtn.addEventListener("click", () => anchorTo(current));
+stepBack.addEventListener("click", () => anchorTo(todayIndex - 1));
+stepOn.addEventListener("click", () => anchorTo(todayIndex + 1));
 function prefersReducedMotion(){
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
