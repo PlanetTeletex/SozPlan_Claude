@@ -15,16 +15,19 @@ so each function is reached directly instead of scrolled to.
 - **Slogan of the day** — the 59 in order: slogan 1 on the first day the app is
   opened, the next one each day after, wrapping round after 59. The starting day
   is kept in `localStorage` (`lojong.start`); if storage is unavailable the app
-  counts from a fixed date instead, so the sequence still advances. `Draw another`
-  pulls a random one; `Today's slogan` returns to the day's.
-- **Where you actually are** — the slogan number sits beside *Draw another*
+  counts from a fixed date instead, so the sequence still advances. `Random slogan`
+  pulls one to sit with without moving the sequence; `Today's slogan` returns to
+  the day's.
+- **Where you actually are** — the slogan number sits beside *Random slogan*
   between `‹` and `›`, and it is the control: step it one at a time, or type the
-  number you are on. A slogan reached by drawing or from the list also offers
-  `Carry on from here`. However it is set, the position is kept and the daily
-  count carries on from there, because the slogan is derived from the starting
-  day: moving n places on is a start n days earlier, so there is still only one
-  value to keep. Deleting a home screen entry can take that storage with it —
-  this is how the place is found again in one go.
+  number you are on. A slogan found in the list also offers `Carry on from here`,
+  to move the sequence there; a random draw does not, since drawing is meant for
+  browsing, not for setting where the practice stands, and offers only
+  `Today's slogan` to return. However the position is set, it is kept and the
+  daily count carries on from there, because the slogan is derived from the
+  starting day: moving n places on is a start n days earlier, so there is still
+  only one value to keep. Deleting a home screen entry can take that storage
+  with it — this is how the place is found again in one go.
 - **All 59 slogans on one page**, grouped under the seven points (point two split
   into absolute and relative bodhichitta), in the *Seven Points* view. Tap any
   slogan to bring it to *Today*.
