@@ -299,6 +299,44 @@ img{ max-width: 100%; }
   font-variant-numeric: tabular-nums;
   letter-spacing: .01em;
   color: var(--ink);
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.readout:hover{ color: var(--maroon); }
+.readout-input{
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 5rem;
+  height: 2.7rem;
+  text-align: center;
+  font-family: Spectral, Georgia, serif;
+  font-size: 1.6rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--lapis);
+  border-radius: 8px;
+  appearance: none;
+  -moz-appearance: textfield;
+}
+.readout-input::-webkit-outer-spin-button,
+.readout-input::-webkit-inner-spin-button{ appearance: none; margin: 0; }
+/* the affordance, in the spot the breath word used to sit */
+.dial-hint{
+  position: absolute;
+  left: 0; right: 0; bottom: 19%;   /* clear of the arc at its lowest point */
+  margin: 0;
+  text-align: center;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-size: .72rem;
+  letter-spacing: .16em;
+  color: var(--ink-faint);
+  pointer-events: none;
 }
 .ring{
   --r:   clamp(125px, 35vw, 158px);   /* radius the marks sit on */
@@ -599,30 +637,6 @@ img{ max-width: 100%; }
   color: var(--ink-faint);
 }
 
-/* ---------- breath pacer ---------- */
-.breath{
-  position: absolute;
-  inset: 13%;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--lapis) 15%, transparent);
-  transform: scale(.52);
-}
-@keyframes breathe{
-  0%   { transform: scale(.52); }
-  40%  { transform: scale(1); }
-  100% { transform: scale(.52); }
-}
-.dial.breathing .breath{ animation: breathe 10s ease-in-out infinite; }
-.breath-word{
-  position: absolute;
-  left: 0; right: 0; bottom: 12%;
-  margin: 0;
-  text-align: center;
-  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
-  font-size: .72rem;
-  letter-spacing: .16em;
-  color: var(--ink-faint);
-}
 
 /* ---------- sitting: everything but the slogan and the dial steps back ---------- */
 .dims, .masthead, .tabs{ transition: opacity .9s ease; }
@@ -747,26 +761,21 @@ body.sitting .sitting{ border-bottom-color: transparent; }
     <div class="timer-body">
       <div class="ring">
         <div class="dial" id="dial">
-          <div class="breath" id="breath" aria-hidden="true" hidden></div>
           <svg viewBox="0 0 140 140" aria-hidden="true">
             <circle class="track" cx="70" cy="70" r="62" fill="none" stroke-width="2"></circle>
             <circle class="arc" id="arc" cx="70" cy="70" r="62" fill="none" stroke-width="2"
                     stroke-linecap="round" stroke-dasharray="389.56" stroke-dashoffset="0"></circle>
           </svg>
-          <div class="readout" id="readout" role="timer" aria-live="off">5:00</div>
-          <p class="breath-word" id="breath-word" aria-hidden="true" hidden>in</p>
+          <button class="readout" id="readout" type="button" aria-live="off"
+                  aria-label="Set how long to sit">5:00</button>
+          <label class="sr-only" for="minutes">Minutes</label>
+          <input class="readout-input" id="minutes" type="number" inputmode="numeric"
+                 min="1" max="180" step="1" value="5" hidden>
+          <p class="dial-hint" id="dial-hint">tap to set</p>
         </div>
 
-        <button class="orb dims" type="button" data-min="3" style="--a: 282.9deg"
-                aria-pressed="false" aria-label="Three minutes" title="3 min">3</button>
-        <button class="orb dims" type="button" data-min="5" style="--a: 334.3deg"
-                aria-pressed="true" aria-label="Five minutes" title="5 min">5</button>
-        <button class="orb dims" type="button" data-min="10" style="--a: 25.7deg"
-                aria-pressed="false" aria-label="Ten minutes" title="10 min">10</button>
-        <button class="orb dims" id="sound-toggle" type="button" style="--a: 77.1deg"
+        <button class="orb dims" id="sound-toggle" type="button" style="--a: 128.6deg"
                 aria-pressed="true" aria-label="Bell" title="Bell"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.4h18"/><path d="M4.8 10.4a7.2 6.4 0 0 0 14.4 0"/></svg></button>
-        <button class="orb dims" id="breath-toggle" type="button" style="--a: 128.6deg"
-                aria-pressed="false" aria-label="Breath pacer" title="Breath pacer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c2.5-5.4 5-5.4 7.5 0s5 5.4 7.5 0"/></svg></button>
         <button class="orb primary" id="start" type="button" style="--a: 180deg" aria-label="Begin" title="Begin">
           <span class="ico-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.2 6.1 18 12l-8.8 5.9Z" fill="currentColor" stroke="none"/></svg></span><span class="ico-pause" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.7 6.4v11.2M14.3 6.4v11.2"/></svg></span>
         </button>
@@ -1312,13 +1321,20 @@ function setStartFace(running){
   startBtn.title = label;
 }
 const soundBtn = document.getElementById("sound-toggle");
-const breathBtn = document.getElementById("breath-toggle");
-const breathEl = document.getElementById("breath");
-const breathWord = document.getElementById("breath-word");
+const minutesInput = document.getElementById("minutes");
+const dialHint = document.getElementById("dial-hint");
 
-let duration = 300, remaining = 300, ticker = null, endsAt = 0;
+/* No fixed lengths: the dial is tapped and a number of minutes typed in.
+   Whatever was last set is what the app opens with next time. */
+const MIN_MINUTES = 1, MAX_MINUTES = 180;
+function clampMinutes(n){
+  const v = Math.round(Number(n));
+  if (!Number.isFinite(v) || v <= 0) return 5;
+  return Math.min(MAX_MINUTES, Math.max(MIN_MINUTES, v));
+}
+let duration = clampMinutes(store.get("lojong.minutes") || 5) * 60;
+let remaining = duration, ticker = null, endsAt = 0;
 let soundOn = store.get("lojong.sound") !== "off";
-let breathOn = store.get("lojong.breath") === "on";
 arc.setAttribute("stroke-dasharray", CIRC);
 syncSound();
 
@@ -1351,41 +1367,42 @@ function tick(){
     requestAnimationFrame(() => { paint(); dial.classList.remove("resetting"); });
   }
 }
-/* ---- slogan 7: these two should ride the breath ------------------------
-   Four seconds in, six out. The words keep pacing even where motion is
-   switched off, which is the part that matters. */
-let breathTimer = null, breathPhase = 0;
-
-function paceBreath(){
-  stopPacing();
-  breathPhase = 0;
-  const step = () => {
-    breathWord.textContent = breathPhase === 0 ? "in" : "out";
-    breathTimer = setTimeout(() => { breathPhase = 1 - breathPhase; step(); },
-                             breathPhase === 0 ? 4000 : 6000);
-  };
-  step();
+/* ---- setting the length -------------------------------------------------
+   Tapping anywhere in the dial swaps the readout for a number field. It is
+   only offered while nothing is running; a sitting is not interrupted. */
+function syncHint(){
+  const idle = ticker === null;
+  dialHint.hidden = !idle || !minutesInput.hidden;
+  readout.setAttribute("aria-label",
+    idle ? "Sitting length " + Math.round(duration / 60) + " minutes — tap to change"
+         : "Time left");
 }
-function stopPacing(){
-  if (breathTimer){ clearTimeout(breathTimer); breathTimer = null; }
+function openEditor(){
+  if (ticker) return;
+  minutesInput.value = String(Math.round(duration / 60));
+  readout.hidden = true;
+  minutesInput.hidden = false;
+  syncHint();
+  minutesInput.focus();
+  minutesInput.select();
 }
-function syncBreath(){
-  breathBtn.setAttribute("aria-pressed", String(breathOn));
-  const label = breathOn ? "Breath pacer on" : "Breath pacer off";
-  breathBtn.setAttribute("aria-label", label);
-  breathBtn.title = label;
-  syncRingState();
-  const running = breathOn && ticker !== null;
-  breathEl.hidden = !running;
-  breathWord.hidden = !running;
-  dial.classList.toggle("breathing", running);
-  running ? paceBreath() : stopPacing();
+function closeEditor(commit){
+  if (minutesInput.hidden) return;
+  minutesInput.hidden = true;
+  readout.hidden = false;
+  if (commit && String(minutesInput.value).trim()){   // a cleared field cancels
+    const min = clampMinutes(minutesInput.value);
+    store.set("lojong.minutes", String(min));
+    setDuration(min);
+  }
+  syncHint();
 }
-breathBtn.addEventListener("click", () => {
-  breathOn = !breathOn;
-  store.set("lojong.breath", breathOn ? "on" : "off");
-  syncBreath();
+readout.addEventListener("click", openEditor);
+minutesInput.addEventListener("keydown", ev => {
+  if (ev.key === "Enter"){ ev.preventDefault(); closeEditor(true); }
+  else if (ev.key === "Escape"){ ev.preventDefault(); closeEditor(false); }
 });
+minutesInput.addEventListener("blur", () => closeEditor(true));
 
 /* A phone blanks its screen after half a minute, which is no way to sit.
    The lock is dropped whenever the page is hidden, so it is taken again
@@ -1415,25 +1432,19 @@ function start(){
   opened = true;
   document.body.classList.add("sitting");
   keepAwake(true);
-  syncBreath();
+  syncHint();
 }
 function stop(){
   if (ticker){ clearInterval(ticker); ticker = null; }
   setStartFace(false);
   document.body.classList.remove("sitting");
   keepAwake(false);
-  syncBreath();
+  syncHint();
 }
 startBtn.addEventListener("click", () => { ticker ? stop() : start(); });
 document.getElementById("reset").addEventListener("click", () => setDuration(duration / 60));
-document.querySelectorAll("[data-min]").forEach(chip => {
-  chip.addEventListener("click", () => {
-    document.querySelectorAll("[data-min]").forEach(c => c.setAttribute("aria-pressed", String(c === chip)));
-    setDuration(Number(chip.dataset.min));
-  });
-});
 paint();
-syncBreath();
+syncHint();
 
 /* a struck bowl: a low fundamental with two inharmonic partials, decaying */
 let audioCtx = null;
@@ -1472,7 +1483,7 @@ function ring(count){
 }
 function syncRingState(){
   const line = document.getElementById("ring-state");
-  if (line) line.textContent = (soundOn ? "bell on" : "bell off") + "  ·  " + (breathOn ? "breath on" : "breath off");
+  if (line) line.textContent = soundOn ? "bell on" : "bell off";
 }
 function syncSound(){
   soundBtn.setAttribute("aria-pressed", String(soundOn));
