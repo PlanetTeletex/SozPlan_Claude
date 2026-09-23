@@ -780,7 +780,7 @@ body.sitting .sitting{ border-bottom-color: transparent; }
                min="1" max="59" step="1" value="1">
         <button class="step" id="step-on" type="button" aria-label="A slogan on">&rsaquo;</button>
       </div>
-      <button class="btn" id="draw" type="button">Draw another</button>
+      <button class="btn" id="draw" type="button">Random slogan</button>
       <button class="btn secondary" id="adopt" type="button" hidden>Carry on from here</button>
       <button class="btn secondary" id="back-to-today" type="button" hidden>Today's slogan</button>
     </div>
@@ -1245,7 +1245,7 @@ function show(index, mode){
   sourceEl.textContent = "Point " + s.point.roman + " — " + s.point.title;
   const isToday = mode === "today";
   backBtn.hidden = isToday;
-  adoptBtn.hidden = isToday;
+  adoptBtn.hidden = mode !== "found";   // a random draw is browsing, not a move
   picker.hidden = !isToday;
   if (isToday && document.activeElement !== sloganNo){
     sloganNo.value = String(SLOGANS[todayIndex].n);
@@ -1339,7 +1339,7 @@ POINTS.forEach((pt, pi) => {
       btn.querySelector(".line").textContent = s[1];
       btn.querySelector(".gloss").textContent = s[2];
       btn.addEventListener("click", () => {
-        show(idx, "drawn");
+        show(idx, "found");
         goTo("today");
       });
       li.appendChild(btn);
