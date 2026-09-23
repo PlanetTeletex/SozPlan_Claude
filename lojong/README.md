@@ -17,13 +17,14 @@ so each function is reached directly instead of scrolled to.
   is kept in `localStorage` (`lojong.start`); if storage is unavailable the app
   counts from a fixed date instead, so the sequence still advances. `Draw another`
   pulls a random one; `Today's slogan` returns to the day's.
-- **Where you actually are** — `‹` and `›` beside *Draw another* move the
-  sequence on or back a slogan at a time, and any slogan reached by drawing or
-  from the list offers `Carry on from here`, which makes it today's. Either way
-  the position is kept and the daily count carries on from there: the slogan is
-  derived from the starting day, so moving n places on is a start n days earlier.
-  Deleting a home screen entry can take that storage with it — this is how the
-  place is found again without stepping through the lot.
+- **Where you actually are** — the slogan number sits beside *Draw another*
+  between `‹` and `›`, and it is the control: step it one at a time, or type the
+  number you are on. A slogan reached by drawing or from the list also offers
+  `Carry on from here`. However it is set, the position is kept and the daily
+  count carries on from there, because the slogan is derived from the starting
+  day: moving n places on is a start n days earlier, so there is still only one
+  value to keep. Deleting a home screen entry can take that storage with it —
+  this is how the place is found again in one go.
 - **All 59 slogans on one page**, grouped under the seven points (point two split
   into absolute and relative bodhichitta), in the *Seven Points* view. Tap any
   slogan to bring it to *Today*.

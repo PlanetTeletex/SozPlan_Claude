@@ -338,6 +338,30 @@ img{ max-width: 100%; }
   color: var(--ink-faint);
   pointer-events: none;
 }
+/* where in the 59 the practice stands: the number is the control */
+.picker{
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+}
+.pick-no{
+  width: 3.1rem;
+  height: 2.15rem;
+  text-align: center;
+  font-family: Spectral, Georgia, serif;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  appearance: none;
+  -moz-appearance: textfield;
+}
+.pick-no:focus{ border-color: var(--lapis); }
+.pick-no::-webkit-outer-spin-button,
+.pick-no::-webkit-inner-spin-button{ appearance: none; margin: 0; }
+
 /* stepping the sequence on or back by one */
 .step{
   appearance: none;
@@ -749,9 +773,14 @@ body.sitting .sitting{ border-bottom-color: transparent; }
     <p class="note" id="featured-note"></p>
     <button class="source" id="featured-source" type="button"></button>
     <div class="actions">
-      <button class="step" id="step-back" type="button" aria-label="A slogan back">&lsaquo;</button>
+      <div class="picker" id="picker">
+        <button class="step" id="step-back" type="button" aria-label="A slogan back">&lsaquo;</button>
+        <label class="sr-only" for="slogan-no">Slogan number</label>
+        <input class="pick-no" id="slogan-no" type="number" inputmode="numeric"
+               min="1" max="59" step="1" value="1">
+        <button class="step" id="step-on" type="button" aria-label="A slogan on">&rsaquo;</button>
+      </div>
       <button class="btn" id="draw" type="button">Draw another</button>
-      <button class="step" id="step-on" type="button" aria-label="A slogan on">&rsaquo;</button>
       <button class="btn secondary" id="adopt" type="button" hidden>Carry on from here</button>
       <button class="btn secondary" id="back-to-today" type="button" hidden>Today's slogan</button>
     </div>
@@ -1091,6 +1120,8 @@ const earlierList = document.getElementById("earlier-list");
 const adoptBtn = document.getElementById("adopt");
 const stepBack = document.getElementById("step-back");
 const stepOn = document.getElementById("step-on");
+const picker = document.getElementById("picker");
+const sloganNo = document.getElementById("slogan-no");
 
 /* Slogan 1 on the first day the app is opened, the next one each day after,
    wrapping round after 59. Dates are compared as plain calendar days, so a
@@ -1215,8 +1246,10 @@ function show(index, mode){
   const isToday = mode === "today";
   backBtn.hidden = isToday;
   adoptBtn.hidden = isToday;
-  stepBack.hidden = !isToday;
-  stepOn.hidden = !isToday;
+  picker.hidden = !isToday;
+  if (isToday && document.activeElement !== sloganNo){
+    sloganNo.value = String(SLOGANS[todayIndex].n);
+  }
   document.querySelectorAll(".row").forEach(row => {
     row.setAttribute("aria-current", Number(row.dataset.index) === index ? "true" : "false");
   });
@@ -1242,6 +1275,19 @@ backBtn.addEventListener("click", () => show(todayIndex, "today"));
 adoptBtn.addEventListener("click", () => anchorTo(current));
 stepBack.addEventListener("click", () => anchorTo(todayIndex - 1));
 stepOn.addEventListener("click", () => anchorTo(todayIndex + 1));
+function jumpToTyped(){
+  const n = Math.round(Number(sloganNo.value));
+  if (!Number.isFinite(n) || n < 1 || n > SLOGANS.length){   // out of range: put it back
+    sloganNo.value = String(SLOGANS[todayIndex].n);
+    return;
+  }
+  if (n - 1 !== todayIndex) anchorTo(n - 1);
+}
+sloganNo.addEventListener("keydown", ev => {
+  if (ev.key === "Enter"){ ev.preventDefault(); sloganNo.blur(); }
+});
+sloganNo.addEventListener("blur", jumpToTyped);
+sloganNo.addEventListener("focus", () => sloganNo.select());
 function prefersReducedMotion(){
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
