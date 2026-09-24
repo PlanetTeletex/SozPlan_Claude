@@ -16,21 +16,16 @@ so each function is reached directly instead of scrolled to.
   opened, the next one each day after, wrapping round after 59. The starting day
   is kept in `localStorage` (`lojong.start`); if storage is unavailable the app
   counts from a fixed date instead, so the sequence still advances. `Random slogan`
-  pulls one to sit with without moving the sequence; `Today's slogan` returns to
-  the day's.
-- **Where you actually are** — the slogan number sits beside *Random slogan*
-  between `‹` and `›`, and it is the control: step it one at a time, or type the
-  number you are on. A slogan found in the list also offers `Carry on from here`,
-  to move the sequence there; a random draw does not, since drawing is meant for
-  browsing, not for setting where the practice stands, and offers only
-  `Today's slogan` to return. However the position is set, it is kept and the
-  daily count carries on from there, because the slogan is derived from the
-  starting day: moving n places on is a start n days earlier, so there is still
-  only one value to keep. Deleting a home screen entry can take that storage
-  with it — this is how the place is found again in one go.
+  pulls one to sit with without moving the sequence, and offers `Today's slogan`
+  to return; *Today* itself carries no other control, so a slogan sat with by
+  chance is never mistaken for where the practice stands.
 - **All 59 slogans on one page**, grouped under the seven points (point two split
-  into absolute and relative bodhichitta), in the *Seven Points* view. Tap any
-  slogan to bring it to *Today*.
+  into absolute and relative bodhichitta), in the *Seven Points* view. Tapping
+  any slogan there makes it today's outright: the app is derived from a starting
+  day rather than a stored position — a slogan n places on is a start n days
+  earlier — so tapping one sets that day and the daily count carries on from
+  there. Deleting a home screen entry can take that day with it; this is how
+  the place is found again, in one tap rather than fifty-eight.
 - **An evening note** — one line under the day's slogan, *Where did it meet you
   today?*, kept in `localStorage` under that slogan. When the slogan comes round
   again 59 days later, the earlier entries are waiting beneath it. This is the
