@@ -613,6 +613,34 @@ img{ max-width: 100%; }
   transition: opacity .3s;
 }
 .evening-status.on{ opacity: 1; }
+.notes-backup{
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 1.6rem 0 0;
+}
+.notes-backup .dot{ color: var(--ink-faint); }
+.link-btn{
+  font: inherit;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-size: .78rem;
+  letter-spacing: .09em;
+  color: var(--ink-faint);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  padding: 0 0 2px;
+  cursor: pointer;
+  transition: color .18s, border-color .18s;
+}
+.link-btn:hover{ color: var(--ink-soft); border-bottom-color: var(--rule); }
+.backup-hint{
+  margin: .35rem 0 0;
+  font-family: "Alegreya Sans SC", "Alegreya Sans", sans-serif;
+  font-size: .72rem;
+  letter-spacing: .1em;
+  color: var(--ink-faint);
+}
 .earlier{ margin-top: 1.7rem; }
 .earlier-list{
   list-style: none;
@@ -745,6 +773,13 @@ body.sitting .sitting{ border-bottom-color: transparent; }
         <p class="eyebrow">When this one last came round</p>
         <ul class="earlier-list" id="earlier-list"></ul>
       </div>
+      <div class="notes-backup">
+        <button class="link-btn" id="notes-export" type="button">Back up notes</button>
+        <span class="dot" aria-hidden="true">&middot;</span>
+        <button class="link-btn" id="notes-import-btn" type="button">Restore notes</button>
+        <input type="file" id="notes-import" accept="application/json,.json" hidden>
+      </div>
+      <p class="backup-hint" id="backup-status" aria-live="polite">Kept only on this device.</p>
     </section>
   </div>
   </section>
@@ -1067,6 +1102,10 @@ const noteInput   = document.getElementById("evening-note");
 const noteStatus  = document.getElementById("evening-status");
 const earlierBox  = document.getElementById("earlier");
 const earlierList = document.getElementById("earlier-list");
+const exportNotesBtn = document.getElementById("notes-export");
+const importNotesBtn = document.getElementById("notes-import-btn");
+const importNotesInput = document.getElementById("notes-import");
+const backupStatus = document.getElementById("backup-status");
 
 
 /* Slogan 1 on the first day the app is opened, the next one each day after,
@@ -1137,6 +1176,71 @@ function flushNote(){
   clearTimeout(noteTimer); noteTimer = null;
   if (noteFor !== null) saveNoteFor(noteFor, noteInput.value);
 }
+
+/* ---- backing up the evening notes --------------------------------------
+   Redeploys don't touch localStorage, but reinstalling the app — deleting
+   a home screen entry does that — wipes it, and the notes have no other
+   copy anywhere. Export writes every entry to a file; import merges it
+   back in, a date at a time, without overwriting what is already here. */
+let backupTimer = null;
+function flashBackupStatus(msg){
+  backupStatus.textContent = msg;
+  clearTimeout(backupTimer);
+  backupTimer = setTimeout(() => { backupStatus.textContent = "Kept only on this device."; }, 3600);
+}
+function countEntries(notes){
+  return Object.values(notes).reduce((n, list) => n + (Array.isArray(list) ? list.length : 0), 0);
+}
+exportNotesBtn.addEventListener("click", () => {
+  flushNote();
+  const notes = readNotes();
+  const count = countEntries(notes);
+  if (!count){ flashBackupStatus("Nothing written yet."); return; }
+  const blob = new Blob([JSON.stringify({ v: 1, app: "lojong", notes: notes }, null, 2)],
+                         { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "lojong-notes-" + isoToday() + ".json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  flashBackupStatus(count + (count === 1 ? " entry backed up." : " entries backed up."));
+});
+importNotesBtn.addEventListener("click", () => importNotesInput.click());
+importNotesInput.addEventListener("change", ev => {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let added = 0;
+    try {
+      const data = JSON.parse(String(reader.result));
+      const incoming = data && data.notes && typeof data.notes === "object" ? data.notes : null;
+      if (!incoming) throw new Error("not a notes backup");
+      const current = readNotes();
+      for (const n of Object.keys(incoming)){
+        const list = incoming[n];
+        if (!Array.isArray(list)) continue;
+        const existing = current[n] || [];
+        const haveDates = new Set(existing.map(e => e.d));
+        for (const entry of list){
+          if (!entry || typeof entry.d !== "string" || typeof entry.t !== "string") continue;
+          if (haveDates.has(entry.d)) continue;      // this device's own entry wins
+          existing.push({ d: entry.d, t: entry.t });
+          haveDates.add(entry.d);
+          added++;
+        }
+        if (existing.length) current[n] = existing;
+      }
+      store.set(NOTES_KEY, JSON.stringify(current));
+      if (noteFor !== null) loadNote(noteFor);        // refresh what's on screen
+      flashBackupStatus(added + (added === 1 ? " entry restored." : " entries restored."));
+    } catch {
+      flashBackupStatus("That file couldn't be read.");
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = "";
+});
 function flash(word){
   noteStatus.textContent = word;
   noteStatus.classList.add("on");
