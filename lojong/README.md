@@ -30,6 +30,13 @@ so each function is reached directly instead of scrolled to.
   today?*, kept in `localStorage` under that slogan. When the slogan comes round
   again 59 days later, the earlier entries are waiting beneath it. This is the
   second half of slogan 41, which the app otherwise left out.
+- **Back up notes / Restore notes**, two quiet links under the evening note.
+  Redeploying the app does not touch `localStorage`, but reinstalling it —
+  deleting a home screen entry does that — wipes it, and the notes have no
+  other copy anywhere. Back up writes every entry to a dated JSON file;
+  restoring merges it back in, one date at a time, without overwriting
+  what is already on the device — so restoring an old file after writing
+  something new can only add what is missing, never replace it.
 - **A way into the context** — the point line under the day's slogan leads to that
   slogan's place among its neighbours in the list.
 - **Search** — a filter over the 59, for when a situation is already there and you
