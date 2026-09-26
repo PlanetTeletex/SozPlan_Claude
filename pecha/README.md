@@ -66,6 +66,15 @@ entfernt, also außerhalb des Bereichs, den übliche Drucker nicht bedrucken
 können. Die Randmarken — Foliozahl links, Kürzel rechts — sitzen im Band
 zwischen innerer Linie und Textspiegel, nie auf dem Rahmen.
 
+## Ein eigenes Titelblatt
+
+*Eigenes Titelblatt, mittig* legt dem Text ein eigenes Blatt voran: der
+Titel groß und in beiden Richtungen mittig auf der Seite, die Rückseite
+bleibt leer, der eigentliche Text beginnt sauber auf dem nächsten Blatt.
+Kein Teil des Fließtexts, keine Zeile aus dem gewöhnlichen Zeilenraster —
+ein Titelblatt, wie ein Buch eines hat. Ein sehr langer Titel bricht in
+mehrere Zeilen um, statt über den Rand zu laufen.
+
 ## Spalten je Seite
 
 Klassische Pecha-Bücher setzen kurze Gebete gern nebeneinander statt
