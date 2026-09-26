@@ -107,6 +107,14 @@ Absatz mehr Zeilen braucht, wächst einfach darüber hinaus, statt in die
 Nachbarspalte hinein zu laufen. Zwei Verse stehen dadurch immer nebeneinander,
 ganz gleich wie kurz oder lang jeder für sich ist und was am Regler steht.
 
+Das setzt voraus, dass es überhaupt zwei Absätze gibt. Ein Gebet, das ohne
+Leerzeile am Stück eingefügt wird, ist für die App **ein** Absatz — er füllt
+die erste Spalte, die übrigen bleiben leer. Das ist keine Fehlfunktion,
+sondern folgt direkt aus „ein Absatz, eine Spalte"; nur ist das im Moment
+selbst leicht misszuverstehen, deshalb steht unter den Einstellungen eine
+Zeile, die live mitzählt, wie viele Absätze der Text hat, und in Signalfarbe
+warnt, sobald es weniger sind als eingestellte Spalten.
+
 ## Steuerzeichen im Text
 
 - `---` (eigene Zeile) — Umbruch auf die **nächste Seite**.
