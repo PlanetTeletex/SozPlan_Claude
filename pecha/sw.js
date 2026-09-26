@@ -1,7 +1,7 @@
 /* Pecha — offline support.
    Bump VERSION to retire the old cache; the page itself is fetched
    network-first, so edits reach an installed app as soon as it is online. */
-const VERSION = "2026-09-26-columns";
+const VERSION = "2026-09-26-titlepage";
 const CACHE = "pecha-" + VERSION;
 const CORE = [
   "./", "./index.html", "./manifest.json",
