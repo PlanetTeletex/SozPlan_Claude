@@ -115,6 +115,13 @@ selbst leicht misszuverstehen, deshalb steht unter den Einstellungen eine
 Zeile, die live mitzählt, wie viele Absätze der Text hat, und in Signalfarbe
 warnt, sobald es weniger sind als eingestellte Spalten.
 
+Manchmal sollen aber **zwei** Absätze zusammen in eine einzige Spalte —
+zwei kurze Gebete, die als Paar gelesen werden. Dafür eine Zeile aus `...`
+(drei Punkte, für sich allein) statt der Leerzeile zwischen ihnen: sie
+beendet den ersten Absatz genau wie eine Leerzeile, hält den zweiten aber
+in derselben Spalte fest, mit einer schmalen Leerzeile als Abstand
+dazwischen. Erst ein Absatz *ohne* `...` beginnt wieder eine neue Spalte.
+
 ## Steuerzeichen im Text
 
 - `---` (eigene Zeile) — Umbruch auf die **nächste Seite**.
