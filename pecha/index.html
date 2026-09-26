@@ -135,6 +135,8 @@ details.set[open] > summary::before{content:"▾ "}
 .chk{display:flex;align-items:center;gap:.45rem;font-size:.88rem;color:var(--ink-soft);margin:.3rem 0}
 .chk input{accent-color:var(--maroon)}
 .fmtnote{font-size:.82rem;color:var(--ink-faint);margin:.5rem 0 0}
+.colnote{font-size:.82rem;color:var(--ink-soft);margin:.4rem 0 0}
+.colnote.warn{color:var(--maroon);font-weight:500}
 
 /* ---------- leaf ---------- */
 .stage{overflow:hidden;margin:0 0 1rem}
@@ -332,6 +334,7 @@ details.set[open] > summary::before{content:"▾ "}
         <label class="chk"><input type="checkbox" id="f-cut"> Schnittlinien mitdrucken</label>
         <label class="chk"><input type="checkbox" id="f-short-flip"> Drucker wendet über die <b>kurze</b> Kante</label>
         <p class="fmtnote" id="fmtnote"></p>
+        <p class="colnote" id="colnote" hidden></p>
       </details>
 
       <div class="row" style="margin:0 0 1.4rem">
@@ -944,6 +947,28 @@ function drawPreview(){
     + " mm · " + f.per + " Blätter je A4-Bogen (" +
     (f.orient === "portrait" ? "hoch" : "quer") + ") · " + (f.per - 1) + " Schnitte"
     + (g.columns > 1 ? " · " + g.columns + " Spalten, je Absatz eine" : "");
+
+  /* The single most confusing moment with more than one column: a prayer
+     typed or pasted as one continuous run, with no blank line marking
+     where the next one begins, is — correctly — just one paragraph, so it
+     fills only the first column and leaves the rest empty. That is not a
+     rendering fault, but nothing on screen says so unless this does. */
+  const colnote = document.getElementById("colnote");
+  if (g.columns > 1){
+    const paraCount = parseBody(t.body, t.keepBreaks).filter(p => !p.br).length;
+    colnote.hidden = false;
+    if (paraCount > 0 && paraCount < g.columns){
+      colnote.className = "colnote warn";
+      colnote.textContent = (paraCount === 1 ? "Nur ein Absatz gefunden" : paraCount + " Absätze gefunden")
+        + " — die " + (g.columns - paraCount === 1 ? "übrige Spalte bleibt" : "übrigen Spalten bleiben")
+        + " leer. Eine Leerzeile beginnt eine neue Spalte.";
+    } else {
+      colnote.className = "colnote";
+      colnote.textContent = "Jede Leerzeile im Text beginnt eine neue Spalte.";
+    }
+  } else {
+    colnote.hidden = true;
+  }
 
   const leaves = Math.ceil(sides.length / 2);
   const sheets = Math.ceil(leaves / g.per);
