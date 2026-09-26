@@ -75,6 +75,12 @@ Kein Teil des Fließtexts, keine Zeile aus dem gewöhnlichen Zeilenraster —
 ein Titelblatt, wie ein Buch eines hat. Ein sehr langer Titel bricht in
 mehrere Zeilen um, statt über den Rand zu laufen.
 
+Darunter, kleiner gesetzt, kann ein *Untertitel* stehen — etwa der Autor
+und die Lebensdaten, so wie es zum Beispiel in Thupten Jinpas Büchern oft
+gemacht wird ("Langri Tangpa (1054–1123)"). Das Feld ist optional und
+bleibt leer, solange nichts eingetragen ist; ohne Titel erscheint auch
+kein Untertitel, da es dann gar kein Titelblatt gibt.
+
 ## Spalten je Seite
 
 Klassische Pecha-Bücher setzen kurze Gebete gern nebeneinander statt

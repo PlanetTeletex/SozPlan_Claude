@@ -163,6 +163,11 @@ details.set[open] > summary::before{content:"▾ "}
   gap:calc(var(--lf-title-pitch) - var(--lf-title-fs))}
 .leaf .titlepage .tl{color:var(--leaf-rule);font-size:var(--lf-title-fs);
   line-height:1.15;font-weight:500;letter-spacing:.02em;text-align:center}
+.leaf .titlepage .tls-group{display:flex;flex-direction:column;align-items:center;
+  gap:calc(var(--lf-subtitle-pitch) - var(--lf-subtitle-fs));
+  margin-top:calc(var(--lf-title-fs) * .5)}
+.leaf .titlepage .tls{color:var(--leaf-ink);opacity:.75;font-size:var(--lf-subtitle-fs);
+  line-height:1.15;letter-spacing:.02em;text-align:center}
 .leaf .ln{height:var(--lf-pitch);line-height:var(--lf-pitch);font-size:var(--lf-fs);
   white-space:nowrap;overflow:hidden}
 .leaf .ln.j{display:flex;justify-content:space-between}
@@ -299,6 +304,8 @@ details.set[open] > summary::before{content:"▾ "}
     <div id="editor" hidden>
       <label class="f"><span>Titel</span>
         <input type="text" id="f-title" placeholder="Die vier Unermesslichen"></label>
+      <label class="f"><span>Untertitel auf dem Titelblatt (optional)</span>
+        <input type="text" id="f-subtitle" placeholder="z. B. Autor, Lebensdaten"></label>
       <label class="f"><span>Kürzel im Blattrand (optional)</span>
         <input type="text" id="f-short" placeholder="z. B. IMM" maxlength="8"></label>
       <label class="f"><span>Text</span>
@@ -399,7 +406,7 @@ function newText(fmt){
   const f = FORMATS[fmt] || FORMATS.C;
   return {
     id: "t" + Date.now().toString(36) + Math.random().toString(36).slice(2,7),
-    title: "", short: "", body: "",
+    title: "", subtitle: "", short: "", body: "",
     format: fmt || "C", lines: f.lines, fs: f.fs, ml: f.ml, lh: 2, columns: 1,
     keepBreaks: true, justify: false, showTitle: true,
     created: Date.now(), updated: Date.now()
@@ -527,13 +534,15 @@ function geometry(t){
   const colGap = columns > 1 ? blockW * 0.06 : 0;
   const colW = (blockW - colGap * (columns - 1)) / columns;
   const titleFs = t.fs * 2;
+  const subtitleFs = t.fs * 1.15;
   return {
     w: f.w, h: f.h, per: f.per, orient: f.orient, name: f.name,
     ml: t.ml, fs: t.fs, lh: t.lh, pitch,
     blockW, columns, colGap, colW,
     mt: Math.max(3, (f.h - t.lines * pitch) / 2),
     lines: t.lines,
-    titleFs, titlePitch: titleFs * t.lh
+    titleFs, titlePitch: titleFs * t.lh,
+    subtitleFs, subtitlePitch: subtitleFs * t.lh
   };
 }
 
@@ -546,8 +555,17 @@ function composeTitlePage(t, g){
   meas.style.width = g.blockW + "mm";
   meas.style.fontSize = g.titleFs + "mm";
   meas.style.lineHeight = g.titlePitch + "mm";
-  const longWord = Math.max(6, Math.round(g.blockW / (g.titleFs * 0.5) / 2));
-  return splitPara(t.title.trim(), longWord);
+  const titleLongWord = Math.max(6, Math.round(g.blockW / (g.titleFs * 0.5) / 2));
+  const title = splitPara(t.title.trim(), titleLongWord);
+
+  let subtitle = null;
+  if (t.subtitle && t.subtitle.trim()){
+    meas.style.fontSize = g.subtitleFs + "mm";
+    meas.style.lineHeight = g.subtitlePitch + "mm";
+    const subLongWord = Math.max(8, Math.round(g.blockW / (g.subtitleFs * 0.5) / 2));
+    subtitle = splitPara(t.subtitle.trim(), subLongWord);
+  }
+  return { title, subtitle };
 }
 
 /* The whole text as a list of leaf sides. With one column a side is a flat
@@ -558,7 +576,7 @@ function composeTitlePage(t, g){
    a paragraph has always been allowed to spill across sides. */
 function compose(t){
   const g = geometry(t);
-  const titleLines = composeTitlePage(t, g);   // measures at its own, larger size
+  const titlePage = composeTitlePage(t, g);   // measures at its own, larger size
 
   const width = g.columns > 1 ? g.colW : g.blockW;
   meas.style.width = width + "mm";
@@ -625,7 +643,7 @@ function compose(t){
   while (boxes.length % g.columns) boxes.push([]);
 
   const sides = [];
-  if (titleLines){ sides.push({ title: titleLines }); sides.push([]); }  // leaf 1, blank verso
+  if (titlePage){ sides.push(titlePage); sides.push([]); }  // leaf 1, blank verso
   for (let i = 0; i < boxes.length; i += g.columns) sides.push(boxes.slice(i, i + g.columns));
   return { sides, g };
 }
@@ -643,6 +661,8 @@ function leafEl(buckets, g, folio, short, justify){
   s.setProperty("--lf-pitch", g.pitch + "mm");
   s.setProperty("--lf-title-fs", g.titleFs + "mm");
   s.setProperty("--lf-title-pitch", g.titlePitch + "mm");
+  s.setProperty("--lf-subtitle-fs", g.subtitleFs + "mm");
+  s.setProperty("--lf-subtitle-pitch", g.subtitlePitch + "mm");
 
   const rules = document.createElement("div");
   rules.className = "rules";
@@ -676,6 +696,17 @@ function leafEl(buckets, g, folio, short, justify){
       tl.textContent = line;
       page.appendChild(tl);
     });
+    if (buckets.subtitle && buckets.subtitle.length){
+      const group = document.createElement("div");
+      group.className = "tls-group";
+      buckets.subtitle.forEach(line => {
+        const tls = document.createElement("div");
+        tls.className = "tls";
+        tls.textContent = line;
+        group.appendChild(tls);
+      });
+      page.appendChild(group);
+    }
     el.appendChild(page);
     return el;
   }
@@ -856,6 +887,7 @@ document.getElementById("import").addEventListener("change", ev => {
    ============================================================ */
 const F = {
   title: document.getElementById("f-title"),
+  subtitle: document.getElementById("f-subtitle"),
   short: document.getElementById("f-short"),
   body:  document.getElementById("f-body"),
   format:document.getElementById("f-format"),
@@ -873,6 +905,7 @@ const F = {
 
 function fillForm(t){
   F.title.value = t.title;
+  F.subtitle.value = t.subtitle || "";
   F.short.value = t.short;
   F.body.value = t.body;
   F.format.value = t.format;
@@ -890,6 +923,7 @@ function fillForm(t){
 
 function readForm(t){
   t.title = F.title.value;
+  t.subtitle = F.subtitle.value;
   t.short = F.short.value;
   t.body = F.body.value;
   t.format = F.format.value;
@@ -1013,7 +1047,7 @@ function drawPreview(){
   });
 }
 
-[F.title, F.short, F.body].forEach(el => el.addEventListener("input", touch));
+[F.title, F.subtitle, F.short, F.body].forEach(el => el.addEventListener("input", touch));
 [F.lines, F.fs, F.ml, F.lh].forEach(el => el.addEventListener("input", touch));
 [F.keep, F.just, F.titleOn, F.cut, F.shortFlip].forEach(el => el.addEventListener("change", touch));
 F.format.addEventListener("change", () => {
