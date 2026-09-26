@@ -98,10 +98,14 @@ Eine Spalte ist nur noch halb (bei zwei) oder ein Drittel (bei drei) so
 breit wie die ganze Seite — derselbe Vers braucht darin entsprechend mehr
 Zeilen. Deshalb springt *Zeilen je Seite* beim Umschalten der Spaltenzahl
 automatisch mit (Basiswert des Formats mal Spaltenzahl), sichtbar am
-Regler, und lässt sich von dort aus weiter von Hand anpassen. Ohne das
-würde ein einzelner Vers oft beide Spalten für sich allein verbrauchen,
-statt neben einem zweiten zu stehen — genau das Bild, das ein Pecha nicht
-zeigen soll.
+Regler, und lässt sich von dort aus weiter von Hand anpassen.
+
+Wichtiger als der Startwert: **ein Absatz wird bei Mehrspaltigkeit nie an
+der Zeilengrenze zerschnitten.** *Zeilen je Seite* bestimmt hier nur noch,
+wie viel Weißraum eine kurze Spalte mindestens bekommt — eine Spalte, deren
+Absatz mehr Zeilen braucht, wächst einfach darüber hinaus, statt in die
+Nachbarspalte hinein zu laufen. Zwei Verse stehen dadurch immer nebeneinander,
+ganz gleich wie kurz oder lang jeder für sich ist und was am Regler steht.
 
 ## Steuerzeichen im Text
 
