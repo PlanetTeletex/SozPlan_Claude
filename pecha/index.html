@@ -318,7 +318,7 @@ details.set[open] > summary::before{content:"▾ "}
               <option value="3">3 Spalten</option>
             </select></label>
           <label class="sl"><span>Zeilen je Seite <b id="v-lines"></b></span>
-            <input type="range" id="f-lines" min="3" max="12" step="1"></label>
+            <input type="range" id="f-lines" min="3" max="18" step="1"></label>
           <label class="sl"><span>Schrift <b id="v-fs"></b></span>
             <input type="range" id="f-fs" min="3" max="14" step="0.1"></label>
           <label class="sl"><span>Seitenrand <b id="v-ml"></b></span>
@@ -956,12 +956,28 @@ function drawPreview(){
 
 [F.title, F.short, F.body].forEach(el => el.addEventListener("input", touch));
 [F.lines, F.fs, F.ml, F.lh].forEach(el => el.addEventListener("input", touch));
-[F.keep, F.just, F.titleOn, F.cut, F.shortFlip, F.columns].forEach(el => el.addEventListener("change", touch));
+[F.keep, F.just, F.titleOn, F.cut, F.shortFlip].forEach(el => el.addEventListener("change", touch));
 F.format.addEventListener("change", () => {
   if (!current) return;
   const f = FORMATS[F.format.value];
   current.format = F.format.value;
-  current.lines = f.lines; current.fs = f.fs; current.ml = f.ml; current.lh = 2;
+  current.lines = Math.min(18, f.lines * (current.columns || 1));
+  current.fs = f.fs; current.ml = f.ml; current.lh = 2;
+  fillForm(current);
+  touch();
+});
+/* A column is roughly 1/columns as wide, so the same prayer needs roughly
+   that many times as many wrapped rows to fit without spilling into its
+   neighbour — the failure mode was a verse eating both columns of a side
+   for itself, leaving nothing for the verse that should stand beside it.
+   Scaling the row budget with the column count keeps that from being the
+   default outcome; the slider still overrides it afterwards. */
+F.columns.addEventListener("change", () => {
+  if (!current) return;
+  const cols = +F.columns.value;
+  const base = (FORMATS[current.format] || FORMATS.C).lines;
+  current.columns = cols;
+  current.lines = Math.min(18, base * cols);
   fillForm(current);
   touch();
 });
