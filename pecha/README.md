@@ -66,15 +66,39 @@ entfernt, also außerhalb des Bereichs, den übliche Drucker nicht bedrucken
 können. Die Randmarken — Foliozahl links, Kürzel rechts — sitzen im Band
 zwischen innerer Linie und Textspiegel, nie auf dem Rahmen.
 
+## Spalten je Seite
+
+Klassische Pecha-Bücher setzen kurze Gebete gern nebeneinander statt
+untereinander — ein knappes Vers neben dem nächsten, statt jedes für sich
+eine halbe Seite Leerraum unter sich zu haben. Dafür gibt es *Spalten je
+Seite*: 1, 2 oder 3.
+
+Die Regel ist denkbar einfach: **jeder Absatz bekommt seine eigene Spalte**,
+sobald mehr als eine Spalte eingestellt ist. Absätze füllen die Spalten von
+links nach rechts, dann das nächste Blatt. Ist ein Absatz zu lang für die
+eingestellte Zeilenzahl, läuft der Rest ohne erneute Überschrift in die
+nächste freie Spalte weiter — nichts geht verloren, nur die Stelle
+verschiebt sich. Passt ein Vers nicht vollständig auf eine Seite, hilft es,
+*Zeilen je Seite* zu erhöhen oder die Schrift zu verkleinern, bis er ganz in
+eine Spalte passt.
+
+Bei einer Spalte (der Voreinstellung) ändert sich nichts: Absätze laufen wie
+gewohnt fortlaufend durch, mehrere pro Seite, wie bisher.
+
 ## Steuerzeichen im Text
 
 - `---` (eigene Zeile) — Umbruch auf die **nächste Seite**.
 - `===` (eigene Zeile) — Beginn eines **neuen Blattes**; die Rückseite davor
   bleibt leer, damit sich ein Gebet als eigener Stapel herausnehmen lässt.
 
-Leerzeilen trennen Absätze. Ist *Zeilenumbrüche aus der Vorlage beibehalten*
-gesetzt (Voreinstellung), beginnt jede Eingabezeile eine neue Ausgabezeile —
-so bleibt die Versgliederung erhalten, die man beim Rezitieren braucht.
+Leerzeilen trennen Absätze — das ist zugleich die Spaltengrenze bei mehr als
+einer Spalte. Ist *Zeilenumbrüche aus der Vorlage beibehalten* gesetzt
+(Voreinstellung), behält innerhalb eines Absatzes jede Eingabezeile ihr
+eigenes Zeilenende, statt zu einem Fließtext zusammengefasst zu werden — ein
+vierzeiliger Vers bleibt so eine Spalte, solange zwischen seinen vier Zeilen
+keine Leerzeile steht, aber jede seiner vier Zeilen behält ihren eigenen
+Umbruch (wichtig für die Versgliederung beim Rezitieren, und dafür, dass
+Blocksatz eine Verszeile nie über die ganze Spaltenbreite auseinanderzieht).
 
 ## Zählung
 

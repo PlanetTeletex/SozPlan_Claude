@@ -153,7 +153,9 @@ details.set[open] > summary::before{content:"▾ "}
   font-size:calc(var(--lf-fs) * .42);letter-spacing:.03em;line-height:1.2}
 .leaf .mark.l{left:calc(var(--lf-ml) * .5)}
 .leaf .mark.r{right:calc(var(--lf-ml) * .5)}
-.leaf .block{position:absolute;left:var(--lf-ml);right:var(--lf-ml);top:var(--lf-mt)}
+.leaf .blockrow{position:absolute;left:var(--lf-ml);right:var(--lf-ml);top:var(--lf-mt);
+  display:flex}
+.leaf .block{flex:1 1 0;min-width:0}
 .leaf .ln{height:var(--lf-pitch);line-height:var(--lf-pitch);font-size:var(--lf-fs);
   white-space:nowrap;overflow:hidden}
 .leaf .ln.j{display:flex;justify-content:space-between}
@@ -304,6 +306,12 @@ details.set[open] > summary::before{content:"▾ "}
               <option value="A">A — Groß</option>
               <option value="B">B — Klassisch schmal</option>
             </select></label>
+          <label class="f" style="margin:0"><span>Spalten je Seite</span>
+            <select id="f-columns">
+              <option value="1">1 Spalte</option>
+              <option value="2">2 Spalten</option>
+              <option value="3">3 Spalten</option>
+            </select></label>
           <label class="sl"><span>Zeilen je Seite <b id="v-lines"></b></span>
             <input type="range" id="f-lines" min="3" max="12" step="1"></label>
           <label class="sl"><span>Schrift <b id="v-fs"></b></span>
@@ -384,7 +392,7 @@ function newText(fmt){
   return {
     id: "t" + Date.now().toString(36) + Math.random().toString(36).slice(2,7),
     title: "", short: "", body: "",
-    format: fmt || "C", lines: f.lines, fs: f.fs, ml: f.ml, lh: 2,
+    format: fmt || "C", lines: f.lines, fs: f.fs, ml: f.ml, lh: 2, columns: 1,
     keepBreaks: true, justify: false, showTitle: true,
     created: Date.now(), updated: Date.now()
   };
@@ -470,19 +478,27 @@ function splitPara(text, longWord){
 
 /* Raw text -> paragraphs, honouring the --- leaf break */
 function parseBody(body, keepBreaks){
+  /* A paragraph is a run of source lines with no blank line between them —
+     a verse typed across several lines stays one paragraph, one column, even
+     with hard line breaks kept. Each paragraph carries its own list of lines:
+     several, one per source line, when those breaks are kept; one, the whole
+     run joined and left to wrap, otherwise. */
   const out = [];
-  let buf = [];
+  let hard = [], soft = [];
   const flush = () => {
-    if (!buf.length) return;
-    out.push({ text: buf.join(" ").replace(/\s+/g, " ").trim() });
-    buf = [];
+    if (keepBreaks){
+      if (hard.length){ out.push({ lines: hard }); hard = []; }
+    } else if (soft.length){
+      out.push({ lines: [soft.join(" ").replace(/\s+/g, " ").trim()] });
+      soft = [];
+    }
   };
   for (const line of String(body || "").replace(/\r\n?/g, "\n").split("\n")){
     if (/^\s*-{3,}\s*$/.test(line)){ flush(); out.push({ br:"side" }); continue; }
     if (/^\s*={3,}\s*$/.test(line)){ flush(); out.push({ br:"leaf" }); continue; }
     if (!line.trim()){ flush(); continue; }
-    if (keepBreaks){ flush(); out.push({ text: line.replace(/\s+/g, " ").trim() }); }
-    else buf.push(line.trim());
+    if (keepBreaks) hard.push(line.replace(/\s+/g, " ").trim());
+    else soft.push(line.trim());
   }
   flush();
   return out;
@@ -491,56 +507,83 @@ function parseBody(body, keepBreaks){
 function geometry(t){
   const f = FORMATS[t.format] || FORMATS.C;
   const pitch = t.fs * t.lh;
+  const blockW = f.w - 2 * t.ml;
+  const columns = Math.max(1, Math.min(3, Math.round(t.columns) || 1));
+  const colGap = columns > 1 ? blockW * 0.06 : 0;
+  const colW = (blockW - colGap * (columns - 1)) / columns;
   return {
     w: f.w, h: f.h, per: f.per, orient: f.orient, name: f.name,
     ml: t.ml, fs: t.fs, lh: t.lh, pitch,
-    blockW: f.w - 2 * t.ml,
+    blockW, columns, colGap, colW,
     mt: Math.max(3, (f.h - t.lines * pitch) / 2),
     lines: t.lines
   };
 }
 
-/* The whole text as a list of leaf sides, each a list of lines */
+/* The whole text as a list of leaf sides. With one column a side is a flat
+   run of lines, exactly as before. With more than one, each paragraph gets
+   its own column ("box") — the way the reference pecha pairs short prayers
+   side by side — and boxes are grouped `columns` at a time into a side. A
+   paragraph too long for one box simply spills into the next, the same way
+   a paragraph has always been allowed to spill across sides. */
 function compose(t){
   const g = geometry(t);
-  meas.style.width = g.blockW + "mm";
+  const width = g.columns > 1 ? g.colW : g.blockW;
+  meas.style.width = width + "mm";
   meas.style.fontSize = g.fs + "mm";
   meas.style.lineHeight = g.pitch + "mm";
 
   const paras = [];
-  if (t.showTitle && t.title.trim()) paras.push({ text: t.title.trim(), cls: "t" });
+  if (t.showTitle && t.title.trim()) paras.push({ lines: [t.title.trim()], cls: "t" });
   paras.push(...parseBody(t.body, t.keepBreaks));
 
   /* a word wider than half the column must be breakable, or its line would
      be set wider than the leaf and clipped */
-  const longWord = Math.max(8, Math.round(g.blockW / (g.fs * 0.5) / 2));
+  const longWord = Math.max(8, Math.round(width / (g.fs * 0.5) / 2));
 
   const lines = [];
   for (const p of paras){
     if (p.br){ lines.push({ br: p.br }); continue; }
-    const parts = splitPara(p.text, longWord);
-    parts.forEach((s, i) => lines.push({ text:s, cls:p.cls || "", last: i === parts.length - 1 }));
+    p.lines.forEach((raw, li) => {
+      const parts = splitPara(raw, longWord);
+      parts.forEach((s, i) => lines.push({
+        text: s, cls: p.cls || "",
+        last: i === parts.length - 1,        // still exempts a hard line's own end from justify
+        paraStart: li === 0 && i === 0        // only the paragraph's very first output line
+      }));
+    });
   }
 
-  const sides = [];
+  const boxes = [];
   let cur = [];
-  const endSide = () => { sides.push(cur); cur = []; };
+  const endBox = () => { boxes.push(cur); cur = []; };
   for (const ln of lines){
-    if (ln.br){
-      if (cur.length) endSide();
-      /* === starts a new leaf, so the verso of the one before stays blank */
-      if (ln.br === "leaf" && sides.length % 2) endSide();
+    if (ln.br === "side"){
+      if (cur.length) endBox();
+      while (boxes.length % g.columns) boxes.push([]);
       continue;
     }
-    if (cur.length >= g.lines) endSide();
+    if (ln.br === "leaf"){
+      if (cur.length) endBox();
+      /* a new leaf's recto must land on an even side, so pad to a whole
+         pair of sides' worth of boxes */
+      while (boxes.length % (g.columns * 2)) boxes.push([]);
+      continue;
+    }
+    if (g.columns > 1 && ln.paraStart && cur.length) endBox();  // a fresh box per paragraph
+    if (cur.length >= g.lines) endBox();
     cur.push(ln);
   }
-  if (cur.length || !sides.length) endSide();
+  if (cur.length || !boxes.length) endBox();
+  while (boxes.length % g.columns) boxes.push([]);
+
+  const sides = [];
+  for (let i = 0; i < boxes.length; i += g.columns) sides.push(boxes.slice(i, i + g.columns));
   return { sides, g };
 }
 
 /* ---------- drawing one leaf ---------- */
-function leafEl(lines, g, folio, short, justify){
+function leafEl(buckets, g, folio, short, justify){
   const el = document.createElement("div");
   el.className = "leaf";
   const s = el.style;
@@ -574,23 +617,29 @@ function leafEl(lines, g, folio, short, justify){
     el.appendChild(r);
   }
 
-  const block = document.createElement("div");
-  block.className = "block";
-  for (let i = 0; i < g.lines; i++){
-    const ln = lines[i];
-    const d = document.createElement("div");
-    d.className = "ln" + (ln && ln.cls ? " " + ln.cls : "");
-    if (!ln){ d.innerHTML = "&nbsp;"; block.appendChild(d); continue; }
-    const words = ln.text.split(" ").filter(Boolean);
-    if (justify && !ln.last && !ln.cls && words.length > 1){
-      d.classList.add("j");
-      words.forEach(w => { const sp = document.createElement("span"); sp.textContent = w; d.appendChild(sp); });
-    } else {
-      d.textContent = ln.text || " ";
+  const row = document.createElement("div");
+  row.className = "blockrow";
+  row.style.gap = g.colGap + "mm";
+  buckets.forEach(bucketLines => {
+    const block = document.createElement("div");
+    block.className = "block";
+    for (let i = 0; i < g.lines; i++){
+      const ln = bucketLines[i];
+      const d = document.createElement("div");
+      d.className = "ln" + (ln && ln.cls ? " " + ln.cls : "");
+      if (!ln){ d.innerHTML = "&nbsp;"; block.appendChild(d); continue; }
+      const words = ln.text.split(" ").filter(Boolean);
+      if (justify && !ln.last && !ln.cls && words.length > 1){
+        d.classList.add("j");
+        words.forEach(w => { const sp = document.createElement("span"); sp.textContent = w; d.appendChild(sp); });
+      } else {
+        d.textContent = ln.text || " ";
+      }
+      block.appendChild(d);
     }
-    block.appendChild(d);
-  }
-  el.appendChild(block);
+    row.appendChild(block);
+  });
+  el.appendChild(row);
   return el;
 }
 
@@ -741,6 +790,7 @@ const F = {
   short: document.getElementById("f-short"),
   body:  document.getElementById("f-body"),
   format:document.getElementById("f-format"),
+  columns: document.getElementById("f-columns"),
   lines: document.getElementById("f-lines"),
   fs:    document.getElementById("f-fs"),
   ml:    document.getElementById("f-ml"),
@@ -757,6 +807,7 @@ function fillForm(t){
   F.short.value = t.short;
   F.body.value = t.body;
   F.format.value = t.format;
+  F.columns.value = t.columns;
   F.lines.value = t.lines;
   F.fs.value = t.fs;
   F.ml.value = t.ml;
@@ -773,6 +824,7 @@ function readForm(t){
   t.short = F.short.value;
   t.body = F.body.value;
   t.format = F.format.value;
+  t.columns = +F.columns.value;
   t.lines = +F.lines.value;
   t.fs = +F.fs.value;
   t.ml = +F.ml.value;
@@ -836,7 +888,8 @@ function drawPreview(){
   document.getElementById("fmtnote").textContent =
     String(f.w).replace(".", ",") + " × " + String(f.h).replace(".", ",")
     + " mm · " + f.per + " Blätter je A4-Bogen (" +
-    (f.orient === "portrait" ? "hoch" : "quer") + ") · " + (f.per - 1) + " Schnitte";
+    (f.orient === "portrait" ? "hoch" : "quer") + ") · " + (f.per - 1) + " Schnitte"
+    + (g.columns > 1 ? " · " + g.columns + " Spalten, je Absatz eine" : "");
 
   const leaves = Math.ceil(sides.length / 2);
   const sheets = Math.ceil(leaves / g.per);
@@ -867,7 +920,7 @@ function drawPreview(){
 
 [F.title, F.short, F.body].forEach(el => el.addEventListener("input", touch));
 [F.lines, F.fs, F.ml, F.lh].forEach(el => el.addEventListener("input", touch));
-[F.keep, F.just, F.titleOn, F.cut, F.shortFlip].forEach(el => el.addEventListener("change", touch));
+[F.keep, F.just, F.titleOn, F.cut, F.shortFlip, F.columns].forEach(el => el.addEventListener("change", touch));
 F.format.addEventListener("change", () => {
   if (!current) return;
   const f = FORMATS[F.format.value];
