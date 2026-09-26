@@ -490,20 +490,27 @@ function parseBody(body, keepBreaks){
      a verse typed across several lines stays one paragraph, one column, even
      with hard line breaks kept. Each paragraph carries its own list of lines:
      several, one per source line, when those breaks are kept; one, the whole
-     run joined and left to wrap, otherwise. */
+     run joined and left to wrap, otherwise.
+
+     Above one column, a paragraph normally starts a fresh column of its
+     own — the point of columns at all. A line of ... between two
+     paragraphs is the one exception: it ends the first exactly like a
+     blank line would, but marks the next as "stack", so compose() keeps
+     it in the very same column instead, stacked below the one before it. */
   const out = [];
-  let hard = [], soft = [];
+  let hard = [], soft = [], stackNext = false;
   const flush = () => {
     if (keepBreaks){
-      if (hard.length){ out.push({ lines: hard }); hard = []; }
+      if (hard.length){ out.push({ lines: hard, stack: stackNext }); hard = []; stackNext = false; }
     } else if (soft.length){
-      out.push({ lines: [soft.join(" ").replace(/\s+/g, " ").trim()] });
-      soft = [];
+      out.push({ lines: [soft.join(" ").replace(/\s+/g, " ").trim()], stack: stackNext });
+      soft = []; stackNext = false;
     }
   };
   for (const line of String(body || "").replace(/\r\n?/g, "\n").split("\n")){
-    if (/^\s*-{3,}\s*$/.test(line)){ flush(); out.push({ br:"side" }); continue; }
-    if (/^\s*={3,}\s*$/.test(line)){ flush(); out.push({ br:"leaf" }); continue; }
+    if (/^\s*-{3,}\s*$/.test(line)){ flush(); out.push({ br:"side" }); stackNext = false; continue; }
+    if (/^\s*={3,}\s*$/.test(line)){ flush(); out.push({ br:"leaf" }); stackNext = false; continue; }
+    if (/^\s*\.{3,}\s*$/.test(line)){ flush(); stackNext = true; continue; }
     if (!line.trim()){ flush(); continue; }
     if (keepBreaks) hard.push(line.replace(/\s+/g, " ").trim());
     else soft.push(line.trim());
@@ -567,12 +574,17 @@ function compose(t){
   const lines = [];
   for (const p of paras){
     if (p.br){ lines.push({ br: p.br }); continue; }
+    /* a stacked paragraph keeps to the column its predecessor is already
+       in — no paraStart, so the box-builder below never starts a fresh
+       one for it — with one blank row ahead of it to set it apart, the
+       way separate paragraphs already read apart in a single column */
+    if (p.stack) lines.push({ text: "", cls: "", last: true, paraStart: false });
     p.lines.forEach((raw, li) => {
       const parts = splitPara(raw, longWord);
       parts.forEach((s, i) => lines.push({
         text: s, cls: p.cls || "",
         last: i === parts.length - 1,        // still exempts a hard line's own end from justify
-        paraStart: li === 0 && i === 0        // only the paragraph's very first output line
+        paraStart: li === 0 && i === 0 && !p.stack   // stacked: stay in the running column
       }));
     });
   }
@@ -955,16 +967,20 @@ function drawPreview(){
      rendering fault, but nothing on screen says so unless this does. */
   const colnote = document.getElementById("colnote");
   if (g.columns > 1){
-    const paraCount = parseBody(t.body, t.keepBreaks).filter(p => !p.br).length;
+    // a stacked paragraph (after a ... line) shares its predecessor's
+    // column rather than starting one of its own, so it doesn't count here
+    const paraCount = parseBody(t.body, t.keepBreaks).filter(p => !p.br && !p.stack).length;
     colnote.hidden = false;
     if (paraCount > 0 && paraCount < g.columns){
       colnote.className = "colnote warn";
       colnote.textContent = (paraCount === 1 ? "Nur ein Absatz gefunden" : paraCount + " Absätze gefunden")
         + " — die " + (g.columns - paraCount === 1 ? "übrige Spalte bleibt" : "übrigen Spalten bleiben")
-        + " leer. Eine Leerzeile beginnt eine neue Spalte.";
+        + " leer. Eine Leerzeile beginnt eine neue Spalte, drei Punkte (…) auf eigener"
+        + " Zeile halten den nächsten Absatz in derselben.";
     } else {
       colnote.className = "colnote";
-      colnote.textContent = "Jede Leerzeile im Text beginnt eine neue Spalte.";
+      colnote.textContent = "Eine Leerzeile beginnt eine neue Spalte; drei Punkte (…) auf eigener"
+        + " Zeile halten den nächsten Absatz in derselben.";
     }
   } else {
     colnote.hidden = true;
