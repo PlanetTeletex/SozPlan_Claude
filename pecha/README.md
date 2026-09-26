@@ -94,6 +94,15 @@ eine Spalte passt.
 Bei einer Spalte (der Voreinstellung) ändert sich nichts: Absätze laufen wie
 gewohnt fortlaufend durch, mehrere pro Seite, wie bisher.
 
+Eine Spalte ist nur noch halb (bei zwei) oder ein Drittel (bei drei) so
+breit wie die ganze Seite — derselbe Vers braucht darin entsprechend mehr
+Zeilen. Deshalb springt *Zeilen je Seite* beim Umschalten der Spaltenzahl
+automatisch mit (Basiswert des Formats mal Spaltenzahl), sichtbar am
+Regler, und lässt sich von dort aus weiter von Hand anpassen. Ohne das
+würde ein einzelner Vers oft beide Spalten für sich allein verbrauchen,
+statt neben einem zweiten zu stehen — genau das Bild, das ein Pecha nicht
+zeigen soll.
+
 ## Steuerzeichen im Text
 
 - `---` (eigene Zeile) — Umbruch auf die **nächste Seite**.
