@@ -190,6 +190,25 @@ details.set[open] > summary::before{content:"▾ "}
 .round:hover{border-color:var(--maroon);color:var(--maroon)}
 .round[disabled]{opacity:.35;cursor:default}
 
+/* ---------- immersive (Vollbild) reading ---------- */
+.immersive-exit{display:none;position:fixed;top:.6rem;left:.6rem;z-index:50;
+  appearance:none;align-items:center;justify-content:center;
+  width:2.3rem;height:2.3rem;border-radius:50%;border:1px solid var(--rule);
+  background:var(--surface);color:var(--ink);font:inherit;font-size:1rem;
+  cursor:pointer;box-shadow:var(--shadow)}
+body.immersive .immersive-exit{display:flex}
+body.immersive header,
+body.immersive nav.tabs{display:none}
+body.immersive main{padding:0}
+body.immersive #view-lesen .wrap{max-width:none;padding:0}
+body.immersive .readbar{display:none}
+body.immersive #read-stage{height:100dvh;height:100vh;display:flex;
+  align-items:center;justify-content:center;touch-action:pan-y}
+body.immersive #read-stage .stage{margin:0}
+body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
+  padding:.7rem 1rem calc(.7rem + env(safe-area-inset-bottom,0));
+  background:linear-gradient(to top, var(--surface) 55%, transparent)}
+
 /* ---------- help ---------- */
 .help{border-top:1px solid var(--rule-soft);margin-top:2.4rem;padding-top:1.2rem;
   font-size:.9rem;color:var(--ink-soft);max-width:40rem}
@@ -360,9 +379,11 @@ details.set[open] > summary::before{content:"▾ "}
 
 <!-- ============ Lesen ============ -->
 <section class="view" id="view-lesen" role="tabpanel" aria-labelledby="tab-lesen" tabindex="-1" hidden>
+  <button class="immersive-exit" id="immersive-exit" type="button" aria-label="Vollbild verlassen">✕</button>
   <div class="wrap">
     <div class="readbar">
       <select id="read-pick" aria-label="Text wählen"></select>
+      <button class="round" id="immersive-enter" type="button" aria-label="Vollbild lesen" title="Vollbild">⤢</button>
     </div>
     <div id="read-stage"></div>
     <div class="nav">
@@ -417,6 +438,7 @@ let lib = loadLib();
 let prefs = loadPrefs();
 let current = null;          // the text open in the editor
 let readIdx = 0;
+let lesenImmersive = true;   // Vollbild is the default whenever the Lesen tab is (re-)entered
 
 function loadLib(){
   try {
@@ -744,10 +766,10 @@ function leafEl(buckets, g, folio, short, justify){
 }
 
 const MM = 96 / 25.4;
-function fitLeaf(el, availPx){
+function fitLeaf(el, availW, availH){
   const wPx = parseFloat(el.style.getPropertyValue("--lf-w")) * MM;
   const hPx = parseFloat(el.style.getPropertyValue("--lf-h")) * MM;
-  const k = Math.min(1, availPx / wPx);
+  const k = Math.min(1, availW / wPx, availH ? availH / hPx : Infinity);
   el.style.transform = "scale(" + k + ")";
   if (el.parentElement) el.parentElement.style.height = (hPx * k) + "px";
 }
@@ -772,7 +794,8 @@ function render(name){
   });
   if (name === "sammlung") drawLib();
   if (name === "setzen") drawEditor();
-  if (name === "lesen") drawReader();
+  if (name === "lesen"){ lesenImmersive = true; drawReader(); }
+  document.body.classList.toggle("immersive", name === "lesen" && lesenImmersive);
   window.scrollTo({ top: 0, behavior: "auto" });
 }
 function goTo(name){
@@ -1258,7 +1281,8 @@ function drawSide(){
   wrap.appendChild(el);
   st.appendChild(wrap);
   stage.appendChild(st);
-  fitLeaf(el, stage.clientWidth || 600);
+  const immersiveNow = document.body.classList.contains("immersive");
+  fitLeaf(el, stage.clientWidth || 600, immersiveNow ? stage.clientHeight : null);
   document.getElementById("read-pos").textContent = "Blatt " + folioOf(readIdx)
     + "  ·  " + (readIdx + 1) + "/" + sides.length;
   document.getElementById("prev").disabled = readIdx === 0;
@@ -1267,8 +1291,48 @@ function drawSide(){
 pick.addEventListener("change", () => { readIdx = 0; drawSide(); });
 document.getElementById("prev").addEventListener("click", () => { readIdx--; drawSide(); });
 document.getElementById("next").addEventListener("click", () => { readIdx++; drawSide(); });
+
+document.getElementById("immersive-enter").addEventListener("click", () => {
+  lesenImmersive = true;
+  document.body.classList.add("immersive");
+  drawSide();
+});
+document.getElementById("immersive-exit").addEventListener("click", () => {
+  lesenImmersive = false;
+  document.body.classList.remove("immersive");
+  drawSide();
+});
+
+/* swipe left/right over the leaf turns the page, the same as the ‹ › buttons */
+(function setupSwipe(){
+  const stage = document.getElementById("read-stage");
+  const THRESH = 40;
+  let sx = null, sy = null, tracking = false;
+  stage.addEventListener("pointerdown", ev => {
+    if (ev.pointerType === "mouse" && ev.button !== 0) return;
+    sx = ev.clientX; sy = ev.clientY; tracking = true;
+  });
+  stage.addEventListener("pointerup", ev => {
+    if (!tracking) return;
+    tracking = false;
+    const dx = ev.clientX - sx, dy = ev.clientY - sy;
+    sx = sy = null;
+    if (Math.abs(dx) <= THRESH || Math.abs(dx) <= Math.abs(dy) * 1.2) return;
+    readIdx += dx < 0 ? 1 : -1;
+    drawSide();
+  });
+  stage.addEventListener("pointercancel", () => { tracking = false; sx = sy = null; });
+})();
+window.addEventListener("resize", () => { if (currentView() === "lesen") drawSide(); });
+
 window.addEventListener("keydown", ev => {
   if (currentView() !== "lesen") return;
+  if (ev.key === "Escape" && document.body.classList.contains("immersive")){
+    lesenImmersive = false;
+    document.body.classList.remove("immersive");
+    drawSide();
+    return;
+  }
   if (ev.target && /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return;
   if (ev.target && ev.target.getAttribute && ev.target.getAttribute("role") === "tab") return;
   if (ev.key === "ArrowRight"){ readIdx++; drawSide(); }

@@ -148,6 +148,18 @@ Blocksatz eine Verszeile nie über die ganze Spaltenbreite auseinanderzieht).
 Blätter werden nach Blatt gezählt, nicht nach Seite: 1a, 1b, 2a, 2b … Bei losen
 Blättern ist die Foliozahl im linken Rand die einzige Ordnung, die der Stapel hat.
 
+## Lesen im Vollbild
+
+Der Reiter *Lesen* öffnet den gewählten Text immer im Vollbild: Kopfzeile und
+Reiterleiste verschwinden, das Blatt füllt den Bildschirm so weit wie sein
+Format es zulässt. Nach vorn und zurück blättert man, wie bei einem echten
+Stapel loser Blätter, mit einer Wischgeste über das Blatt — nach links für
+das nächste, nach rechts für das vorige; die ‹ ›-Tasten und die Pfeiltasten
+der Tastatur tun dasselbe. Der Kreis mit dem Kreuz oben links (oder die
+Escape-Taste) verlässt das Vollbild wieder und legt Kopfzeile, Reiterleiste
+und die Textauswahl frei — etwa um einen anderen Text aus der Sammlung zu
+wählen. Ein Blattform-Symbol daneben führt zurück ins Vollbild.
+
 ## Auf den Homescreen
 
 Die Seite ist eine installierbare Web-App. Über GitHub Pages aufrufen, dann:
