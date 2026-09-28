@@ -110,14 +110,32 @@ label.f > span{display:block;font-size:.8rem;color:var(--ink-soft);margin:0 0 .1
 /* ---------- library ---------- */
 .libtools{display:flex;gap:.5rem;align-items:center;margin:0 0 1rem}
 .libtools input{flex:1}
-ul.lib{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule-soft)}
-ul.lib li{border-bottom:1px solid var(--rule-soft)}
-.entry{display:block;width:100%;text-align:left;background:none;border:0;font:inherit;
-  padding:.72rem .2rem;cursor:pointer;color:inherit}
-.entry:hover{background:var(--surface)}
-.entry .t{font-family:Spectral,Georgia,serif;font-size:1.05rem;display:block}
-.entry .m{font-size:.8rem;color:var(--ink-faint);display:block;margin-top:.1rem}
-.empty{color:var(--ink-soft);font-size:.95rem;padding:1.6rem 0;text-align:center}
+
+/* the shelf: an open pigeonhole cabinet, one cubby per saved text, the way
+   a Tibetan monastery library keeps its loose-leaf pecha wrapped and stacked
+   — plus one dashed cubby always waiting at the end for the next text. */
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(6.4rem,1fr));
+  gap:.5rem;padding:.9rem;margin:0 0 1rem;
+  background:var(--surface-sunk);border-radius:8px;box-shadow:var(--shadow)}
+.cubby{position:relative;height:5.2rem;appearance:none;font:inherit;color:inherit;cursor:pointer;
+  background:var(--surface);border:1px solid var(--rule);border-radius:4px;
+  box-shadow:inset 0 3px 6px -4px rgba(43,35,32,.35);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.25rem;padding:.4rem .25rem}
+.cubby:hover{border-color:var(--ink-faint)}
+.cubby .bundle{position:relative;width:82%;height:1.7rem;flex-shrink:0;
+  background:var(--maroon);border-radius:3px;box-shadow:0 1px 2px rgba(43,35,32,.25)}
+.cubby .bundle i{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.35)}
+.cubby .bundle i:nth-child(1){left:26%}
+.cubby .bundle i:nth-child(2){left:64%}
+.cubby .tag{position:absolute;right:-.55rem;top:-.4rem;white-space:nowrap;
+  background:var(--surface);border:1px solid var(--rule);border-radius:2px;padding:.05rem .35rem;
+  font-family:'Alegreya Sans',sans-serif;font-size:.62rem;letter-spacing:.03em;color:var(--ink);
+  transform:rotate(-6deg);box-shadow:0 1px 2px rgba(43,35,32,.2)}
+.cubby .cap{font-size:.62rem;line-height:1.2;color:var(--ink-soft);text-align:center;
+  max-width:96%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cubby.ghost{border-style:dashed;color:var(--ink-faint)}
+.cubby.ghost .plus{font-size:1.3rem;font-weight:300;line-height:1}
 
 /* ---------- settings ---------- */
 details.set{border:1px solid var(--rule);border-radius:8px;background:var(--surface);
@@ -277,8 +295,7 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
       <input type="search" id="search" placeholder="Suchen…" aria-label="Sammlung durchsuchen">
       <button class="btn" id="new-text" type="button">Neuer Text</button>
     </div>
-    <ul class="lib" id="lib"></ul>
-    <p class="empty" id="lib-empty" hidden>Noch nichts gesetzt. <b>Neuer Text</b> legt das erste Blatt an.</p>
+    <div class="shelf" id="shelf"></div>
 
     <div class="row" style="margin-top:1.6rem">
       <button class="btn quiet" id="export" type="button">Sammlung sichern</button>
@@ -830,44 +847,65 @@ function toast(msg){
    Sammlung
    ============================================================ */
 const searchEl = document.getElementById("search");
+function startNewText(){
+  current = newText("C");
+  goTo("setzen");
+  setTimeout(() => document.getElementById("f-title").focus(), 30);
+}
+
 function drawLib(){
   const q = searchEl.value.trim().toLowerCase();
   const list = lib
     .filter(t => !q || (t.title + " " + t.body).toLowerCase().includes(q))
     .sort((a,b) => b.updated - a.updated);
-  const ul = document.getElementById("lib");
-  ul.textContent = "";
+  const shelf = document.getElementById("shelf");
+  shelf.textContent = "";
   for (const t of list){
-    const li = document.createElement("li");
     const b = document.createElement("button");
     b.type = "button";
-    b.className = "entry";
-    const tt = document.createElement("span");
-    tt.className = "t";
-    tt.textContent = t.title.trim() || "Ohne Titel";
-    const m = document.createElement("span");
-    m.className = "m";
+    b.className = "cubby";
     const n = sidesCount(t);
-    m.textContent = FORMATS[t.format].name + " · " + Math.ceil(n / 2)
-      + (Math.ceil(n / 2) === 1 ? " Blatt · " : " Blätter · ")
-      + new Date(t.updated).toLocaleDateString("de-DE");
-    b.append(tt, m);
+    const leaves = Math.ceil(n / 2);
+    const title = t.title.trim() || "Ohne Titel";
+    b.setAttribute("aria-label", title + ", " + FORMATS[t.format].name + ", "
+      + leaves + (leaves === 1 ? " Blatt" : " Blätter"));
+    const bundle = document.createElement("div");
+    bundle.className = "bundle";
+    bundle.append(document.createElement("i"), document.createElement("i"));
+    if (t.short.trim()){
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = t.short.trim();
+      bundle.appendChild(tag);
+    }
+    const cap = document.createElement("span");
+    cap.className = "cap";
+    cap.textContent = title;
+    b.append(bundle, cap);
     b.addEventListener("click", () => { current = t; goTo("setzen"); });
-    li.appendChild(b);
-    ul.appendChild(li);
+    shelf.appendChild(b);
   }
-  document.getElementById("lib-empty").hidden = lib.length > 0;
+  const ghost = document.createElement("button");
+  ghost.type = "button";
+  ghost.className = "cubby ghost";
+  ghost.setAttribute("aria-label", "Neuer Text");
+  const plus = document.createElement("span");
+  plus.className = "plus";
+  plus.textContent = "+";
+  const ghostCap = document.createElement("span");
+  ghostCap.className = "cap";
+  ghostCap.textContent = "Neuer Text";
+  ghost.append(plus, ghostCap);
+  ghost.addEventListener("click", startNewText);
+  shelf.appendChild(ghost);
+
   document.getElementById("lib-count").textContent =
     lib.length === 0 ? "" :
     lib.length + (lib.length === 1 ? " Text" : " Texte") + (q ? ", " + list.length + " davon gefunden" : "");
 }
 searchEl.addEventListener("input", drawLib);
 
-document.getElementById("new-text").addEventListener("click", () => {
-  current = newText("C");
-  goTo("setzen");
-  setTimeout(() => document.getElementById("f-title").focus(), 30);
-});
+document.getElementById("new-text").addEventListener("click", startNewText);
 
 document.getElementById("export").addEventListener("click", () => {
   const blob = new Blob([JSON.stringify({ v:1, texts: lib }, null, 2)], { type:"application/json" });
