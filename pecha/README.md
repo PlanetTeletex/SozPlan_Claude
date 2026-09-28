@@ -13,8 +13,8 @@ Drei Bereiche hinter drei Reitern — `#sammlung`, `#setzen`, `#lesen`.
 
 - **Setzen** — Titel, Randkürzel und Text einfügen. Der Satz entsteht sofort:
   die Vorschau zeigt jede Blattseite so, wie sie aus dem Drucker kommt.
-- **Sammlung** — alle Texte, durchsuchbar über Titel und Inhalt, mit Blattzahl
-  und Änderungsdatum. Sichern und Einlesen als JSON-Datei.
+- **Sammlung** — ein Regal statt einer Liste: jeder Text sein eigenes Fach,
+  durchsuchbar über Titel und Inhalt. Sichern und Einlesen als JSON-Datei.
 - **Lesen** — eine Blattseite groß auf dem Schirm, weiter mit den Pfeiltasten.
   Für die Rezitation, wenn nichts gedruckt ist.
 
@@ -147,6 +147,16 @@ Blocksatz eine Verszeile nie über die ganze Spaltenbreite auseinanderzieht).
 
 Blätter werden nach Blatt gezählt, nicht nach Seite: 1a, 1b, 2a, 2b … Bei losen
 Blättern ist die Foliozahl im linken Rand die einzige Ordnung, die der Stapel hat.
+
+## Das Regal
+
+Die Sammlung zeigt keine Liste, sondern ein offenes Fach-Regal — wie die
+Bibliotheken tibetischer Klöster, in denen jedes lose gebundene Pecha
+eingehüllt und liegend in seinem eigenen Fach steht. Jeder gesetzte Text
+ist ein in Stoff gebundenes Bündel mit dem Kürzel am Anhänger, Titel und
+Format darunter; ein Fach antippen öffnet den Text zum Bearbeiten. Am Ende
+wartet immer genau ein gestricheltes Fach mit einem Plus — antippen legt
+einen neuen Text an. Das Regal wächst von selbst mit jedem weiteren Text.
 
 ## Lesen im Vollbild
 
