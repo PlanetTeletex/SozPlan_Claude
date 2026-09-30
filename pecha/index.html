@@ -142,6 +142,16 @@ label.f > span{display:block;font-size:.8rem;color:var(--ink-soft);margin:0 0 .1
 .cubby.ghost{border-style:dashed;color:var(--ink-faint)}
 .cubby.ghost .plus{font-size:1.3rem;font-weight:300;line-height:1}
 
+.imgrow{display:flex;flex-wrap:wrap;gap:.4rem .5rem;align-items:center;margin:-.4rem 0 1rem}
+.imglist{display:flex;flex-wrap:wrap;gap:.35rem}
+.imgchip{display:inline-flex;align-items:center;gap:.3rem;border:1px solid var(--rule);
+  border-radius:999px;padding:.08rem .2rem .08rem .55rem;font-size:.8rem;color:var(--ink-soft);
+  background:var(--surface)}
+.imgchip.unused{opacity:.6}
+.imgchip button{appearance:none;border:0;background:none;color:var(--ink-faint);cursor:pointer;
+  font:inherit;font-size:.95rem;line-height:1;padding:.1rem .3rem;border-radius:999px}
+.imgchip button:hover{color:var(--maroon)}
+
 /* ---------- settings ---------- */
 details.set{border:1px solid var(--rule);border-radius:8px;background:var(--surface);
   padding:.5rem .8rem;margin:0 0 1.2rem}
@@ -210,6 +220,10 @@ details.set[open] > summary::before{content:"▾ "}
 .leaf .ln{height:var(--lf-pitch);line-height:var(--lf-pitch);font-size:var(--lf-fs);
   white-space:nowrap;overflow:hidden}
 .leaf .ln.j{display:flex;justify-content:space-between}
+.leaf .ln.h{color:var(--leaf-rule)}
+.leaf .imgpage{position:absolute;left:var(--lf-frame-ml);right:var(--lf-frame-ml);top:9%;bottom:9%;
+  display:flex;align-items:center;justify-content:center}
+.leaf .imgpage img{display:block;max-width:100%;max-height:100%;object-fit:contain}
 .leaf .ln.t{color:var(--leaf-rule);text-align:center;font-weight:600;
   letter-spacing:.02em;display:block}
 .sidecap{font-size:.78rem;color:var(--ink-faint);margin:.1rem 0 1.1rem}
@@ -353,6 +367,9 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
       <p>Bei mehreren Spalten laufen die Strophen von Spalte zu Spalte weiter; keine
       wird zerrissen. <code>|||</code> auf eigener Zeile beginnt eine <b>neue Spalte</b>,
       <code>...</code> <b>hält</b> die nächste Strophe mit der vorigen zusammen.</p>
+      <p>Eine Zeile, die mit <code>#</code> beginnt, wird eine <b>Überschrift</b> in Weinrot
+      und bleibt immer bei der Strophe darunter. <b>Bild einfügen</b> unter dem Textfeld
+      setzt ein Bild auf eine eigene Seite, dort wo <code>[[Bild 1]]</code> im Text steht.</p>
     </div>
   </div>
 </section>
@@ -371,7 +388,12 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
       <label class="f"><span>Kürzel im Blattrand (optional)</span>
         <input type="text" id="f-short" placeholder="z. B. IMM" maxlength="8"></label>
       <label class="f"><span>Text</span>
-        <textarea id="f-body" rows="9" placeholder="Hier einfügen. --- beginnt eine neue Seite, === ein neues Blatt."></textarea></label>
+        <textarea id="f-body" rows="9" placeholder="Hier einfügen. # am Zeilenanfang macht eine Überschrift, --- beginnt eine neue Seite, === ein neues Blatt."></textarea></label>
+      <div class="imgrow">
+        <button class="btn quiet" id="img-add" type="button">Bild einfügen</button>
+        <input type="file" id="img-file" accept="image/*" hidden>
+        <span class="imglist" id="img-list"></span>
+      </div>
 
       <details class="set" id="setbox">
         <summary>Format und Satz</summary>
@@ -387,6 +409,13 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
               <option value="1">1 Spalte</option>
               <option value="2">2 Spalten</option>
               <option value="3">3 Spalten</option>
+            </select></label>
+          <label class="f" style="margin:0"><span>Farbe der Randbänder</span>
+            <select id="f-band">
+              <option value="wine">Weinrot</option>
+              <option value="lapis">Lapisblau</option>
+              <option value="green">Grün</option>
+              <option value="saffron">Safran</option>
             </select></label>
           <label class="sl"><span>Zeilen je Seite <b id="v-lines"></b></span>
             <input type="range" id="f-lines" min="3" max="18" step="1"></label>
@@ -452,7 +481,7 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
 /* ---------- storage (browser storage can throw) ---------- */
 const store = {
   get(k){ try { return localStorage.getItem(k); } catch { return null; } },
-  set(k, v){ try { localStorage.setItem(k, v); } catch { /* ignore */ } }
+  set(k, v){ try { localStorage.setItem(k, v); return true; } catch { return false; } }
 };
 
 /* ---------- the three formats ----------
@@ -464,6 +493,14 @@ const FORMATS = {
   C: { name:"Mittel",           w:210, h:99,    per:3, orient:"portrait",  lines:6, fs:6.6, ml:21 }
 };
 const A4 = { portrait:{w:210,h:297}, landscape:{w:297,h:210} };
+/* Band colour per text, as printed pecha books mark each prayer's stack —
+   wine-red follows the theme (c: null), the others are fixed inks. */
+const BANDS = {
+  wine:    { name:"Weinrot",   c:null },
+  lapis:   { name:"Lapisblau", c:"#2f519c" },
+  green:   { name:"Grün",      c:"#5b8a4a" },
+  saffron: { name:"Safran",    c:"#b27c16" }
+};
 
 const LIB_KEY = "pecha.library";
 const PREF_KEY = "pecha.prefs";
@@ -475,6 +512,7 @@ function newText(fmt){
     title: "", subtitle: "", short: "", body: "",
     format: fmt || "C", lines: f.lines, fs: f.fs, ml: f.ml, lh: 2, columns: 1,
     keepBreaks: true, justify: false, showTitle: true, fit: true,
+    band: "wine", images: {}, imgSeq: 0,
     created: Date.now(), updated: Date.now()
   };
 }
@@ -496,8 +534,14 @@ function fix(t){                       // tolerate older / partial records
   const base = newText(t && t.format);
   return Object.assign(base, t || {}, { id: (t && t.id) || base.id });
 }
+/* Browser storage is small (about 5 MB on an iPhone) and images fill it
+   fast — a failed write must say so, not lose the collection quietly. */
+let saveWarned = false;
 function saveLib(){
-  store.set(LIB_KEY, JSON.stringify({ v:1, texts: lib }));
+  const ok = store.set(LIB_KEY, JSON.stringify({ v:1, texts: lib }));
+  if (!ok && !saveWarned) toast("Speicher voll — nicht gesichert. Ein Bild entfernen oder die Sammlung sichern.");
+  saveWarned = !ok;
+  return ok;
 }
 
 /* Typesetting a text costs a layout query per word, so the library list
@@ -558,25 +602,28 @@ function splitPara(text, longWord){
   return out.map(s => s.trim());
 }
 
-/* Raw text -> paragraphs, honouring the --- leaf break */
+/* Raw text -> paragraphs, honouring the break and marker lines */
 function parseBody(body, keepBreaks){
   /* A paragraph is a run of source lines with no blank line between them —
-     a verse typed across several lines stays one paragraph, one column, even
+     a verse typed across several lines stays one paragraph, one stanza, even
      with hard line breaks kept. Each paragraph carries its own list of lines:
      several, one per source line, when those breaks are kept; one, the whole
-     run joined and left to wrap, otherwise.
+     run joined and left to wrap, otherwise. `hl` marks which are headings.
 
      A paragraph is a stanza: compose() lets stanzas flow down a column and
      on into the next, never tearing one apart. A line of ... between two
      paragraphs marks the second as "stack": it is bound to the one before,
-     so the two always share a column. A line of ||| starts a new column. */
+     so the two always share a column. A line of ||| starts a new column.
+     A line beginning with # is a heading: it opens a new stanza and always
+     stays with the lines that follow it. [[Bild 2]] on its own line places
+     the text's second image on a page of its own. */
   const out = [];
-  let hard = [], soft = [], stackNext = false;
+  let hard = [], hardHl = [], soft = [], stackNext = false;
   const flush = () => {
     if (keepBreaks){
-      if (hard.length){ out.push({ lines: hard, stack: stackNext }); hard = []; stackNext = false; }
+      if (hard.length){ out.push({ lines: hard, hl: hardHl, stack: stackNext }); hard = []; hardHl = []; stackNext = false; }
     } else if (soft.length){
-      out.push({ lines: [soft.join(" ").replace(/\s+/g, " ").trim()], stack: stackNext });
+      out.push({ lines: [soft.join(" ").replace(/\s+/g, " ").trim()], hl: [false], stack: stackNext });
       soft = []; stackNext = false;
     }
   };
@@ -585,8 +632,17 @@ function parseBody(body, keepBreaks){
     if (/^\s*={3,}\s*$/.test(line)){ flush(); out.push({ br:"leaf" }); stackNext = false; continue; }
     if (/^\s*\.{3,}\s*$/.test(line)){ flush(); stackNext = true; continue; }
     if (/^\s*\|{3,}\s*$/.test(line)){ flush(); out.push({ br:"col" }); stackNext = false; continue; }
+    const img = /^\s*\[\[\s*Bild\s+(\d+)\s*\]\]\s*$/i.exec(line);
+    if (img){ flush(); out.push({ br:"image", n: img[1] }); stackNext = false; continue; }
     if (!line.trim()){ flush(); continue; }
-    if (keepBreaks) hard.push(line.replace(/\s+/g, " ").trim());
+    const head = /^\s*#+\s*(.*\S)\s*$/.exec(line);
+    if (head){
+      flush();
+      if (keepBreaks){ hard.push(head[1].replace(/\s+/g, " ")); hardHl.push(true); }
+      else out.push({ lines: [head[1].replace(/\s+/g, " ")], hl: [true], stack: false });
+      continue;
+    }
+    if (keepBreaks){ hard.push(line.replace(/\s+/g, " ").trim()); hardHl.push(false); }
     else soft.push(line.trim());
   }
   flush();
@@ -700,20 +756,29 @@ function compose(t){
      A stanza bound by ... travels together with the one before it. */
   const blank = () => ({ text: "", cls: "", last: true });
   const units = [];
+  let heldHead = null;                        // a heading alone waits for its stanza
   for (const p of paras){
-    if (p.br){ units.push({ br: p.br }); continue; }
+    if (p.br){
+      if (heldHead){ units.push({ rows: heldHead }); heldHead = null; }
+      units.push(p);
+      continue;
+    }
     const rows = [];
-    p.lines.forEach(raw => {
+    p.lines.forEach((raw, li) => {
       const parts = splitPara(raw, longWord);
+      const cls = p.hl && p.hl[li] ? "h" : "";
       parts.forEach((s, i) => rows.push({
-        text: s, cls: p.cls || "",
+        text: s, cls,
         last: i === parts.length - 1         // still exempts a hard line's own end from justify
       }));
     });
+    if (heldHead){ rows.unshift(...heldHead); heldHead = null; }
+    if (p.hl && p.hl.every(Boolean)){ heldHead = rows; continue; }
     const prev = units[units.length - 1];
     if (p.stack && prev && prev.rows) prev.rows.push(blank(), ...rows);
     else units.push({ rows });
   }
+  if (heldHead) units.push({ rows: heldHead });
 
   const cap = Math.max(1, g.lines);
   const boxes = [];
@@ -721,6 +786,15 @@ function compose(t){
   const endBox = () => { boxes.push(cur); cur = []; };
   for (const u of units){
     if (u.br === "col"){ endBox(); continue; }
+    if (u.br === "image"){                    // an image takes a page of its own
+      const src = t.images && t.images[u.n];
+      if (!src || !/^data:image\//.test(src)) continue;
+      if (cur.length) endBox();
+      while (boxes.length % g.columns) boxes.push([]);
+      boxes.push({ image: src });
+      while (boxes.length % g.columns) boxes.push([]);
+      continue;
+    }
     if (u.br === "side"){
       if (cur.length) endBox();
       while (boxes.length % g.columns) boxes.push([]);
@@ -745,7 +819,11 @@ function compose(t){
 
   const sides = [];
   if (titlePage){ sides.push(titlePage); sides.push([]); }  // leaf 1, blank verso
-  for (let i = 0; i < boxes.length; i += g.columns) sides.push(boxes.slice(i, i + g.columns));
+  for (let i = 0; i < boxes.length; i += g.columns){
+    const chunk = boxes.slice(i, i + g.columns);
+    sides.push(chunk[0] && chunk[0].image ? { image: chunk[0].image } : chunk);
+  }
+  g.band = (BANDS[t.band] || BANDS.wine).c;
   return { sides, g };
 }
 
@@ -758,6 +836,7 @@ function leafEl(buckets, g, folio, short, justify){
   s.setProperty("--lf-h", g.h + "mm");
   s.setProperty("--lf-ml", g.ml + "mm");
   const frameMl = g.frameMl ?? g.ml;               // the frame never moves with the text
+  if (g.band) s.setProperty("--leaf-band", g.band);
   s.setProperty("--lf-frame-ml", frameMl + "mm");
   s.setProperty("--lf-mt", g.mt + "mm");
   s.setProperty("--lf-fs", g.fs + "mm");
@@ -790,6 +869,17 @@ function leafEl(buckets, g, folio, short, justify){
     k.className = "short";
     k.textContent = short;
     el.appendChild(k);
+  }
+
+  if (buckets && buckets.image){                // an image page: the picture centred in the frame
+    const page = document.createElement("div");
+    page.className = "imgpage";
+    const img = document.createElement("img");
+    img.alt = "";
+    img.src = buckets.image;
+    page.appendChild(img);
+    el.appendChild(page);
+    return el;
   }
 
   if (!Array.isArray(buckets)){                 // the title page: centred, no grid
@@ -941,6 +1031,7 @@ function drawLib(){
       + leaves + (leaves === 1 ? " Blatt" : " Blätter"));
     const bundle = document.createElement("div");
     bundle.className = "bundle";
+    if (BANDS[t.band] && BANDS[t.band].c) bundle.style.background = BANDS[t.band].c;
     bundle.append(document.createElement("i"), document.createElement("i"));
     if (t.short.trim()){
       const tag = document.createElement("span");
@@ -1030,6 +1121,7 @@ const F = {
   keep:  document.getElementById("f-keep"),
   fit:   document.getElementById("f-fit"),
   just:  document.getElementById("f-just"),
+  band:  document.getElementById("f-band"),
   titleOn: document.getElementById("f-title-on"),
   cut:   document.getElementById("f-cut"),
   shortFlip: document.getElementById("f-short-flip")
@@ -1049,6 +1141,8 @@ function fillForm(t){
   F.keep.checked = t.keepBreaks;
   F.fit.checked = t.fit;
   F.just.checked = t.justify;
+  F.band.value = BANDS[t.band] ? t.band : "wine";
+  drawImgList(t);
   F.titleOn.checked = t.showTitle;
   F.cut.checked = prefs.cutLines;
   F.shortFlip.checked = prefs.flip === "short";
@@ -1068,6 +1162,7 @@ function readForm(t){
   t.keepBreaks = F.keep.checked;
   t.fit = F.fit.checked;
   t.justify = F.just.checked;
+  t.band = F.band.value;
   t.showTitle = F.titleOn.checked;
   prefs.cutLines = F.cut.checked;
   prefs.flip = F.shortFlip.checked ? "short" : "long";
@@ -1178,7 +1273,91 @@ function drawPreview(){
 
 [F.title, F.subtitle, F.short, F.body].forEach(el => el.addEventListener("input", touch));
 [F.lines, F.fs, F.ml, F.lh].forEach(el => el.addEventListener("input", touch));
-[F.keep, F.fit, F.just, F.titleOn, F.cut, F.shortFlip].forEach(el => el.addEventListener("change", touch));
+[F.keep, F.fit, F.just, F.titleOn, F.cut, F.shortFlip, F.band].forEach(el => el.addEventListener("change", touch));
+
+/* ---------- images ---------- */
+function drawImgList(t){
+  const box = document.getElementById("img-list");
+  box.textContent = "";
+  for (const n of Object.keys(t.images || {}).filter(k => /^\d+$/.test(k)).sort((a, b) => a - b)){
+    const used = new RegExp("^\\s*\\[\\[\\s*Bild\\s+" + n + "\\s*\\]\\]\\s*$", "im").test(t.body);
+    const chip = document.createElement("span");
+    chip.className = "imgchip" + (used ? "" : " unused");
+    chip.title = used ? "Steht im Text als [[Bild " + n + "]]" : "Nicht im Text verwendet";
+    chip.append("Bild " + n);
+    const x = document.createElement("button");
+    x.type = "button";
+    x.textContent = "×";
+    x.setAttribute("aria-label", "Bild " + n + " entfernen");
+    x.addEventListener("click", () => {
+      if (!confirm("Bild " + n + " aus diesem Text entfernen?")) return;
+      delete t.images[n];
+      F.body.value = F.body.value.replace(
+        new RegExp("^\\s*\\[\\[\\s*Bild\\s+" + n + "\\s*\\]\\]\\s*\\n?", "gim"), "");
+      touch();
+      drawImgList(t);
+    });
+    chip.appendChild(x);
+    box.appendChild(chip);
+  }
+}
+
+function loadImage(file){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("unreadable")); };
+    img.src = url;
+  });
+}
+/* 1200 px on the long side prints at about 250 dpi on the leaf and keeps
+   one picture near 150 kB, so a few dozen fit into browser storage */
+async function shrinkImage(file){
+  const img = await loadImage(file);
+  const k = Math.min(1, 1200 / Math.max(img.naturalWidth, img.naturalHeight));
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(img.naturalWidth * k));
+  c.height = Math.max(1, Math.round(img.naturalHeight * k));
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#fff";                      // transparent areas become paper, not black
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", 0.85);
+}
+
+document.getElementById("img-add").addEventListener("click", () => document.getElementById("img-file").click());
+document.getElementById("img-file").addEventListener("change", async ev => {
+  const file = ev.target.files && ev.target.files[0];
+  ev.target.value = "";
+  if (!file || !current) return;
+  const t = current;
+  let data;
+  try { data = await shrinkImage(file); }
+  catch { toast("Dieses Bild lässt sich nicht lesen"); return; }
+  t.images = t.images || {};
+  const n = String((t.imgSeq || 0) + 1);
+  t.imgSeq = +n;
+  t.images[n] = data;
+  const marker = "[[Bild " + n + "]]";
+  const b = F.body, pos = b.selectionStart ?? b.value.length;
+  const before = b.value.slice(0, pos), after = b.value.slice(pos);
+  const pre = before && !before.endsWith("\n") ? "\n" : "";
+  const post = after.startsWith("\n") ? "" : "\n";
+  b.value = before + pre + marker + post + after;
+  b.selectionStart = b.selectionEnd = (before + pre + marker + post).length;
+  touch();
+  clearTimeout(saveTimer);
+  if (!lib.some(x => x.id === t.id)) lib.push(t);
+  if (!saveLib()){                              // did not fit: take it back out again
+    delete t.images[n];
+    b.value = before + after;
+    touch();
+    saveLib();
+    toast("Das Bild passt nicht mehr in den Speicher");
+  }
+  drawImgList(t);
+});
 F.format.addEventListener("change", () => {
   if (!current) return;
   const f = FORMATS[F.format.value];

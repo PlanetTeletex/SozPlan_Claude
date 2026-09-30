@@ -134,6 +134,12 @@ bei fließendem Text gilt wie bisher die volle Satzbreite.
 - `===` (eigene Zeile) — Beginn eines **neuen Blattes**; die Rückseite davor
   bleibt leer, damit sich ein Gebet als eigener Stapel herausnehmen lässt.
 - `|||` (eigene Zeile) — Beginn einer **neuen Spalte**.
+- `# Text` — eine **Überschrift** in Weinrot. Sie beginnt eine neue Strophe
+  und bleibt immer bei den Zeilen darunter, auch wenn eine Leerzeile folgt:
+  eine Überschrift steht nie allein am Fuß einer Spalte.
+- `[[Bild 1]]` (eigene Zeile) — setzt das erste Bild des Textes auf eine
+  **eigene Seite**. Der Knopf *Bild einfügen* legt es an und setzt die Zeile
+  an die Stelle, an der gerade der Cursor steht.
 - `...` (eigene Zeile, statt der Leerzeile zwischen zwei Strophen) — hält die
   zweite Strophe **mit der ersten zusammen**; passt das Paar nicht mehr in
   die laufende Spalte, wandern beide gemeinsam in die nächste.
@@ -145,6 +151,26 @@ vierzeiliger Vers bleibt so eine Strophe, solange zwischen seinen vier Zeilen
 keine Leerzeile steht, und jede seiner vier Zeilen behält ihren eigenen
 Umbruch (wichtig für die Versgliederung beim Rezitieren, und dafür, dass
 Blocksatz eine Verszeile nie über die ganze Spaltenbreite auseinanderzieht).
+
+## Bandfarbe
+
+Gedruckte Gebetsbücher geben jedem Gebet eine eigene Farbe an den Rändern,
+damit man es im Stapel sofort wiederfindet. *Farbe der Randbänder* stellt
+das je Text ein: Weinrot (Voreinstellung), Lapisblau, Grün oder Safran. Die
+Farbe trägt das Band und der Folio-Reiter; Titel und Überschriften bleiben
+Weinrot. Im Regal der Sammlung ist das Bündel in derselben Farbe gebunden.
+
+## Bildseiten
+
+*Bild einfügen* unter dem Textfeld nimmt ein Foto vom Gerät, etwa eine
+Thangka-Abbildung, und stellt es mittig auf eine eigene Seite, mit Band und
+Foliozahl wie jede andere. Das Bild wird dabei auf 1200 Pixel an der langen
+Seite verkleinert: gedruckt reicht das für rund 250 dpi, und ein Bild belegt
+nur etwa 150 kB. Der Speicher des Browsers ist klein (auf dem iPhone rund
+5 MB); ist er voll, nimmt die App das Bild wieder heraus und sagt es,
+statt still Änderungen zu verlieren. Die Bilder stehen als Kärtchen unter dem
+Textfeld; das × entfernt ein Bild samt seiner Zeile im Text. *Sammlung
+sichern* nimmt die Bilder mit.
 
 ## Zählung
 
