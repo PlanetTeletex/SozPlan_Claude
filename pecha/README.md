@@ -84,50 +84,28 @@ kein Untertitel, da es dann gar kein Titelblatt gibt.
 
 ## Spalten je Seite
 
-Klassische Pecha-Bücher setzen kurze Gebete gern nebeneinander statt
-untereinander — ein knappes Vers neben dem nächsten, statt jedes für sich
-eine halbe Seite Leerraum unter sich zu haben. Dafür gibt es *Spalten je
-Seite*: 1, 2 oder 3.
+Gedruckte Pecha-Bücher setzen ein Gebet gern in zwei oder drei Spalten
+nebeneinander, statt jede Strophe für sich eine halbe Seite Leerraum unter
+sich haben zu lassen. Dafür gibt es *Spalten je Seite*: 1, 2 oder 3.
 
-Die Regel ist denkbar einfach: **jeder Absatz bekommt seine eigene Spalte**,
-sobald mehr als eine Spalte eingestellt ist. Absätze füllen die Spalten von
-links nach rechts, dann das nächste Blatt. Ist ein Absatz zu lang für die
-eingestellte Zeilenzahl, läuft der Rest ohne erneute Überschrift in die
-nächste freie Spalte weiter — nichts geht verloren, nur die Stelle
-verschiebt sich. Passt ein Vers nicht vollständig auf eine Seite, hilft es,
-*Zeilen je Seite* zu erhöhen oder die Schrift zu verkleinern, bis er ganz in
-eine Spalte passt.
+**Die Strophen fließen von Spalte zu Spalte**, wie in einem gesetzten Buch:
+Eine Strophe (ein Absatz, also Zeilen ohne Leerzeile dazwischen) folgt in
+derselben Spalte auf die vorige, durch eine Leerzeile abgesetzt. Passt sie
+dort nicht mehr ganz hinein, beginnt sie oben in der nächsten Spalte, dann
+auf der nächsten Seite. **Eine Strophe wird nie zerrissen**, weder zwischen
+zwei Spalten noch zwischen zwei Seiten; geteilt wird nur eine, die für sich
+allein höher ist als eine ganze Spalte. Das gilt auch bei einer Spalte.
 
-Bei einer Spalte (der Voreinstellung) ändert sich nichts: Absätze laufen wie
-gewohnt fortlaufend durch, mehrere pro Seite, wie bisher.
+*Zeilen je Seite* ist die Höhe einer Spalte. Weil eine Spalte nur halb oder
+ein Drittel so breit ist wie die Seite, muss die Schrift entsprechend kleiner
+werden, damit die Zeilen ganz bleiben (siehe *Satz nach Zeilen*). Deshalb
+springt *Zeilen je Seite* beim Umschalten der Spaltenzahl automatisch mit
+(Basiswert des Formats mal Spaltenzahl); die zusätzlichen Zeilen nehmen im
+Fluss einfach weitere Strophen auf. Der Regler bleibt danach frei einstellbar.
 
-Eine Spalte ist nur noch halb (bei zwei) oder ein Drittel (bei drei) so
-breit wie die ganze Seite — derselbe Vers braucht darin entsprechend mehr
-Zeilen. Deshalb springt *Zeilen je Seite* beim Umschalten der Spaltenzahl
-automatisch mit (Basiswert des Formats mal Spaltenzahl), sichtbar am
-Regler, und lässt sich von dort aus weiter von Hand anpassen.
-
-Wichtiger als der Startwert: **ein Absatz wird bei Mehrspaltigkeit nie an
-der Zeilengrenze zerschnitten.** *Zeilen je Seite* bestimmt hier nur noch,
-wie viel Weißraum eine kurze Spalte mindestens bekommt — eine Spalte, deren
-Absatz mehr Zeilen braucht, wächst einfach darüber hinaus, statt in die
-Nachbarspalte hinein zu laufen. Zwei Verse stehen dadurch immer nebeneinander,
-ganz gleich wie kurz oder lang jeder für sich ist und was am Regler steht.
-
-Das setzt voraus, dass es überhaupt zwei Absätze gibt. Ein Gebet, das ohne
-Leerzeile am Stück eingefügt wird, ist für die App **ein** Absatz — er füllt
-die erste Spalte, die übrigen bleiben leer. Das ist keine Fehlfunktion,
-sondern folgt direkt aus „ein Absatz, eine Spalte"; nur ist das im Moment
-selbst leicht misszuverstehen, deshalb steht unter den Einstellungen eine
-Zeile, die live mitzählt, wie viele Absätze der Text hat, und in Signalfarbe
-warnt, sobald es weniger sind als eingestellte Spalten.
-
-Manchmal sollen aber **zwei** Absätze zusammen in eine einzige Spalte —
-zwei kurze Gebete, die als Paar gelesen werden. Dafür eine Zeile aus `...`
-(drei Punkte, für sich allein) statt der Leerzeile zwischen ihnen: sie
-beendet den ersten Absatz genau wie eine Leerzeile, hält den zweiten aber
-in derselben Spalte fest, mit einer schmalen Leerzeile als Abstand
-dazwischen. Erst ein Absatz *ohne* `...` beginnt wieder eine neue Spalte.
+Zwei Steuerzeichen lenken den Fluss von Hand (siehe unten): `|||` beginnt
+eine neue Spalte, `...` hält eine Strophe mit der vorigen zusammen, so dass
+beide immer in derselben Spalte stehen.
 
 ## Satz nach Zeilen
 
@@ -155,13 +133,16 @@ bei fließendem Text gilt wie bisher die volle Satzbreite.
 - `---` (eigene Zeile) — Umbruch auf die **nächste Seite**.
 - `===` (eigene Zeile) — Beginn eines **neuen Blattes**; die Rückseite davor
   bleibt leer, damit sich ein Gebet als eigener Stapel herausnehmen lässt.
+- `|||` (eigene Zeile) — Beginn einer **neuen Spalte**.
+- `...` (eigene Zeile, statt der Leerzeile zwischen zwei Strophen) — hält die
+  zweite Strophe **mit der ersten zusammen**; passt das Paar nicht mehr in
+  die laufende Spalte, wandern beide gemeinsam in die nächste.
 
-Leerzeilen trennen Absätze — das ist zugleich die Spaltengrenze bei mehr als
-einer Spalte. Ist *Zeilenumbrüche aus der Vorlage beibehalten* gesetzt
+Leerzeilen trennen Strophen (Absätze). Ist *Zeilenumbrüche aus der Vorlage beibehalten* gesetzt
 (Voreinstellung), behält innerhalb eines Absatzes jede Eingabezeile ihr
 eigenes Zeilenende, statt zu einem Fließtext zusammengefasst zu werden — ein
-vierzeiliger Vers bleibt so eine Spalte, solange zwischen seinen vier Zeilen
-keine Leerzeile steht, aber jede seiner vier Zeilen behält ihren eigenen
+vierzeiliger Vers bleibt so eine Strophe, solange zwischen seinen vier Zeilen
+keine Leerzeile steht, und jede seiner vier Zeilen behält ihren eigenen
 Umbruch (wichtig für die Versgliederung beim Rezitieren, und dafür, dass
 Blocksatz eine Verszeile nie über die ganze Spaltenbreite auseinanderzieht).
 
