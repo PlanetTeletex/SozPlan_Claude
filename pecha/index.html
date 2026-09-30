@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#131923" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap">
 <style>
 /* ---------- tokens: light ---------- */
 :root{
@@ -32,9 +32,12 @@
   --rule:         #cdc1a8;
   --rule-soft:    #dbd1bc;
   --btn-fg:       #f6f1e6;
-  --leaf:         #f7f2e6;
-  --leaf-ink:     #2b2320;
+  --leaf:         #fcfbf7;
+  --leaf-ink:     #36312d;
+  --leaf-soft:    #6b645d;
   --leaf-rule:    #7a1f2b;
+  --leaf-band:    #7a1f2b;
+  --leaf-gold:    #a47a18;
   --focus:        #22417a;
   --shadow: 0 1px 2px rgba(43,35,32,.06), 0 10px 28px -20px rgba(43,35,32,.55);
   color-scheme: light;
@@ -45,7 +48,8 @@
     --ink:#e8ddc7; --ink-soft:#a99d89; --ink-faint:#8b8272;
     --maroon:#d4838c; --lapis:#8fa9df; --gold:#d3a53a;
     --rule:#33405a; --rule-soft:#263043; --btn-fg:#131923;
-    --leaf:#1d2534; --leaf-ink:#e8ddc7; --leaf-rule:#d4838c;
+    --leaf:#1d2534; --leaf-ink:#e8ddc7; --leaf-soft:#b3a893; --leaf-rule:#d4838c;
+    --leaf-band:#9e3a46; --leaf-gold:#d3a53a;
     --focus:#8fa9df;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.9);
     color-scheme: dark;
@@ -56,7 +60,8 @@
   --ink:#e8ddc7; --ink-soft:#a99d89; --ink-faint:#8b8272;
   --maroon:#d4838c; --lapis:#8fa9df; --gold:#d3a53a;
   --rule:#33405a; --rule-soft:#263043; --btn-fg:#131923;
-  --leaf:#1d2534; --leaf-ink:#e8ddc7; --leaf-rule:#d4838c;
+  --leaf:#1d2534; --leaf-ink:#e8ddc7; --leaf-soft:#b3a893; --leaf-rule:#d4838c;
+  --leaf-band:#9e3a46; --leaf-gold:#d3a53a;
   --focus:#8fa9df;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.9);
   color-scheme: dark;
@@ -73,7 +78,7 @@ body{margin:0;background:var(--paper);color:var(--ink);
 /* ---------- chrome ---------- */
 header{border-bottom:1px solid var(--rule);background:var(--surface)}
 .bar{display:flex;align-items:baseline;gap:.7rem;padding:.7rem 0 .55rem}
-.brand{font-family:Spectral,Georgia,serif;font-size:1.15rem;color:var(--maroon);margin:0;font-weight:500}
+.brand{font-family:'Crimson Pro',Georgia,serif;font-size:1.15rem;color:var(--maroon);margin:0;font-weight:500}
 .brand-sub{color:var(--ink-faint);font-size:.82rem}
 .bar .spacer{flex:1}
 .ghost{background:none;border:1px solid var(--rule);color:var(--ink-soft);
@@ -89,7 +94,7 @@ nav.tabs{background:var(--surface);border-bottom:1px solid var(--rule);
 main{padding:1.4rem 0 5rem}
 .view:focus{outline:none}
 
-h2{font-family:Spectral,Georgia,serif;font-weight:400;font-size:1.4rem;margin:0 0 .2rem}
+h2{font-family:'Crimson Pro',Georgia,serif;font-weight:400;font-size:1.4rem;margin:0 0 .2rem}
 .lede{color:var(--ink-soft);margin:0 0 1.4rem;font-size:.95rem}
 
 /* ---------- controls ---------- */
@@ -125,7 +130,7 @@ label.f > span{display:block;font-size:.8rem;color:var(--ink-soft);margin:0 0 .1
 .cubby:hover{border-color:var(--ink-faint)}
 .cubby .bundle{position:relative;width:82%;height:1.7rem;flex-shrink:0;
   background:var(--maroon);border-radius:3px;box-shadow:0 1px 2px rgba(43,35,32,.25)}
-.cubby .bundle i{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.35)}
+.cubby .bundle i{position:absolute;top:0;bottom:0;width:2px;background:var(--gold)}
 .cubby .bundle i:nth-child(1){left:26%}
 .cubby .bundle i:nth-child(2){left:64%}
 .cubby .tag{position:absolute;right:-.55rem;top:-.4rem;white-space:nowrap;
@@ -162,40 +167,56 @@ details.set[open] > summary::before{content:"▾ "}
 .leaf{position:relative;transform-origin:top left;
   width:var(--lf-w);height:var(--lf-h);
   background:var(--leaf);color:var(--leaf-ink);
-  font-family:Spectral,Georgia,serif;font-weight:400;
+  font-family:'Crimson Pro',Georgia,serif;font-weight:400;
   box-shadow:var(--shadow)}
-.leaf .rules{position:absolute;inset:0;pointer-events:none}
-.leaf .rules i{position:absolute;top:5mm;bottom:5mm;width:0;border-left:.4mm solid var(--leaf-rule)}
-/* the margin marks sit in the band between the inner rule and the text,
-   so they never print on top of the frame */
-.leaf .mark{position:absolute;top:50%;transform:translateY(-50%);
-  width:calc(var(--lf-ml) * .5);text-align:center;color:var(--leaf-rule);
-  font-size:calc(var(--lf-fs) * .42);letter-spacing:.03em;line-height:1.2}
-.leaf .mark.l{left:calc(var(--lf-ml) * .5)}
-.leaf .mark.r{right:calc(var(--lf-ml) * .5)}
+/* wine-red bands at both short ends, kept a few mm inside the edge so a
+   printer's unprintable margin cannot swallow them */
+.leaf .band{position:absolute;top:var(--lf-band-y);bottom:var(--lf-band-y);
+  width:var(--lf-band-w);background:var(--leaf-band);pointer-events:none}
+.leaf .band.l{left:var(--lf-band-x)}
+.leaf .band.r{right:var(--lf-band-x)}
+/* folio: a small wine-red tab hanging off the right band; Kürzel: gold, left */
+.leaf .folio{position:absolute;top:50%;transform:translateY(-50%);
+  right:calc(var(--lf-band-x) + var(--lf-band-w));
+  background:var(--leaf-band);color:#fbf7ef;
+  font-family:'Alegreya Sans',sans-serif;font-weight:500;
+  font-size:max(calc(var(--lf-fs) * .45), 2.3mm);line-height:1;letter-spacing:.02em;
+  padding:.55em .5em}
+.leaf .short{position:absolute;top:50%;transform:translateY(-50%);
+  left:calc(var(--lf-band-x) + var(--lf-band-w) + 1.2mm);
+  max-width:calc(var(--lf-ml) - var(--lf-band-x) - var(--lf-band-w) - 2.4mm);
+  overflow:hidden;white-space:nowrap;color:var(--leaf-gold);
+  font-family:'Alegreya Sans',sans-serif;font-weight:700;
+  font-size:max(calc(var(--lf-fs) * .42), 2.2mm);letter-spacing:.08em;line-height:1.2}
 .leaf .blockrow{position:absolute;left:var(--lf-ml);right:var(--lf-ml);top:var(--lf-mt);
   display:flex}
 .leaf .block{flex:1 1 0;min-width:0}
 .leaf .titlepage{position:absolute;left:var(--lf-ml);right:var(--lf-ml);top:5mm;bottom:5mm;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:calc(var(--lf-title-pitch) - var(--lf-title-fs))}
+.leaf .titlepage .orn{display:flex;align-items:center;gap:calc(var(--lf-title-fs) * .3);
+  margin-bottom:calc(var(--lf-title-fs) * .25)}
+.leaf .titlepage .orn i{display:block;width:calc(var(--lf-title-fs) * 1.8);height:.3mm;
+  background:var(--leaf-gold)}
+.leaf .titlepage .orn b{display:block;width:calc(var(--lf-title-fs) * .2);
+  height:calc(var(--lf-title-fs) * .2);background:var(--leaf-gold);transform:rotate(45deg)}
 .leaf .titlepage .tl{color:var(--leaf-rule);font-size:var(--lf-title-fs);
-  line-height:1.15;font-weight:500;letter-spacing:.02em;text-align:center}
+  line-height:1.15;font-weight:600;letter-spacing:.01em;text-align:center}
 .leaf .titlepage .tls-group{display:flex;flex-direction:column;align-items:center;
   gap:calc(var(--lf-subtitle-pitch) - var(--lf-subtitle-fs));
   margin-top:calc(var(--lf-title-fs) * .5)}
-.leaf .titlepage .tls{color:var(--leaf-ink);opacity:.75;font-size:var(--lf-subtitle-fs);
+.leaf .titlepage .tls{color:var(--leaf-soft);font-size:var(--lf-subtitle-fs);
   line-height:1.15;letter-spacing:.02em;text-align:center}
 .leaf .ln{height:var(--lf-pitch);line-height:var(--lf-pitch);font-size:var(--lf-fs);
   white-space:nowrap;overflow:hidden}
 .leaf .ln.j{display:flex;justify-content:space-between}
-.leaf .ln.t{color:var(--leaf-rule);text-align:center;font-weight:500;
+.leaf .ln.t{color:var(--leaf-rule);text-align:center;font-weight:600;
   letter-spacing:.02em;display:block}
 .sidecap{font-size:.78rem;color:var(--ink-faint);margin:.1rem 0 1.1rem}
 
 /* measuring element — must have layout, must not be seen */
 #meas{position:absolute;left:-10000px;top:0;visibility:hidden;
-  font-family:Spectral,Georgia,serif;font-weight:400;white-space:normal;
+  font-family:'Crimson Pro',Georgia,serif;font-weight:400;white-space:normal;
   overflow-wrap:break-word;hyphens:none}
 
 /* ---------- reader ---------- */
@@ -230,7 +251,7 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
 /* ---------- help ---------- */
 .help{border-top:1px solid var(--rule-soft);margin-top:2.4rem;padding-top:1.2rem;
   font-size:.9rem;color:var(--ink-soft);max-width:40rem}
-.help h3{font-family:Spectral,Georgia,serif;font-weight:400;font-size:1.05rem;
+.help h3{font-family:'Crimson Pro',Georgia,serif;font-weight:400;font-size:1.05rem;
   color:var(--ink);margin:1.2rem 0 .3rem}
 .help ol{padding-left:1.2rem;margin:.3rem 0}
 .help li{margin:.25rem 0}
@@ -260,8 +281,10 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
   .sheet{break-after:page;page-break-after:always;
     -webkit-print-color-adjust:exact;print-color-adjust:exact}
   .sheet:last-child{break-after:auto;page-break-after:auto}
-  .sheet .leaf{background:transparent;color:#1a1a1a;box-shadow:none;
-    --leaf-rule:#7a1f2b}
+  .sheet .leaf{background:transparent;box-shadow:none;
+    --leaf:#ffffff; --leaf-ink:#2a2522; --leaf-soft:#5a544e;
+    --leaf-rule:#7a1f2b; --leaf-band:#7a1f2b; --leaf-gold:#a47a18;
+    color:var(--leaf-ink)}
 }
 </style>
 </head>
@@ -703,32 +726,38 @@ function leafEl(buckets, g, folio, short, justify){
   s.setProperty("--lf-subtitle-fs", g.subtitleFs + "mm");
   s.setProperty("--lf-subtitle-pitch", g.subtitlePitch + "mm");
 
-  const rules = document.createElement("div");
-  rules.className = "rules";
-  const x1 = (g.ml * 0.38).toFixed(2) + "mm", x2 = (g.ml * 0.50).toFixed(2) + "mm";
-  [["left",x1],["left",x2],["right",x1],["right",x2]].forEach(([side, x]) => {
-    const i = document.createElement("i");
-    i.style[side] = x;
-    rules.appendChild(i);
+  // ~4.5 mm in from the edge clears common printers' dead margin; a very
+  // narrow Seitenrand pulls the band inward so it never touches the text
+  const bandX = Math.min(Math.max(4.5, g.ml * 0.22), g.ml * 0.4);
+  s.setProperty("--lf-band-x", bandX + "mm");
+  s.setProperty("--lf-band-w", Math.min(g.ml * 0.14, g.w * 0.013) + "mm");
+  s.setProperty("--lf-band-y", (g.h * 0.06) + "mm");
+  ["l", "r"].forEach(side => {
+    const b = document.createElement("div");
+    b.className = "band " + side;
+    el.appendChild(b);
   });
-  el.appendChild(rules);
 
   if (folio){
-    const l = document.createElement("div");
-    l.className = "mark l";
-    l.textContent = folio;
-    el.appendChild(l);
+    const f = document.createElement("div");
+    f.className = "folio";
+    f.textContent = folio;
+    el.appendChild(f);
   }
   if (short){
-    const r = document.createElement("div");
-    r.className = "mark r";
-    r.textContent = short;
-    el.appendChild(r);
+    const k = document.createElement("div");
+    k.className = "short";
+    k.textContent = short;
+    el.appendChild(k);
   }
 
   if (!Array.isArray(buckets)){                 // the title page: centred, no grid
     const page = document.createElement("div");
     page.className = "titlepage";
+    const orn = document.createElement("div");
+    orn.className = "orn";
+    orn.append(document.createElement("i"), document.createElement("b"), document.createElement("i"));
+    page.appendChild(orn);
     buckets.title.forEach(line => {
       const tl = document.createElement("div");
       tl.className = "tl";
