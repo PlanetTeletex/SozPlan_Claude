@@ -61,10 +61,11 @@ vorn `V1 V2 V3` und hinten `R1 R2 R3`. Schneiden, Streifen aufeinanderlegen —
 steht hinter `V1` die `R1`, stimmt es. Sonst im Setzen-Bereich auf die andere
 Kante umstellen. Danach stimmt jeder weitere Druck.
 
-Die Rahmenlinien stehen 8 mm vom Blattrand und 5 mm von Ober- und Unterkante
-entfernt, also außerhalb des Bereichs, den übliche Drucker nicht bedrucken
-können. Die Randmarken — Foliozahl links, Kürzel rechts — sitzen im Band
-zwischen innerer Linie und Textspiegel, nie auf dem Rahmen.
+Die weinroten Randbänder an beiden Schmalseiten beginnen rund 4,5 mm vom
+Blattrand, also außerhalb des Bereichs, den übliche Drucker nicht bedrucken
+können — wer sie bündig will, schneidet den weißen Streifen außen ab. Die
+Foliozahl hängt als kleiner weinroter Reiter rechts am Band, das Kürzel steht
+in Gold links; beide bleiben zwischen Band und Textspiegel.
 
 ## Ein eigenes Titelblatt
 
@@ -210,6 +211,17 @@ der acht; der endlose Knoten war ohnehin vergeben, den trägt `lojong`.
 
 ## Gestaltung
 
-Dieselbe Palette wie `lojong`: Sandsteingrund, *btsod*-Bordeaux, Lapis, Gold;
-nachts tiefes Nachtlapis, und das Blatt wird mit dunkel, statt weiß zu leuchten.
-Hell und dunkel folgen der Systemeinstellung, mit Schalter zum Übergehen.
+Die App-Oberfläche teilt die Palette mit `lojong`: Sandsteingrund,
+*btsod*-Bordeaux, Lapis, Gold; nachts tiefes Nachtlapis. Hell und dunkel
+folgen der Systemeinstellung, mit Schalter zum Übergehen.
+
+Das Blatt selbst folgt einem gedruckten zeitgenössischen Pecha-Gebetsbuch:
+weißes Papier statt Pergamentton, zwei weinrote Bänder an den Schmalseiten
+statt Doppellinien, die Foliozahl weiß auf weinrotem Reiter. Der Titel steht
+halbfett in Weinrot, der Untertitel kleiner in warmem Grau, darüber ein
+schmales goldenes Zierband mit Raute — dort, wo im Vorbild die tibetische
+Titelzeile in Gold steht. Gold bleibt sonst dem Kürzel vorbehalten, so wie es
+im Vorbild die heilige Schriftzeile auszeichnet. Der Text ist ein weiches
+Anthrazit statt Schwarz, gesetzt in *Crimson Pro*, der freien Schwester der
+Minion, in der solche Gebetsbücher meist gesetzt sind. Im Regal sind die
+Bündel entsprechend weinrot gebunden, mit goldener Schnur.
