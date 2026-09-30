@@ -191,7 +191,7 @@ details.set[open] > summary::before{content:"▾ "}
 .leaf .blockrow{position:absolute;left:var(--lf-ml);right:var(--lf-ml);top:var(--lf-mt);
   display:flex}
 .leaf .block{flex:1 1 0;min-width:0}
-.leaf .titlepage{position:absolute;left:var(--lf-ml);right:var(--lf-ml);top:5mm;bottom:5mm;
+.leaf .titlepage{position:absolute;left:var(--lf-frame-ml);right:var(--lf-frame-ml);top:5mm;bottom:5mm;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:calc(var(--lf-title-pitch) - var(--lf-title-fs))}
 .leaf .titlepage .orn{display:flex;align-items:center;gap:calc(var(--lf-title-fs) * .3);
@@ -395,11 +395,13 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
             <input type="range" id="f-lh" min="1.2" max="3" step="0.05"></label>
         </div>
         <label class="chk"><input type="checkbox" id="f-keep"> Zeilenumbrüche aus der Vorlage beibehalten</label>
+        <label class="chk"><input type="checkbox" id="f-fit"> Satz nach Zeilen: Rand und Spaltenabstand passen sich an, umbrochen wird nur im Notfall</label>
         <label class="chk"><input type="checkbox" id="f-just"> Blocksatz</label>
         <label class="chk"><input type="checkbox" id="f-title-on"> Eigenes Titelblatt, mittig</label>
         <label class="chk"><input type="checkbox" id="f-cut"> Schnittlinien mitdrucken</label>
         <label class="chk"><input type="checkbox" id="f-short-flip"> Drucker wendet über die <b>kurze</b> Kante</label>
         <p class="fmtnote" id="fmtnote"></p>
+        <p class="colnote" id="fitnote" hidden></p>
         <p class="colnote" id="colnote" hidden></p>
       </details>
 
@@ -469,7 +471,7 @@ function newText(fmt){
     id: "t" + Date.now().toString(36) + Math.random().toString(36).slice(2,7),
     title: "", subtitle: "", short: "", body: "",
     format: fmt || "C", lines: f.lines, fs: f.fs, ml: f.ml, lh: 2, columns: 1,
-    keepBreaks: true, justify: false, showTitle: true,
+    keepBreaks: true, justify: false, showTitle: true, fit: true,
     created: Date.now(), updated: Date.now()
   };
 }
@@ -636,9 +638,47 @@ function composeTitlePage(t, g){
    side by side — and boxes are grouped `columns` at a time into a side. A
    paragraph too long for one box simply spills into the next, the same way
    a paragraph has always been allowed to spill across sides. */
+/* Satz nach Zeilen: a line of the source is meant to stay one line. The
+   columns take the width of the longest line in the whole text (one grid for
+   every leaf, so columns don't jump while turning pages); whatever room is
+   left goes evenly to the outer margins and the gaps between columns. Only a
+   line too long even at the minimum margin and gap is wrapped. */
+function naturalWidth(text){
+  meas.style.width = "auto";
+  meas.style.whiteSpace = "nowrap";
+  meas.textContent = text;
+  const w = meas.getBoundingClientRect().width / MM;
+  meas.style.whiteSpace = "";
+  return w;
+}
+function fitGeometry(t, g, paras){
+  const frame = Object.assign({}, g, { frameMl: g.ml, frameBlockW: g.blockW, fitted: false });
+  if (!t.fit || !t.keepBreaks) return frame;
+  meas.style.fontSize = g.fs + "mm";
+  meas.style.lineHeight = g.pitch + "mm";
+  const widths = [];
+  for (const p of paras) if (!p.br) for (const raw of p.lines) widths.push(naturalWidth(raw));
+  if (!widths.length) return frame;
+
+  const n = g.columns;
+  const gapMin = n > 1 ? Math.max(g.fs * 1.5, 5) : 0;
+  const colMax = (g.w - 2 * g.ml - (n - 1) * gapMin) / n;
+  const natural = Math.max(...widths) + 0.5;           // slack against sub-pixel rounding
+  const colW = Math.max(10, Math.min(natural, colMax));
+  const extra = Math.max(0, (g.w - 2 * g.ml - n * colW - (n - 1) * gapMin) / (n + 1));
+  const colGap = n > 1 ? gapMin + extra : 0;
+  return Object.assign(frame, {
+    fitted: true,
+    ml: g.ml + extra, colW, colGap,
+    blockW: n * colW + (n - 1) * colGap,
+    tooLong: widths.filter(w => w + 0.5 > colW).length
+  });
+}
+
 function compose(t){
-  const g = geometry(t);
-  const titlePage = composeTitlePage(t, g);   // measures at its own, larger size
+  const g0 = geometry(t);
+  const titlePage = composeTitlePage(t, g0);   // measures at its own, larger size, on the fixed frame
+  const g = fitGeometry(t, g0, parseBody(t.body, t.keepBreaks));
 
   const width = g.columns > 1 ? g.colW : g.blockW;
   meas.style.width = width + "mm";
@@ -718,6 +758,8 @@ function leafEl(buckets, g, folio, short, justify){
   s.setProperty("--lf-w", g.w + "mm");
   s.setProperty("--lf-h", g.h + "mm");
   s.setProperty("--lf-ml", g.ml + "mm");
+  const frameMl = g.frameMl ?? g.ml;               // the frame never moves with the text
+  s.setProperty("--lf-frame-ml", frameMl + "mm");
   s.setProperty("--lf-mt", g.mt + "mm");
   s.setProperty("--lf-fs", g.fs + "mm");
   s.setProperty("--lf-pitch", g.pitch + "mm");
@@ -728,9 +770,9 @@ function leafEl(buckets, g, folio, short, justify){
 
   // ~4.5 mm in from the edge clears common printers' dead margin; a very
   // narrow Seitenrand pulls the band inward so it never touches the text
-  const bandX = Math.min(Math.max(4.5, g.ml * 0.22), g.ml * 0.4);
+  const bandX = Math.min(Math.max(4.5, frameMl * 0.22), frameMl * 0.4);
   s.setProperty("--lf-band-x", bandX + "mm");
-  s.setProperty("--lf-band-w", Math.min(g.ml * 0.14, g.w * 0.013) + "mm");
+  s.setProperty("--lf-band-w", Math.min(frameMl * 0.14, g.w * 0.013) + "mm");
   s.setProperty("--lf-band-y", (g.h * 0.06) + "mm");
   ["l", "r"].forEach(side => {
     const b = document.createElement("div");
@@ -987,6 +1029,7 @@ const F = {
   ml:    document.getElementById("f-ml"),
   lh:    document.getElementById("f-lh"),
   keep:  document.getElementById("f-keep"),
+  fit:   document.getElementById("f-fit"),
   just:  document.getElementById("f-just"),
   titleOn: document.getElementById("f-title-on"),
   cut:   document.getElementById("f-cut"),
@@ -1005,6 +1048,7 @@ function fillForm(t){
   F.ml.value = t.ml;
   F.lh.value = t.lh;
   F.keep.checked = t.keepBreaks;
+  F.fit.checked = t.fit;
   F.just.checked = t.justify;
   F.titleOn.checked = t.showTitle;
   F.cut.checked = prefs.cutLines;
@@ -1023,6 +1067,7 @@ function readForm(t){
   t.ml = +F.ml.value;
   t.lh = +F.lh.value;
   t.keepBreaks = F.keep.checked;
+  t.fit = F.fit.checked;
   t.justify = F.just.checked;
   t.showTitle = F.titleOn.checked;
   prefs.cutLines = F.cut.checked;
@@ -1075,7 +1120,7 @@ function drawPreview(){
   const de = (n, d) => n.toFixed(d).replace(".", ",");
   document.getElementById("v-lines").textContent = t.lines;
   document.getElementById("v-fs").textContent = de(t.fs, 1) + " mm · " + Math.round(t.fs * 2.835) + " pt";
-  document.getElementById("v-ml").textContent = de(t.ml, 1) + " mm";
+  document.getElementById("v-ml").textContent = de(t.ml, 1) + " mm" + (g.fitted ? ", mindestens" : "");
   document.getElementById("v-lh").textContent = de(t.lh, 2) + "×";
   const f = FORMATS[t.format];
   document.getElementById("fmtnote").textContent =
@@ -1083,6 +1128,21 @@ function drawPreview(){
     + " mm · " + f.per + " Blätter je A4-Bogen (" +
     (f.orient === "portrait" ? "hoch" : "quer") + ") · " + (f.per - 1) + " Schnitte"
     + (g.columns > 1 ? " · " + g.columns + " Spalten, je Absatz eine" : "");
+
+  const fitnote = document.getElementById("fitnote");
+  fitnote.hidden = !g.fitted;
+  if (g.fitted){
+    const gap = g.columns > 1 ? ", Spaltenabstand " + de(g.colGap, 0) + " mm" : "";
+    if (g.tooLong){
+      fitnote.className = "colnote warn";
+      fitnote.textContent = g.tooLong + (g.tooLong === 1 ? " Zeile ist" : " Zeilen sind")
+        + " auch bei knappstem Rand zu lang und " + (g.tooLong === 1 ? "wird" : "werden")
+        + " umbrochen — weniger Spalten oder kleinere Schrift halten sie ganz.";
+    } else {
+      fitnote.className = "colnote";
+      fitnote.textContent = "Jede Zeile passt ganz. Rand " + de(g.ml, 0) + " mm" + gap + ".";
+    }
+  }
 
   /* The single most confusing moment with more than one column: a prayer
      typed or pasted as one continuous run, with no blank line marking
@@ -1139,7 +1199,7 @@ function drawPreview(){
 
 [F.title, F.subtitle, F.short, F.body].forEach(el => el.addEventListener("input", touch));
 [F.lines, F.fs, F.ml, F.lh].forEach(el => el.addEventListener("input", touch));
-[F.keep, F.just, F.titleOn, F.cut, F.shortFlip].forEach(el => el.addEventListener("change", touch));
+[F.keep, F.fit, F.just, F.titleOn, F.cut, F.shortFlip].forEach(el => el.addEventListener("change", touch));
 F.format.addEventListener("change", () => {
   if (!current) return;
   const f = FORMATS[F.format.value];
