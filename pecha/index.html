@@ -391,6 +391,7 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
         <textarea id="f-body" rows="9" placeholder="Hier einfügen. # am Zeilenanfang macht eine Überschrift, --- beginnt eine neue Seite, === ein neues Blatt."></textarea></label>
       <div class="imgrow">
         <button class="btn quiet" id="img-add" type="button">Bild einfügen</button>
+        <button class="btn quiet" id="img-back" type="button">Bild auf die Rückseite des Titelblatts</button>
         <input type="file" id="img-file" accept="image/*" hidden>
         <span class="imglist" id="img-list"></span>
       </div>
@@ -745,6 +746,13 @@ function compose(t){
   meas.style.lineHeight = g.pitch + "mm";
 
   const paras = parseBody(t.body, t.keepBreaks);
+  /* an image standing first in the text goes onto the back of the title
+     leaf, instead of leaving that side blank */
+  let verso = null;
+  if (titlePage && paras[0] && paras[0].br === "image"){
+    const src = t.images && t.images[paras[0].n];
+    if (src && /^data:image\//.test(src)){ verso = { image: src }; paras.shift(); }
+  }
 
   /* a word wider than half the column must be breakable, or its line would
      be set wider than the leaf and clipped */
@@ -818,7 +826,7 @@ function compose(t){
   while (boxes.length % g.columns) boxes.push([]);
 
   const sides = [];
-  if (titlePage){ sides.push(titlePage); sides.push([]); }  // leaf 1, blank verso
+  if (titlePage){ sides.push(titlePage); sides.push(verso || []); }  // leaf 1, verso blank unless an image leads
   for (let i = 0; i < boxes.length; i += g.columns){
     const chunk = boxes.slice(i, i + g.columns);
     sides.push(chunk[0] && chunk[0].image ? { image: chunk[0].image } : chunk);
@@ -1223,6 +1231,9 @@ function drawPreview(){
     (f.orient === "portrait" ? "hoch" : "quer") + ") · " + (f.per - 1) + " Schnitte"
     + (g.columns > 1 ? " · " + g.columns + " Spalten" : "");
 
+  document.getElementById("img-back").hidden = !(t.showTitle && t.title.trim());
+  drawImgList(t);
+
   const fitnote = document.getElementById("fitnote");
   fitnote.hidden = !g.fitted;
   if (g.fitted){
@@ -1279,12 +1290,15 @@ function drawPreview(){
 function drawImgList(t){
   const box = document.getElementById("img-list");
   box.textContent = "";
+  const lead = LEAD_IMG.exec(t.body || "");
+  const onBack = t.showTitle && t.title.trim() && lead ? lead[1] : null;
   for (const n of Object.keys(t.images || {}).filter(k => /^\d+$/.test(k)).sort((a, b) => a - b)){
     const used = new RegExp("^\\s*\\[\\[\\s*Bild\\s+" + n + "\\s*\\]\\]\\s*$", "im").test(t.body);
     const chip = document.createElement("span");
     chip.className = "imgchip" + (used ? "" : " unused");
-    chip.title = used ? "Steht im Text als [[Bild " + n + "]]" : "Nicht im Text verwendet";
-    chip.append("Bild " + n);
+    chip.title = n === onBack ? "Steht auf der Rückseite des Titelblatts"
+      : used ? "Steht im Text als [[Bild " + n + "]]" : "Nicht im Text verwendet";
+    chip.append("Bild " + n + (n === onBack ? " · Titelrückseite" : ""));
     const x = document.createElement("button");
     x.type = "button";
     x.textContent = "×";
@@ -1326,32 +1340,58 @@ async function shrinkImage(file){
   return c.toDataURL("image/jpeg", 0.85);
 }
 
-document.getElementById("img-add").addEventListener("click", () => document.getElementById("img-file").click());
+/* [[Bild N]] as the very first thing in the text: that image goes onto the
+   back of the title leaf (compose() takes it from there) */
+const LEAD_IMG = /^\s*\[\[\s*Bild\s+(\d+)\s*\]\][ \t]*(?:\n|$)/i;
+let imgMode = "cursor";
+document.getElementById("img-add").addEventListener("click", () => {
+  imgMode = "cursor";
+  document.getElementById("img-file").click();
+});
+document.getElementById("img-back").addEventListener("click", () => {
+  imgMode = "back";
+  document.getElementById("img-file").click();
+});
 document.getElementById("img-file").addEventListener("change", async ev => {
   const file = ev.target.files && ev.target.files[0];
   ev.target.value = "";
   if (!file || !current) return;
-  const t = current;
+  const t = current, mode = imgMode;
   let data;
   try { data = await shrinkImage(file); }
   catch { toast("Dieses Bild lässt sich nicht lesen"); return; }
+  const b = F.body;
+  const prevBody = b.value, prevImages = Object.assign({}, t.images), prevSeq = t.imgSeq || 0;
   t.images = t.images || {};
-  const n = String((t.imgSeq || 0) + 1);
+  const n = String(prevSeq + 1);
   t.imgSeq = +n;
   t.images[n] = data;
   const marker = "[[Bild " + n + "]]";
-  const b = F.body, pos = b.selectionStart ?? b.value.length;
-  const before = b.value.slice(0, pos), after = b.value.slice(pos);
-  const pre = before && !before.endsWith("\n") ? "\n" : "";
-  const post = after.startsWith("\n") ? "" : "\n";
-  b.value = before + pre + marker + post + after;
-  b.selectionStart = b.selectionEnd = (before + pre + marker + post).length;
+  if (mode === "back"){
+    const lead = LEAD_IMG.exec(b.value);
+    if (lead){                                  // replaces the image already there
+      b.value = marker + "\n" + b.value.slice(lead[0].length);
+      const old = lead[1];
+      const stillUsed = new RegExp("^\\s*\\[\\[\\s*Bild\\s+" + old + "\\s*\\]\\]\\s*$", "im").test(b.value);
+      if (!stillUsed) delete t.images[old];
+    } else {
+      b.value = marker + "\n" + b.value.replace(/^\s*\n/, "");
+    }
+  } else {
+    const pos = b.selectionStart ?? b.value.length;
+    const before = b.value.slice(0, pos), after = b.value.slice(pos);
+    const pre = before && !before.endsWith("\n") ? "\n" : "";
+    const post = after.startsWith("\n") ? "" : "\n";
+    b.value = before + pre + marker + post + after;
+    b.selectionStart = b.selectionEnd = (before + pre + marker + post).length;
+  }
   touch();
   clearTimeout(saveTimer);
   if (!lib.some(x => x.id === t.id)) lib.push(t);
-  if (!saveLib()){                              // did not fit: take it back out again
-    delete t.images[n];
-    b.value = before + after;
+  if (!saveLib()){                              // did not fit: put everything back
+    t.images = prevImages;
+    t.imgSeq = prevSeq;
+    b.value = prevBody;
     touch();
     saveLib();
     toast("Das Bild passt nicht mehr in den Speicher");

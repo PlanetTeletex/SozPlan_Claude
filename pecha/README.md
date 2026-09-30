@@ -172,6 +172,14 @@ statt still Änderungen zu verlieren. Die Bilder stehen als Kärtchen unter dem
 Textfeld; das × entfernt ein Bild samt seiner Zeile im Text. *Sammlung
 sichern* nimmt die Bilder mit.
 
+**Bild auf der Rückseite des Titelblatts.** Die Rückseite des Titelblatts
+bleibt sonst leer. *Bild auf die Rückseite des Titelblatts* setzt ein Bild
+genau dorthin — technisch einfach als `[[Bild N]]` ganz am Anfang des
+Textes: Steht ein Bild als Erstes im Text und gibt es ein Titelblatt, kommt
+es auf dessen Rückseite statt auf eine eigene Seite. Ein zweites Bild über
+denselben Knopf ersetzt das erste. Das Kärtchen zeigt es als
+„Titelrückseite“; ohne Titelblatt ist es einfach die erste Seite.
+
 ## Zählung
 
 Blätter werden nach Blatt gezählt, nicht nach Seite: 1a, 1b, 2a, 2b … Bei losen
