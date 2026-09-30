@@ -350,6 +350,9 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
       damit ein Vers nicht über den Rand rutscht. Eine Zeile aus <code>===</code>
       beginnt ein <b>neues Blatt</b>: die Rückseite davor bleibt leer, und das Gebet
       danach lässt sich als eigener Stapel herausnehmen.</p>
+      <p>Bei mehreren Spalten laufen die Strophen von Spalte zu Spalte weiter; keine
+      wird zerrissen. <code>|||</code> auf eigener Zeile beginnt eine <b>neue Spalte</b>,
+      <code>...</code> <b>hält</b> die nächste Strophe mit der vorigen zusammen.</p>
     </div>
   </div>
 </section>
@@ -563,11 +566,10 @@ function parseBody(body, keepBreaks){
      several, one per source line, when those breaks are kept; one, the whole
      run joined and left to wrap, otherwise.
 
-     Above one column, a paragraph normally starts a fresh column of its
-     own — the point of columns at all. A line of ... between two
-     paragraphs is the one exception: it ends the first exactly like a
-     blank line would, but marks the next as "stack", so compose() keeps
-     it in the very same column instead, stacked below the one before it. */
+     A paragraph is a stanza: compose() lets stanzas flow down a column and
+     on into the next, never tearing one apart. A line of ... between two
+     paragraphs marks the second as "stack": it is bound to the one before,
+     so the two always share a column. A line of ||| starts a new column. */
   const out = [];
   let hard = [], soft = [], stackNext = false;
   const flush = () => {
@@ -582,6 +584,7 @@ function parseBody(body, keepBreaks){
     if (/^\s*-{3,}\s*$/.test(line)){ flush(); out.push({ br:"side" }); stackNext = false; continue; }
     if (/^\s*={3,}\s*$/.test(line)){ flush(); out.push({ br:"leaf" }); stackNext = false; continue; }
     if (/^\s*\.{3,}\s*$/.test(line)){ flush(); stackNext = true; continue; }
+    if (/^\s*\|{3,}\s*$/.test(line)){ flush(); out.push({ br:"col" }); stackNext = false; continue; }
     if (!line.trim()){ flush(); continue; }
     if (keepBreaks) hard.push(line.replace(/\s+/g, " ").trim());
     else soft.push(line.trim());
@@ -691,55 +694,51 @@ function compose(t){
      be set wider than the leaf and clipped */
   const longWord = Math.max(8, Math.round(width / (g.fs * 0.5) / 2));
 
-  const lines = [];
+  /* Stanzas flow down a column and on into the next, the way a printed
+     pecha is set: a stanza is only torn apart when it is taller than a
+     whole column, and one blank row sets stanzas apart inside a column.
+     A stanza bound by ... travels together with the one before it. */
+  const blank = () => ({ text: "", cls: "", last: true });
+  const units = [];
   for (const p of paras){
-    if (p.br){ lines.push({ br: p.br }); continue; }
-    /* a stacked paragraph keeps to the column its predecessor is already
-       in — no paraStart, so the box-builder below never starts a fresh
-       one for it — with one blank row ahead of it to set it apart, the
-       way separate paragraphs already read apart in a single column */
-    if (p.stack) lines.push({ text: "", cls: "", last: true, paraStart: false });
-    p.lines.forEach((raw, li) => {
+    if (p.br){ units.push({ br: p.br }); continue; }
+    const rows = [];
+    p.lines.forEach(raw => {
       const parts = splitPara(raw, longWord);
-      parts.forEach((s, i) => lines.push({
+      parts.forEach((s, i) => rows.push({
         text: s, cls: p.cls || "",
-        last: i === parts.length - 1,        // still exempts a hard line's own end from justify
-        paraStart: li === 0 && i === 0 && !p.stack   // stacked: stay in the running column
+        last: i === parts.length - 1         // still exempts a hard line's own end from justify
       }));
     });
+    const prev = units[units.length - 1];
+    if (p.stack && prev && prev.rows) prev.rows.push(blank(), ...rows);
+    else units.push({ rows });
   }
 
-  /* With more than one column, a paragraph must never be split by a row
-     cap: two verses meant to sit side by side would otherwise end up with
-     one spilling into its neighbour's column, however "Zeilen je Seite" is
-     set — no value the sliders offer can be relied on to exactly match
-     every paragraph's wrapped length. So above one column, a box simply
-     grows to hold its whole paragraph; only the leaf/side breaks below cut
-     it off. A generous hard ceiling still guards against a pasted wall of
-     text with no paragraph breaks at all, which is a misuse the sliders
-     cannot be tuned around either way. */
-  const HARD_ROW_CEILING = 400;
+  const cap = Math.max(1, g.lines);
   const boxes = [];
   let cur = [];
   const endBox = () => { boxes.push(cur); cur = []; };
-  for (const ln of lines){
-    if (ln.br === "side"){
+  for (const u of units){
+    if (u.br === "col"){ endBox(); continue; }
+    if (u.br === "side"){
       if (cur.length) endBox();
       while (boxes.length % g.columns) boxes.push([]);
       continue;
     }
-    if (ln.br === "leaf"){
+    if (u.br === "leaf"){
       if (cur.length) endBox();
       /* a new leaf's recto must land on an even side, so pad to a whole
          pair of sides' worth of boxes */
       while (boxes.length % (g.columns * 2)) boxes.push([]);
       continue;
     }
-    if (g.columns > 1){
-      if (ln.paraStart && cur.length) endBox();               // a fresh box per paragraph
-      if (cur.length >= HARD_ROW_CEILING) endBox();            // runaway text only
-    } else if (cur.length >= g.lines) endBox();                // one column: unchanged
-    cur.push(ln);
+    if (cur.length && cur.length + 1 + u.rows.length > cap) endBox();
+    if (cur.length) cur.push(blank());
+    for (const row of u.rows){                // only a stanza taller than a column splits
+      if (cur.length >= cap) endBox();
+      cur.push(row);
+    }
   }
   if (cur.length || !boxes.length) endBox();
   while (boxes.length % g.columns) boxes.push([]);
@@ -1127,7 +1126,7 @@ function drawPreview(){
     String(f.w).replace(".", ",") + " × " + String(f.h).replace(".", ",")
     + " mm · " + f.per + " Blätter je A4-Bogen (" +
     (f.orient === "portrait" ? "hoch" : "quer") + ") · " + (f.per - 1) + " Schnitte"
-    + (g.columns > 1 ? " · " + g.columns + " Spalten, je Absatz eine" : "");
+    + (g.columns > 1 ? " · " + g.columns + " Spalten" : "");
 
   const fitnote = document.getElementById("fitnote");
   fitnote.hidden = !g.fitted;
@@ -1144,31 +1143,11 @@ function drawPreview(){
     }
   }
 
-  /* The single most confusing moment with more than one column: a prayer
-     typed or pasted as one continuous run, with no blank line marking
-     where the next one begins, is — correctly — just one paragraph, so it
-     fills only the first column and leaves the rest empty. That is not a
-     rendering fault, but nothing on screen says so unless this does. */
   const colnote = document.getElementById("colnote");
-  if (g.columns > 1){
-    // a stacked paragraph (after a ... line) shares its predecessor's
-    // column rather than starting one of its own, so it doesn't count here
-    const paraCount = parseBody(t.body, t.keepBreaks).filter(p => !p.br && !p.stack).length;
-    colnote.hidden = false;
-    if (paraCount > 0 && paraCount < g.columns){
-      colnote.className = "colnote warn";
-      colnote.textContent = (paraCount === 1 ? "Nur ein Absatz gefunden" : paraCount + " Absätze gefunden")
-        + " — die " + (g.columns - paraCount === 1 ? "übrige Spalte bleibt" : "übrigen Spalten bleiben")
-        + " leer. Eine Leerzeile beginnt eine neue Spalte, drei Punkte (…) auf eigener"
-        + " Zeile halten den nächsten Absatz in derselben.";
-    } else {
-      colnote.className = "colnote";
-      colnote.textContent = "Eine Leerzeile beginnt eine neue Spalte; drei Punkte (…) auf eigener"
-        + " Zeile halten den nächsten Absatz in derselben.";
-    }
-  } else {
-    colnote.hidden = true;
-  }
+  colnote.hidden = g.columns < 2;
+  colnote.className = "colnote";
+  colnote.textContent = "Strophen laufen von Spalte zu Spalte weiter. Eine Leerzeile trennt"
+    + " Strophen, ||| auf eigener Zeile beginnt eine neue Spalte, … hält zwei Strophen zusammen.";
 
   const leaves = Math.ceil(sides.length / 2);
   const sheets = Math.ceil(leaves / g.per);
@@ -1209,12 +1188,10 @@ F.format.addEventListener("change", () => {
   fillForm(current);
   touch();
 });
-/* A column is roughly 1/columns as wide, so the same prayer needs roughly
-   that many times as many wrapped rows to fit without spilling into its
-   neighbour — the failure mode was a verse eating both columns of a side
-   for itself, leaving nothing for the verse that should stand beside it.
-   Scaling the row budget with the column count keeps that from being the
-   default outcome; the slider still overrides it afterwards. */
+/* A column is roughly 1/columns as wide, so for its lines to stay whole the
+   type has to shrink by about as much — more rows per column, a smaller
+   font. With stanzas flowing, those extra rows simply hold more stanzas,
+   as in a printed pecha. The slider still overrides it afterwards. */
 F.columns.addEventListener("change", () => {
   if (!current) return;
   const cols = +F.columns.value;
