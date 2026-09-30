@@ -129,6 +129,27 @@ beendet den ersten Absatz genau wie eine Leerzeile, hält den zweiten aber
 in derselben Spalte fest, mit einer schmalen Leerzeile als Abstand
 dazwischen. Erst ein Absatz *ohne* `...` beginnt wieder eine neue Spalte.
 
+## Satz nach Zeilen
+
+In gedruckten Pecha-Gebetsbüchern bleibt eine Zeile der Vorlage eine Zeile:
+Nicht die Spalte bestimmt, wo umbrochen wird, sondern die längste Zeile
+bestimmt, wie breit die Spalte ist. *Satz nach Zeilen* (für neue und
+bestehende Texte eingeschaltet) macht es genauso:
+
+- Jede Spalte ist so breit wie die längste Zeile des ganzen Textes. Das Raster
+  ist für alle Blätter gleich, damit die Spalten beim Blättern nicht springen.
+- Was an Breite übrig bleibt, geht zu gleichen Teilen an den Seitenrand und an
+  die Abstände zwischen den Spalten. Kurze Zeilen stehen also mit viel Luft
+  mittig im Blatt, lange füllen es.
+- *Seitenrand* ist dann ein Mindestrand; der Spaltenabstand ist mindestens
+  anderthalb Schriftgrößen.
+- Umbrochen wird nur eine Zeile, die auch bei Mindestrand und knappstem
+  Spaltenabstand nicht passt. Ein Hinweis unter den Einstellungen sagt, wie
+  viele das sind; weniger Spalten oder eine kleinere Schrift halten sie ganz.
+
+Das setzt voraus, dass die Zeilenumbrüche der Vorlage beibehalten werden;
+bei fließendem Text gilt wie bisher die volle Satzbreite.
+
 ## Steuerzeichen im Text
 
 - `---` (eigene Zeile) — Umbruch auf die **nächste Seite**.
