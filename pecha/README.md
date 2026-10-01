@@ -7,6 +7,19 @@ beidseitig auf A4 drucken, schneiden — und über die Zeit eine Sammlung anlege
 Die einzige Anfrage nach außen ist das Google-Fonts-Stylesheet; ohne es fällt die
 Seite auf die System-Serife zurück und bleibt voll benutzbar.
 
+## Die Startseite
+
+Bei jedem Öffnen empfängt die App mit einer Startseite: ein tibetisches
+Thangka des Buddha Shakyamuni aus dem 18. Jahrhundert (gemeinfrei, über
+Wikimedia Commons), montiert wie ein echtes Rollbild — gelber Seidenvorhang,
+dunkelblauer Brokat mit Goldmuster, rote und gelbe Streifen um das Bild,
+Holzstäbe mit Goldknäufen. Die Montierung ist gezeichnet (SVG), das Gemälde
+selbst bleibt unverändert (`thangka.jpg`, auch offline im Speicher der App).
+Darunter der Titel im Stil der Titelblätter, die Zahl der Texte in der
+Sammlung und *Eintreten*, das in die Sammlung führt. Im Dunkelmodus steht die
+Thangka auf nachtblauem Grund, der Titel in Gold. Die Kopfzeile der App trägt
+denselben Titelstil: goldene Raute, „Pecha“ halbfett in Weinrot.
+
 ## Was sie tut
 
 Drei Bereiche hinter drei Reitern — `#sammlung`, `#setzen`, `#lesen`.

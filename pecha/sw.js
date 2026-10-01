@@ -1,13 +1,13 @@
 /* Pecha — offline support.
    Bump VERSION to retire the old cache; the page itself is fetched
    network-first, so edits reach an installed app as soon as it is online. */
-const VERSION = "2026-09-30-title-verso-image";
+const VERSION = "2026-10-01-landing-thangka";
 const CACHE = "pecha-" + VERSION;
 const CORE = [
   "./", "./index.html", "./manifest.json",
   "./icon.svg", "./favicon.svg",
   "./apple-touch-icon.png", "./icon-192.png", "./icon-512.png",
-  "./icon-maskable-192.png", "./icon-maskable-512.png"
+  "./icon-maskable-192.png", "./icon-maskable-512.png", "./thangka.jpg"
 ];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 /* the manifest and the icons, which a home screen asks for again at install time */
