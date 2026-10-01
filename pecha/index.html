@@ -92,6 +92,9 @@ nav.tabs{background:var(--surface);border-bottom:1px solid var(--rule);
   color:var(--ink-soft);font:inherit;font-size:.92rem;padding:.55rem .75rem;cursor:pointer}
 .tab[aria-selected="true"]{color:var(--maroon);border-bottom-color:var(--gold)}
 main{padding:1.4rem 0 5rem}
+.savebar{padding:.5rem 1rem;font-size:.85rem;color:var(--ink-soft)}
+.savebar[data-state="error"]{color:var(--maroon);font-weight:500}
+.savebar p{display:inline;margin-right:.6rem}
 .view:focus{outline:none}
 
 h2{font-family:'Crimson Pro',Georgia,serif;font-weight:400;font-size:1.4rem;margin:0 0 .2rem}
@@ -321,6 +324,11 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
   </div>
 </nav>
 
+<div class="wrap savebar" id="savebar" data-state="saved">
+  <p id="save-status" role="status" aria-live="polite">Sammlung im Browser gespeichert.</p>
+  <button class="btn quiet" id="save-retry" type="button" hidden>Erneut speichern</button>
+  <button class="btn quiet" id="save-backup" type="button" hidden>Sammlung als Datei sichern</button>
+</div>
 <main>
 
 <!-- ============ Sammlung ============ -->
@@ -531,17 +539,54 @@ function loadLib(){
   } catch { /* fall through to empty */ }
   return [];
 }
-function fix(t){                       // tolerate older / partial records
-  const base = newText(t && t.format);
-  return Object.assign(base, t || {}, { id: (t && t.id) || base.id });
+function fix(t){                       // normalize older and imported records before use
+  if (!t || typeof t !== "object" || Array.isArray(t)) throw new Error("kein Texteintrag");
+  const format = Object.hasOwn(FORMATS, t.format) ? t.format : "C";
+  const base = newText(format);
+  const out = Object.assign(base, t, { format });
+  for (const key of ["title", "subtitle", "short", "body"])
+    out[key] = typeof t[key] === "string" ? t[key] : base[key];
+  out.id = typeof t.id === "string" && t.id ? t.id : base.id;
+  const bounded = (key, min, max) => {
+    const value = Number(t[key] ?? base[key]);
+    out[key] = Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : base[key];
+  };
+  bounded("lines", 3, 18); out.lines = Math.round(out.lines);
+  bounded("columns", 1, 3); out.columns = Math.round(out.columns);
+  bounded("fs", 2.5, 14); bounded("ml", 6, 45); bounded("lh", 1.2, 3);
+  out.fs = Math.min(out.fs, (FORMATS[format].h - 6) / (out.lines * out.lh));
+  for (const key of ["keepBreaks", "justify", "showTitle", "fit"])
+    out[key] = typeof t[key] === "boolean" ? t[key] : base[key];
+  out.band = Object.hasOwn(BANDS, t.band) ? t.band : "wine";
+  out.images = {};
+  for (const [key, src] of Object.entries(t.images && typeof t.images === "object" ? t.images : {}))
+    if (/^\d+$/.test(key) && typeof src === "string" && /^data:image\//.test(src)) out.images[key] = src;
+  out.imgSeq = Math.max(0, ...Object.keys(out.images).map(Number), Number(t.imgSeq) || 0);
+  for (const key of ["created", "updated"])
+    out[key] = Number.isFinite(t[key]) ? t[key] : base[key];
+  delete out.sidesN; delete out.sidesStamp;
+  return out;
 }
-/* Browser storage is small (about 5 MB on an iPhone) and images fill it
-   fast — a failed write must say so, not lose the collection quietly. */
+/* Keep failed writes visible until a successful retry. Imports are staged:
+   they only replace the live library after the entire collection is stored. */
 let saveWarned = false;
-function saveLib(){
-  const ok = store.set(LIB_KEY, JSON.stringify({ v:1, texts: lib }));
-  if (!ok && !saveWarned) toast("Speicher voll — nicht gesichert. Ein Bild entfernen oder die Sammlung sichern.");
-  saveWarned = !ok;
+let saveState = "saved";
+function setSaveStatus(state){
+  saveState = state;
+  document.getElementById("savebar").dataset.state = state;
+  document.getElementById("save-status").textContent = state === "error"
+    ? "Nicht im Browser gespeichert. Erneut versuchen oder die Sammlung als Datei sichern."
+    : state === "pending" ? "Änderungen werden gespeichert…" : "Sammlung im Browser gespeichert.";
+  document.getElementById("save-retry").hidden = state !== "error";
+  document.getElementById("save-backup").hidden = state !== "error";
+}
+function saveLib(texts = lib, report = true){
+  const ok = store.set(LIB_KEY, JSON.stringify({ v:1, texts }));
+  if (report){
+    setSaveStatus(ok ? "saved" : "error");
+    if (!ok && !saveWarned) toast("Nicht gespeichert — Browserspeicher voll oder nicht verfügbar.");
+    saveWarned = !ok;
+  }
   return ok;
 }
 
@@ -1076,13 +1121,19 @@ searchEl.addEventListener("input", drawLib);
 
 document.getElementById("new-text").addEventListener("click", startNewText);
 
-document.getElementById("export").addEventListener("click", () => {
+function exportLib(){
   const blob = new Blob([JSON.stringify({ v:1, texts: lib }, null, 2)], { type:"application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "pecha-sammlung-" + new Date().toISOString().slice(0,10) + ".json";
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+document.getElementById("export").addEventListener("click", exportLib);
+document.getElementById("save-backup").addEventListener("click", exportLib);
+document.getElementById("save-retry").addEventListener("click", () => {
+  clearTimeout(saveTimer);
+  saveLib();
 });
 document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import").click());
 document.getElementById("import").addEventListener("change", ev => {
@@ -1095,13 +1146,21 @@ document.getElementById("import").addEventListener("change", ev => {
       const data = JSON.parse(String(r.result));
       const texts = Array.isArray(data) ? data : (data && data.texts);
       if (!Array.isArray(texts)) throw new Error("kein Sammlungsformat");
+      const next = lib.slice();
       for (const raw of texts){
         const t = fix(raw);
-        const at = lib.findIndex(x => x.id === t.id);
-        if (at < 0){ lib.push(t); added++; }
-        else if ((t.updated || 0) > (lib[at].updated || 0)){ lib[at] = t; updated++; }
+        const at = next.findIndex(x => x.id === t.id);
+        if (at < 0){ next.push(t); added++; }
+        else if ((t.updated || 0) > (next[at].updated || 0)){ next[at] = t; updated++; }
       }
-      saveLib();
+      if (!saveLib(next, false)){
+        toast("Einlesen nicht übernommen — Browserspeicher voll oder nicht verfügbar. Die bisherige Sammlung bleibt erhalten.");
+        return;
+      }
+      clearTimeout(saveTimer);
+      lib = next;
+      if (current) current = lib.find(t => t.id === current.id) || current;
+      setSaveStatus("saved"); saveWarned = false;
       drawLib();
       toast(added + " neu, " + updated + " aktualisiert");
     } catch (e){
@@ -1186,10 +1245,23 @@ function touch(){
   if (current.title.trim() || current.body.trim()){
     if (!lib.some(x => x.id === current.id)) lib.push(current);
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveLib, 350);
+    setSaveStatus("pending");
+    saveTimer = setTimeout(() => saveLib(), 350);
   }
   drawPreview();
 }
+
+/* Flush debounced edits when the app is backgrounded or closed. */
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden" && saveState !== "saved"){
+    clearTimeout(saveTimer); saveLib();
+  }
+});
+window.addEventListener("beforeunload", ev => {
+  if (saveState === "saved") return;
+  clearTimeout(saveTimer);
+  if (!saveLib()){ ev.preventDefault(); ev.returnValue = ""; }
+});
 
 /* keep the block inside the leaf whatever the sliders say */
 function clampToFormat(t){
@@ -1210,7 +1282,7 @@ function drawEditor(){
     return;
   }
   document.getElementById("set-status").textContent =
-    "Änderungen werden sofort gespeichert.";
+    "Der Satz wird sofort aktualisiert; den Speicherstatus findest du oben.";
   fillForm(current);
   drawPreview();
 }
@@ -1425,8 +1497,14 @@ document.getElementById("delete").addEventListener("click", () => {
   if (!current) return;
   const name = current.title.trim() || "diesen Text";
   if (!confirm("„" + name + "“ endgültig löschen?")) return;
-  lib = lib.filter(x => x.id !== current.id);
-  saveLib();
+  const next = lib.filter(x => x.id !== current.id);
+  if (!saveLib(next, false)){
+    toast("Löschen nicht übernommen — Browserspeicher nicht verfügbar.");
+    return;
+  }
+  clearTimeout(saveTimer);
+  lib = next;
+  setSaveStatus("saved"); saveWarned = false;
   current = null;
   goTo("sammlung");
   toast("Gelöscht");
