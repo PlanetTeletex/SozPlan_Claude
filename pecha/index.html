@@ -92,6 +92,9 @@ nav.tabs{background:var(--surface);border-bottom:1px solid var(--rule);
   color:var(--ink-soft);font:inherit;font-size:.92rem;padding:.55rem .75rem;cursor:pointer}
 .tab[aria-selected="true"]{color:var(--maroon);border-bottom-color:var(--gold)}
 main{padding:1.4rem 0 5rem}
+.savebar{padding:.5rem 1rem;font-size:.85rem;color:var(--ink-soft)}
+.savebar[data-state="error"]{color:var(--maroon);font-weight:500}
+.savebar p{display:inline;margin-right:.6rem}
 .view:focus{outline:none}
 
 h2{font-family:'Crimson Pro',Georgia,serif;font-weight:400;font-size:1.4rem;margin:0 0 .2rem}
@@ -170,6 +173,9 @@ details.set[open] > summary::before{content:"▾ "}
 .fmtnote{font-size:.82rem;color:var(--ink-faint);margin:.5rem 0 0}
 .colnote{font-size:.82rem;color:var(--ink-soft);margin:.4rem 0 0}
 .colnote.warn{color:var(--maroon);font-weight:500}
+.layout-report{border-left:3px solid var(--gold);padding:.5rem .8rem;margin:0 0 1rem;font-size:.85rem;color:var(--ink-soft)}
+.layout-report ul{margin:.2rem 0;padding-left:1.2rem}
+.layout-report.blocked{border-color:var(--maroon);color:var(--maroon)}
 
 /* ---------- leaf ---------- */
 .stage{overflow:hidden;margin:0 0 1rem}
@@ -205,18 +211,18 @@ details.set[open] > summary::before{content:"▾ "}
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:calc(var(--lf-title-pitch) - var(--lf-title-fs))}
 .leaf .titlepage .orn{display:flex;align-items:center;gap:calc(var(--lf-title-fs) * .3);
-  margin-bottom:calc(var(--lf-title-fs) * .25)}
+  margin-bottom:calc(var(--lf-title-fs) * .25);flex-shrink:0}
 .leaf .titlepage .orn i{display:block;width:calc(var(--lf-title-fs) * 1.8);height:.3mm;
   background:var(--leaf-gold)}
 .leaf .titlepage .orn b{display:block;width:calc(var(--lf-title-fs) * .2);
   height:calc(var(--lf-title-fs) * .2);background:var(--leaf-gold);transform:rotate(45deg)}
 .leaf .titlepage .tl{color:var(--leaf-rule);font-size:var(--lf-title-fs);
-  line-height:1.15;font-weight:600;letter-spacing:.01em;text-align:center}
+  line-height:1.15;font-weight:600;letter-spacing:.01em;text-align:center;flex-shrink:0}
 .leaf .titlepage .tls-group{display:flex;flex-direction:column;align-items:center;
   gap:calc(var(--lf-subtitle-pitch) - var(--lf-subtitle-fs));
-  margin-top:calc(var(--lf-title-fs) * .5)}
+  margin-top:calc(var(--lf-title-fs) * .5);flex-shrink:0}
 .leaf .titlepage .tls{color:var(--leaf-soft);font-size:var(--lf-subtitle-fs);
-  line-height:1.15;letter-spacing:.02em;text-align:center}
+  line-height:1.15;letter-spacing:.02em;text-align:center;flex-shrink:0}
 .leaf .ln{height:var(--lf-pitch);line-height:var(--lf-pitch);font-size:var(--lf-fs);
   white-space:nowrap;overflow:hidden}
 .leaf .ln.j{display:flex;justify-content:space-between}
@@ -251,7 +257,8 @@ details.set[open] > summary::before{content:"▾ "}
   cursor:pointer;box-shadow:var(--shadow)}
 body.immersive .immersive-exit{display:flex}
 body.immersive header,
-body.immersive nav.tabs{display:none}
+body.immersive nav.tabs,
+body.immersive .savebar{display:none}
 body.immersive main{padding:0}
 body.immersive #view-lesen .wrap{max-width:none;padding:0}
 body.immersive .readbar{display:none}
@@ -321,6 +328,11 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
   </div>
 </nav>
 
+<div class="wrap savebar" id="savebar" data-state="saved">
+  <p id="save-status" role="status" aria-live="polite">Sammlung im Browser gespeichert.</p>
+  <button class="btn quiet" id="save-retry" type="button" hidden>Erneut speichern</button>
+  <button class="btn quiet" id="save-backup" type="button" hidden>Sammlung als Datei sichern</button>
+</div>
 <main>
 
 <!-- ============ Sammlung ============ -->
@@ -438,6 +450,7 @@ body.immersive .nav{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
         <p class="colnote" id="colnote" hidden></p>
       </details>
 
+      <div id="layout-report" class="layout-report" role="status" aria-live="polite" hidden></div>
       <div class="row" style="margin:0 0 1.4rem">
         <button class="btn" id="print-leaves" type="button">Blätter drucken</button>
         <button class="btn quiet" id="print-test" type="button">Testbogen</button>
@@ -531,17 +544,59 @@ function loadLib(){
   } catch { /* fall through to empty */ }
   return [];
 }
-function fix(t){                       // tolerate older / partial records
-  const base = newText(t && t.format);
-  return Object.assign(base, t || {}, { id: (t && t.id) || base.id });
+function fix(t){                       // normalize older and imported records before use
+  if (!t || typeof t !== "object" || Array.isArray(t)) throw new Error("kein Texteintrag");
+  const format = Object.hasOwn(FORMATS, t.format) ? t.format : "C";
+  const base = newText(format);
+  const out = Object.assign({}, base, t, { format });
+  for (const key of ["title", "subtitle", "short", "body"])
+    out[key] = typeof t[key] === "string" ? t[key] : base[key];
+  out.id = typeof t.id === "string" && t.id ? t.id : base.id;
+  const bounded = (key, min, max) => {
+    const value = Number(t[key] ?? base[key]);
+    out[key] = Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : base[key];
+  };
+  bounded("lines", 3, 18); out.lines = Math.round(out.lines);
+  bounded("columns", 1, 3); out.columns = Math.round(out.columns);
+  bounded("fs", 2.5, 14); bounded("ml", 6, 45); bounded("lh", 1.2, 3);
+  out.fs = Math.min(out.fs, (FORMATS[format].h - 6) / (out.lines * out.lh));
+  for (const key of ["keepBreaks", "justify", "showTitle", "fit"])
+    out[key] = typeof t[key] === "boolean" ? t[key] : base[key];
+  out.band = Object.hasOwn(BANDS, t.band) ? t.band : "wine";
+  out.images = {};
+  const seq = Number(t.imgSeq);
+  out.imgSeq = Number.isSafeInteger(seq) && seq >= 0 ? seq : 0;
+  for (const [key, src] of Object.entries(t.images && typeof t.images === "object" ? t.images : {})){
+    if (/^\d+$/.test(key) && Number.isSafeInteger(Number(key)) && typeof src === "string" && /^data:image\//.test(src)){
+      out.images[key] = src;
+      out.imgSeq = Math.max(out.imgSeq, Number(key));
+    }
+  }
+  for (const key of ["created", "updated"])
+    out[key] = Number.isFinite(t[key]) ? t[key] : base[key];
+  delete out.sidesN; delete out.sidesStamp;
+  return out;
 }
-/* Browser storage is small (about 5 MB on an iPhone) and images fill it
-   fast — a failed write must say so, not lose the collection quietly. */
+/* Keep failed writes visible until a successful retry. Imports are staged:
+   they only replace the live library after the entire collection is stored. */
 let saveWarned = false;
-function saveLib(){
-  const ok = store.set(LIB_KEY, JSON.stringify({ v:1, texts: lib }));
-  if (!ok && !saveWarned) toast("Speicher voll — nicht gesichert. Ein Bild entfernen oder die Sammlung sichern.");
-  saveWarned = !ok;
+let saveState = "saved";
+function setSaveStatus(state){
+  saveState = state;
+  document.getElementById("savebar").dataset.state = state;
+  document.getElementById("save-status").textContent = state === "error"
+    ? "Nicht im Browser gespeichert. Erneut versuchen oder die Sammlung als Datei sichern."
+    : state === "pending" ? "Änderungen werden gespeichert…" : "Sammlung im Browser gespeichert.";
+  document.getElementById("save-retry").hidden = state !== "error";
+  document.getElementById("save-backup").hidden = state !== "error";
+}
+function saveLib(texts = lib, report = true){
+  const ok = store.set(LIB_KEY, JSON.stringify({ v:1, texts }));
+  if (report){
+    setSaveStatus(ok ? "saved" : "error");
+    if (!ok && !saveWarned) toast("Nicht gespeichert — Browserspeicher voll oder nicht verfügbar.");
+    saveWarned = !ok;
+  }
   return ok;
 }
 
@@ -670,34 +725,52 @@ function geometry(t){
   };
 }
 
-/* A title page in its own right: centred on the whole leaf, not squeezed
-   into the top of the body grid. It gets a leaf to itself — the verso stays
-   blank, the same way === already reserves a blank verso for a fresh leaf —
-   and the body starts clean on the leaf after it. */
+/* Match the titlepage CSS: ornament, line boxes, gaps and subtitle group.
+   Titles have their own size; reducing them never changes the body grid. */
+function titleBlockHeight(titleN, subtitleN, fs, subFs, lh){
+  const childN = 1 + titleN + (subtitleN ? 1 : 0);
+  return Math.max(0.3, fs * 0.2) + fs * 0.25 + titleN * fs * 1.15
+    + (childN - 1) * fs * (lh - 1)
+    + (subtitleN ? fs * 0.5 + subtitleN * subFs * 1.15
+      + (subtitleN - 1) * subFs * (lh - 1) : 0);
+}
 function composeTitlePage(t, g){
   if (!t.showTitle || !t.title.trim()) return null;
-  meas.style.width = g.blockW + "mm";
-  meas.style.fontSize = g.titleFs + "mm";
-  meas.style.lineHeight = g.titlePitch + "mm";
-  const titleLongWord = Math.max(6, Math.round(g.blockW / (g.titleFs * 0.5) / 2));
-  const title = splitPara(t.title.trim(), titleLongWord);
-
-  let subtitle = null;
-  if (t.subtitle && t.subtitle.trim()){
-    meas.style.fontSize = g.subtitleFs + "mm";
-    meas.style.lineHeight = g.subtitlePitch + "mm";
-    const subLongWord = Math.max(8, Math.round(g.blockW / (g.subtitleFs * 0.5) / 2));
-    subtitle = splitPara(t.subtitle.trim(), subLongWord);
+  const hasSub = !!(t.subtitle && t.subtitle.trim());
+  const minScale = Math.min(1, Math.max(3 / g.titleFs, hasSub ? 2.5 / g.subtitleFs : 0));
+  let scale = 1, page;
+  try {
+    for (;;){
+      const fs = g.titleFs * scale, subFs = g.subtitleFs * scale;
+      meas.style.width = g.blockW + "mm";
+      meas.style.fontSize = fs + "mm";
+      meas.style.lineHeight = fs * t.lh + "mm";
+      meas.style.fontWeight = "600";
+      // Match the slight letter spacing of .tl and .tls while measuring.
+      meas.style.letterSpacing = (fs * 0.01) + "mm";
+      const title = splitPara(t.title.trim());
+      let subtitle = null;
+      if (hasSub){
+        meas.style.fontSize = subFs + "mm";
+        meas.style.lineHeight = subFs * t.lh + "mm";
+        meas.style.fontWeight = "400";
+        meas.style.letterSpacing = (subFs * 0.02) + "mm";
+        subtitle = splitPara(t.subtitle.trim());
+      }
+      const height = titleBlockHeight(title.length, subtitle ? subtitle.length : 0, fs, subFs, t.lh);
+      page = { title, subtitle, titleFs: fs, titlePitch: fs * t.lh,
+        subtitleFs: subFs, subtitlePitch: subFs * t.lh, titleScale: scale,
+        titleHeight: height, titleOverflow: height > g.h - 11 };
+      if (!page.titleOverflow || scale <= minScale) break;
+      scale = Math.max(minScale, scale * 0.9);
+    }
+  } finally {
+    meas.style.fontWeight = "400";
+    meas.style.letterSpacing = "";
   }
-  return { title, subtitle };
+  return page;
 }
 
-/* The whole text as a list of leaf sides. With one column a side is a flat
-   run of lines, exactly as before. With more than one, each paragraph gets
-   its own column ("box") — the way the reference pecha pairs short prayers
-   side by side — and boxes are grouped `columns` at a time into a side. A
-   paragraph too long for one box simply spills into the next, the same way
-   a paragraph has always been allowed to spill across sides. */
 /* Satz nach Zeilen: a line of the source is meant to stay one line. The
    columns take the width of the longest line in the whole text (one grid for
    every leaf, so columns don't jump while turning pages); whatever room is
@@ -739,6 +812,14 @@ function compose(t){
   const g0 = geometry(t);
   const titlePage = composeTitlePage(t, g0);   // measures at its own, larger size, on the fixed frame
   const g = fitGeometry(t, g0, parseBody(t.body, t.keepBreaks));
+  const warnings = [];
+  if (titlePage){
+    for (const key of ["titleFs", "titlePitch", "subtitleFs", "subtitlePitch"]) g[key] = titlePage[key];
+    if (titlePage.titleOverflow) warnings.push({ blocking: true,
+      message: "Titel und Untertitel passen auch verkleinert nicht auf das Titelblatt. Bitte kürzen; der Druck ist bis dahin gesperrt." });
+    else if (titlePage.titleScale < 1) warnings.push({ blocking: false,
+      message: "Titelblatt automatisch verkleinert, damit Titel, Untertitel und Zierband vollständig passen. Die Textschrift bleibt unverändert." });
+  }
 
   const width = g.columns > 1 ? g.colW : g.blockW;
   meas.style.width = width + "mm";
@@ -767,7 +848,7 @@ function compose(t){
   let heldHead = null;                        // a heading alone waits for its stanza
   for (const p of paras){
     if (p.br){
-      if (heldHead){ units.push({ rows: heldHead }); heldHead = null; }
+      if (heldHead){ units.push({ rows: heldHead, headOnly: true }); heldHead = null; }
       units.push(p);
       continue;
     }
@@ -786,12 +867,13 @@ function compose(t){
     if (p.stack && prev && prev.rows) prev.rows.push(blank(), ...rows);
     else units.push({ rows });
   }
-  if (heldHead) units.push({ rows: heldHead });
+  if (heldHead) units.push({ rows: heldHead, headOnly: true });
 
   const cap = Math.max(1, g.lines);
   const boxes = [];
   let cur = [];
   const endBox = () => { boxes.push(cur); cur = []; };
+  let stanzaN = 0;
   for (const u of units){
     if (u.br === "col"){ endBox(); continue; }
     if (u.br === "image"){                    // an image takes a page of its own
@@ -815,10 +897,20 @@ function compose(t){
       while (boxes.length % (g.columns * 2)) boxes.push([]);
       continue;
     }
+    stanzaN++;
+    if (u.headOnly) warnings.push({ blocking: false,
+      message: "Überschrift in Abschnitt " + stanzaN + " ohne folgenden Text: Text ergänzen oder den erzwungenen Umbruch prüfen." });
+    if (u.rows.length > cap) warnings.push({ blocking: false,
+      message: "Abschnitt " + stanzaN + " hat " + u.rows.length + " Zeilen bei " + cap
+        + " Zeilen je Spalte und wird geteilt. Mehr Zeilen einstellen oder den Abschnitt kürzen." });
     if (cur.length && cur.length + 1 + u.rows.length > cap) endBox();
     if (cur.length) cur.push(blank());
-    for (const row of u.rows){                // only a stanza taller than a column splits
-      if (cur.length >= cap) endBox();
+    for (let ri = 0; ri < u.rows.length; ri++){
+      const row = u.rows[ri], next = u.rows[ri + 1];
+      // If an oversized heading wraps across columns, its last line still
+      // travels with the first body line. Explicit break markers are retained.
+      if (cur.length >= cap || (row.cls === "h" && next && next.cls !== "h"
+          && cur.length === cap - 1 && cap > 1)) endBox();
       cur.push(row);
     }
   }
@@ -832,7 +924,7 @@ function compose(t){
     sides.push(chunk[0] && chunk[0].image ? { image: chunk[0].image } : chunk);
   }
   g.band = (BANDS[t.band] || BANDS.wine).c;
-  return { sides, g };
+  return { sides, g, warnings };
 }
 
 /* ---------- drawing one leaf ---------- */
@@ -1076,13 +1168,19 @@ searchEl.addEventListener("input", drawLib);
 
 document.getElementById("new-text").addEventListener("click", startNewText);
 
-document.getElementById("export").addEventListener("click", () => {
+function exportLib(){
   const blob = new Blob([JSON.stringify({ v:1, texts: lib }, null, 2)], { type:"application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "pecha-sammlung-" + new Date().toISOString().slice(0,10) + ".json";
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+document.getElementById("export").addEventListener("click", exportLib);
+document.getElementById("save-backup").addEventListener("click", exportLib);
+document.getElementById("save-retry").addEventListener("click", () => {
+  clearTimeout(saveTimer);
+  saveLib();
 });
 document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import").click());
 document.getElementById("import").addEventListener("change", ev => {
@@ -1095,13 +1193,21 @@ document.getElementById("import").addEventListener("change", ev => {
       const data = JSON.parse(String(r.result));
       const texts = Array.isArray(data) ? data : (data && data.texts);
       if (!Array.isArray(texts)) throw new Error("kein Sammlungsformat");
+      const next = lib.slice();
       for (const raw of texts){
         const t = fix(raw);
-        const at = lib.findIndex(x => x.id === t.id);
-        if (at < 0){ lib.push(t); added++; }
-        else if ((t.updated || 0) > (lib[at].updated || 0)){ lib[at] = t; updated++; }
+        const at = next.findIndex(x => x.id === t.id);
+        if (at < 0){ next.push(t); added++; }
+        else if ((t.updated || 0) > (next[at].updated || 0)){ next[at] = t; updated++; }
       }
-      saveLib();
+      if (!saveLib(next, false)){
+        toast("Einlesen nicht übernommen — Browserspeicher voll oder nicht verfügbar. Die bisherige Sammlung bleibt erhalten.");
+        return;
+      }
+      clearTimeout(saveTimer);
+      lib = next;
+      if (current) current = lib.find(t => t.id === current.id) || current;
+      setSaveStatus("saved"); saveWarned = false;
       drawLib();
       toast(added + " neu, " + updated + " aktualisiert");
     } catch (e){
@@ -1183,13 +1289,26 @@ function touch(){
   readForm(current);
   clampToFormat(current);
   current.updated = Date.now();
-  if (current.title.trim() || current.body.trim()){
+  if (current.title.trim() || current.body.trim() || lib.some(x => x.id === current.id)){
     if (!lib.some(x => x.id === current.id)) lib.push(current);
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveLib, 350);
+    setSaveStatus("pending");
+    saveTimer = setTimeout(() => saveLib(), 350);
   }
   drawPreview();
 }
+
+/* Flush debounced edits when the app is backgrounded or closed. */
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden" && saveState !== "saved"){
+    clearTimeout(saveTimer); saveLib();
+  }
+});
+window.addEventListener("beforeunload", ev => {
+  if (saveState === "saved") return;
+  clearTimeout(saveTimer);
+  if (!saveLib()){ ev.preventDefault(); ev.returnValue = ""; }
+});
 
 /* keep the block inside the leaf whatever the sliders say */
 function clampToFormat(t){
@@ -1210,15 +1329,33 @@ function drawEditor(){
     return;
   }
   document.getElementById("set-status").textContent =
-    "Änderungen werden sofort gespeichert.";
+    "Der Satz wird sofort aktualisiert; den Speicherstatus findest du oben.";
   fillForm(current);
   drawPreview();
+}
+
+function drawLayoutReport(warnings){
+  const report = document.getElementById("layout-report");
+  report.textContent = "";
+  report.hidden = !warnings.length;
+  const blocked = warnings.some(w => w.blocking);
+  report.classList.toggle("blocked", blocked);
+  document.getElementById("print-leaves").disabled = blocked;
+  if (!warnings.length) return;
+  const label = document.createElement("strong");
+  label.textContent = blocked ? "Bitte vor dem Druck korrigieren" : "Hinweise zum Satz";
+  const list = document.createElement("ul");
+  for (const warning of warnings){
+    const li = document.createElement("li"); li.textContent = warning.message; list.appendChild(li);
+  }
+  report.append(label, list);
 }
 
 function drawPreview(){
   if (!current) return;
   const t = current;
-  const { sides, g } = compose(t);
+  const { sides, g, warnings } = compose(t);
+  drawLayoutReport(warnings);
   const de = (n, d) => n.toFixed(d).replace(".", ",");
   document.getElementById("v-lines").textContent = t.lines;
   document.getElementById("v-fs").textContent = de(t.fs, 1) + " mm · " + Math.round(t.fs * 2.835) + " pt";
@@ -1425,8 +1562,14 @@ document.getElementById("delete").addEventListener("click", () => {
   if (!current) return;
   const name = current.title.trim() || "diesen Text";
   if (!confirm("„" + name + "“ endgültig löschen?")) return;
-  lib = lib.filter(x => x.id !== current.id);
-  saveLib();
+  const next = lib.filter(x => x.id !== current.id);
+  if (!saveLib(next, false)){
+    toast("Löschen nicht übernommen — Browserspeicher nicht verfügbar.");
+    return;
+  }
+  clearTimeout(saveTimer);
+  lib = next;
+  setSaveStatus("saved"); saveWarned = false;
   current = null;
   goTo("sammlung");
   toast("Gelöscht");
@@ -1476,7 +1619,8 @@ function setPageSize(orient){
 }
 
 function buildLeafSheets(t){
-  const { sides, g } = compose(t);
+  const { sides, g, warnings } = compose(t);
+  if (warnings.some(w => w.blocking)) return { error: true, warnings };
   const root = document.getElementById("print-root");
   root.textContent = "";
   setPageSize(g.orient);
@@ -1553,6 +1697,7 @@ function printNow(){
 document.getElementById("print-leaves").addEventListener("click", () => {
   if (!current) return;
   const r = buildLeafSheets(current);
+  if (r.error){ drawLayoutReport(r.warnings); toast("Bitte das Titelblatt vor dem Druck kürzen."); return; }
   toast(r.sheets + (r.sheets === 1 ? " Bogen" : " Bögen") + ", beidseitig drucken");
   printNow();
 });
