@@ -85,6 +85,11 @@ in Gold links; beide bleiben zwischen Band und Textspiegel.
 *Eigenes Titelblatt, mittig* legt dem Text ein eigenes Blatt voran: der
 Titel groß und in beiden Richtungen mittig auf der Seite, die Rückseite
 bleibt leer, der eigentliche Text beginnt sauber auf dem nächsten Blatt.
+Lange Titel und Untertitel werden gemeinsam so weit verkleinert, dass auch
+Zierband und Abstände auf das Blatt passen. Die Schrift des Gebetstextes bleibt
+dabei unverändert. Passen sie selbst bei der Mindestgröße nicht, zeigt die App
+einen Hinweis und sperrt den Druck, bis Titel oder Untertitel gekürzt sind.
+
 Kein Teil des Fließtexts, keine Zeile aus dem gewöhnlichen Zeilenraster —
 ein Titelblatt, wie ein Buch eines hat. Ein sehr langer Titel bricht in
 mehrere Zeilen um, statt über den Rand zu laufen.
@@ -107,7 +112,10 @@ derselben Spalte auf die vorige, durch eine Leerzeile abgesetzt. Passt sie
 dort nicht mehr ganz hinein, beginnt sie oben in der nächsten Spalte, dann
 auf der nächsten Seite. **Eine Strophe wird nie zerrissen**, weder zwischen
 zwei Spalten noch zwischen zwei Seiten; geteilt wird nur eine, die für sich
-allein höher ist als eine ganze Spalte. Das gilt auch bei einer Spalte.
+allein höher ist als eine ganze Spalte. Das gilt auch bei einer Spalte. Hinweise direkt vor den Druckknöpfen nennen
+übergroße Abschnitte, die geteilt werden müssen, sowie Überschriften ohne
+folgenden Text. Muss eine mehrzeilige Überschrift über mehrere Spalten laufen,
+bleibt wenigstens ihre letzte Zeile mit der ersten Textzeile zusammen.
 
 *Zeilen je Seite* ist die Höhe einer Spalte. Weil eine Spalte nur halb oder
 ein Drittel so breit ist wie die Seite, muss die Schrift entsprechend kleiner
@@ -242,7 +250,15 @@ Im `localStorage` dieses Browsers, auf diesem Gerät. Kein Konto, keine Übertra
 kein Netz. Geleerte Browserdaten nehmen die Sammlung mit — **Sammlung sichern**
 legt sie als Datei ab, **einlesen** holt sie zurück oder auf ein anderes Gerät.
 Beim Einlesen gewinnt je Eintrag die neuere Fassung; nichts wird überschrieben,
-was neuer ist.
+was neuer ist. Ein Import wird erst übernommen und als erfolgreich gemeldet,
+wenn die gesamte Sammlung im Browser gespeichert werden konnte. Bei einem
+Fehler bleibt die bisherige Sammlung erhalten.
+
+Der Speicherstatus steht dauerhaft oberhalb der Reiterinhalte. Bei einem
+Schreibfehler bleiben „Erneut speichern“ und „Sammlung als Datei sichern“
+sichtbar. Änderungen werden nach einer kurzen Pause gespeichert; beim
+Wechsel in den Hintergrund wird eine ausstehende Speicherung sofort versucht.
+Auch eine Löschung wird erst nach erfolgreicher Speicherung übernommen.
 
 ## Bewusst nicht drin
 
@@ -274,3 +290,17 @@ im Vorbild die heilige Schriftzeile auszeichnet. Der Text ist ein weiches
 Anthrazit statt Schwarz, gesetzt in *Crimson Pro*, der freien Schwester der
 Minion, in der solche Gebetsbücher meist gesetzt sind. Im Regal sind die
 Bündel entsprechend weinrot gebunden, mit goldener Schnur.
+
+## Prüfungen
+
+`node --test tests/reliability.test.cjs` (vom Repository-Hauptverzeichnis)
+prüft Speicherung, transaktionalen Import, Cache-Trennung und Satzlogik ohne
+weitere Abhängigkeiten. Die Textmessung ist in diesen Logiktests simuliert.
+
+Für echte Browsergeometrie: Playwright und Chromium installieren und
+`node --test tests/browser.test.cjs` ausführen. Die Browserprüfung umfasst
+Titel in allen drei Formaten, Drucklayout, Speicherausfälle und den gemeinsamen
+Offline-Betrieb von Pecha und Lojong nach einem Service-Worker-Wechsel.
+`PECHA_BROWSER_EXECUTABLE` kann auf ein vorhandenes Chromium zeigen;
+`PECHA_FONT_DIR` auf das `files`-Verzeichnis von `@fontsource/crimson-pro`, um
+die Satzschrift ohne externe Font-Anfragen zu prüfen.

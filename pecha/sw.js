@@ -1,7 +1,7 @@
 /* Pecha — offline support.
    Bump VERSION to retire the old cache; the page itself is fetched
    network-first, so edits reach an installed app as soon as it is online. */
-const VERSION = "2026-10-01-landing-thangka";
+const VERSION = "2026-10-01-landing-thangka-reliability";
 const CACHE = "pecha-" + VERSION;
 const CORE = [
   "./", "./index.html", "./manifest.json",
@@ -24,7 +24,7 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil((async () => {
     const names = await caches.keys();
-    await Promise.all(names.filter(n => n !== CACHE).map(n => caches.delete(n)));
+    await Promise.all(names.filter(n => n.startsWith("pecha-") && n !== CACHE).map(n => caches.delete(n)));
     await self.clients.claim();
   })());
 });
