@@ -34,6 +34,7 @@ test('storage, actual title bounds, print layout and shared-origin offline apps'
     }
     const origin=`http://127.0.0.1:${server.address().port}`;
     await page.goto(origin+'/pecha/');await page.evaluate(()=>document.fonts.ready);
+    await page.locator('#landing-enter').click();
     await page.locator('#new-text').click();await page.locator('#f-title').fill('Saved text');
     await page.locator('#f-body').fill('A prayer line.');
     await page.waitForFunction(()=>document.querySelector('#savebar').dataset.state==='saved');
